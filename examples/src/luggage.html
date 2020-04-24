@@ -116,9 +116,9 @@
 	var params = {
 		/*downloadSTL:function (){
 			exportASCII();
-		},*/
-		minScale: 10,
-		maxScale: 20,
+		},
+		minScale: 10,*/
+		maxScale: 30,
 		rotation: Math.PI / 4, // positive is counter-clockwise
 		back: function () {
 			removeLastDecals();
@@ -384,7 +384,8 @@
 		// if ( params.rotate ) orientation.z = Math.random() * 2 * Math.PI;
 
 		// var scale = params.minScale + Math.random() * ( params.maxScale - params.minScale );
-		var scale = params.minScale + ( params.maxScale - params.minScale );
+		// var scale = params.minScale + ( params.maxScale - params.minScale );
+		var scale = params.maxScale;
 		size.set( scale, scale, scale );
 		var material = decalMaterial.clone();
 		// material.color.setHex( Math.random() * 0xffffff );
@@ -567,7 +568,7 @@
 	function initGUI(){
 		var gui = new dat.GUI();
 		// gui.add( params, 'downloadSTL' );
-		gui.add( params, 'minScale', 1, 30 );
+		// gui.add( params, 'minScale', 1, 30 );
 		gui.add( params, 'maxScale', 1, 30 );
 		gui.add( params, 'rotation', - 3.5, 3.5 ).name( 'rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
 		gui.add( params, 'back' );
