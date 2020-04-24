@@ -105,8 +105,17 @@ div#decals.close .map_wrapper,div#decals.close .recently_wrapper,div#decals.clos
 .map.map_btn_close{width: 110px;}
 .no_recently { color: #333; width: 100%; text-align: center; padding: 20px 0; }
 .activeDecal{border:1px solid red}
-
-.dg ul li:nth-of-type(4),.dg ul li:nth-of-type(5),.dg ul li:nth-of-type(4):hover,.dg ul li:nth-of-type(5):hover{width:50%;display: inline-block;background-image: url("../img/back_left.png")!important;background-repeat: no-repeat!important;background-position: 70%!important;}
-.dg ul li:nth-of-type(5),.dg ul li:nth-of-type(5):hover{background-image: url("../img/forward_right.png")!important;}
-/*.dg ul li:nth-of-type(5) div.button,.dg ul li:nth-of-type(6) div.button{background-image: url("../img/back_left.png");background-repeat: no-repeat;height: 26px; line-height: 26px; background-position: center;}
-.dg ul li:nth-of-type(6) div.button{background-image: url("../img/forward_right.png");}*/
+#decal_upload {position: relative;cursor: pointer;}
+#decal_upload .text_ipload{cursor: pointer;color: #999; width: 95%; margin: 10px auto; padding: 5px; text-align: center; border: 1px dashed #999; }
+#decal_upload #upload_input { cursor: pointer;position: absolute; top: 0; left: 9px; width: 95%; height: 36px; opacity: 0; z-index: 1; }
+p.open_upload { margin: 0; }
+.close_upload{display: none;}
+.close .open_upload{display: none;}
+.close .close_upload{display: block;margin: 0;font-size: 25px; line-height: 25px; }
+.back_btn,.forward_btn,.back_btn:hover,.forward_btn:hover{width:50%;display: inline-block;background-repeat: no-repeat!important;background-position: 70%!important;}
+.back_btn{background-image: url("../img/back_dark.png")!important;}
+.forward_btn{background-image: url("../img/forward_dark.png")!important;}
+.forward_btn,.forward_btn:hover{background-image: url("../img/forward_dark.png")!important;}
+.back_btn.active_back{background-image: url("../img/back_grey.png")!important;}
+.forward_btn.active_forward{background-image: url("../img/forward_grey.png")!important;}
+.dg.main.a,.close-button{min-width: 250px;}

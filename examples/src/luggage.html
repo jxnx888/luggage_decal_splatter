@@ -15,6 +15,13 @@
 			<!--			<div id="exportASCII">exportASCII</div>-->
 		</div>
 		<div class="map_decals clearfix" id="map_decals">
+			<div class="upload_wrapper clearfix" id="decal_upload">
+				<div class="text_ipload">
+					<p class="open_upload">+ Upload decal(png)</p>
+					<p class="close_upload">+</p>
+				</div>
+				<input id="upload_input"  name="file" type="file" multiple="false" onchange="uploadMap(this.files)" title="Upload Image Search"/>
+			</div>
 			<div class="map_wrapper clearfix" id="map_wrapper"></div>
 			<div class="recently_wrapper clearfix" id="recently_wrapper">
 				<div class="no_recently">No recently used decals!</div>
@@ -36,27 +43,28 @@
 <script src='../js/DecalGeometry.js'></script>
 <script src='../js/OrbitControls.js'></script>
 <script src='../js/dat.gui.min.js'></script>
+<script src='../js/fastclick.js'></script>
 <script>
 	$(".show_more").click(function (  ) {
 		$("#decals").toggleClass("close");
 		$(".show_more").toggleClass("show_more_close");
 		$(".map").toggleClass("map_btn_close");
+		$(".map").trigger("click")
 	})
 	$(".map").click(function(){
 		$("#decals .top_nav div").removeClass("active");
 		$("#decals .top_nav .map").addClass("active");
 		$("#map_decals #map_wrapper").show();
 		$("#map_decals #recently_wrapper").hide();
+		$("#decal_upload").show(); //上传显示
 	})
 	$(".recent").click(function(){
 		$("#decals .top_nav div").removeClass("active");
 		$("#decals .top_nav .recent").addClass("active");
 		$("#map_decals #map_wrapper").hide();
+		$("#decal_upload").hide(); //上传隐藏
 		$("#map_decals #recently_wrapper").show();
 	})
-</script>
-<script>
-
 </script>
 <script>
 	var container = document.getElementById( 'container' );
@@ -119,7 +127,7 @@
 		},
 		minScale: 10,*/
 		maxScale: 30,
-		rotation: Math.PI / 4, // positive is counter-clockwise
+		rotation: Math.PI /180, // positive is counter-clockwise   Math.PI = 3.14 = 180°
 		back: function () {
 			removeLastDecals();
 		},
@@ -383,19 +391,19 @@
 		}
 		// if ( params.rotate ) orientation.z = Math.random() * 2 * Math.PI;
 
-		// var scale = params.minScale + Math.random() * ( params.maxScale - params.minScale );
-		// var scale = params.minScale + ( params.maxScale - params.minScale );
 		var scale = params.maxScale;
 		size.set( scale, scale, scale );
 		var material = decalMaterial.clone();
-		// material.color.setHex( Math.random() * 0xffffff );
 
 		var m = new THREE.Mesh( new THREE.DecalGeometry( mesh, position, orientation, size ), material );
 		decals.push( m );
-		// currentDecalMap = decals;
 		currentDecalObj = decals;
-		// console.log("shoot : " + decals)
 		scene.add( m );
+		if(decals.length>0){
+			if(decals.length>0){
+				$(".back_btn").addClass("active_back")
+			}
+		}
 		createMap("recently_wrapper",recentlyUsedDecal);
 	}
 
@@ -426,7 +434,9 @@
 		} );
 
 		decals = [];
-
+		removedDecals = [];
+		$(".back_btn").removeClass("active_back");
+		$(".forward_btn").removeClass("active_forward");
 	}
 
 	function removeLastDecals() {
@@ -435,6 +445,18 @@
 			removedDecals.push( decals[decals.length - 1] );
 			decals.pop();
 		}
+		if(decals.length>0){
+			$(".back_btn").removeClass("active_back").addClass("active_back"); //目前decals数组不为空
+		}
+		else{
+			$(".back_btn").removeClass("active_back"); //目前decals数组为空
+		}
+		if(removedDecals.length>0){ //已撤回的数组是否为空
+			$(".forward_btn").removeClass("active_forward").addClass("active_forward"); //目前decals数组不为空
+		}
+		else{
+			$(".forward_btn").removeClass("active_forward"); //目前decals数组为空
+		}
 	}
 
 	function returnLastDecals() {
@@ -442,6 +464,18 @@
 			decals.push( removedDecals[removedDecals.length-1] );
 			scene.add( removedDecals[removedDecals.length-1] );
 			removedDecals.pop();
+		}
+		if(decals.length>0){
+			$(".back_btn").removeClass("active_back").addClass("active_back"); //目前decals数组不为空
+		}
+		else{
+			$(".back_btn").removeClass("active_back"); //目前decals数组为空
+		}
+		if(removedDecals.length>0){
+			$(".forward_btn").removeClass("active_forward").addClass("active_forward"); //目前decals数组不为空
+		}
+		else{
+			$(".forward_btn").removeClass("active_forward"); //目前decals数组为空
 		}
 	}
 	// 导出相关
@@ -517,6 +551,7 @@
 	}
 
 	function createMap(id,arr) {  //展示贴图，并赋予点击事件
+		var reveseHTML =''
 		var reverseArr =[];
 		if(id=="recently_wrapper"){
 			if(arr.length > 0){
@@ -528,11 +563,12 @@
 			}
 		}
 		else{
-			reverseArr = arr
+			reverseArr = arr;
+			reveseHTML+=""
 		}
 		// var map = document.getElementById(id);
 		// map.innerHTML='';
-		var reveseHTML =''
+
 		for ( var m in reverseArr ) {
 			/*var eachDecal = document.createElement( 'button' );
 			var eachDecalImg = document.createElement( 'img' );
@@ -553,16 +589,77 @@
 		}
 		$("#"+id).html(reveseHTML)
 	}
+	function uploadMap(file){
+		if(file.length>1){
+			alert('Please drag only one image.');
+			document.getElementById('upload_input').value = null;
+			return false;
+		}
+		if(file[0].type.indexOf("png")>-1){}else{
+			alert('File ' + file[0].name + ' is not a image(only support png).');
+			document.getElementById('upload_input').value = null;
+			return false;
+		}
+		if ((file[0].size)/1024 > 8192) {
+			alert('File size need less than 8M');
+			document.getElementById('upload_input').value = null;
+			return false;
+		}
+		else{
 
+			var imgsrc;
+			if(window.webkitURL){
+				imgsrc=window.webkitURL.createObjectURL(file[0]);
+			}
+			else if(window.URL){
+				imgsrc=window.URL.createObjectURL(file[0])
+			}
+			else{
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					imgsrc=e.target.result;
+				}
+				reader.readAsDataURL(file[0]);
+			}
+			var uploadHTML = '<div class="each_decal" onclick="changeCurrentDecal(this)"><img src="'+imgsrc+'" alt=""></div>';
+			$("#map_wrapper").prepend(uploadHTML);
+			$("#map_wrapper .each_decal:eq(0)").trigger("click");//默认选中
+		}
+	}
+	function getCanvasBase64(img) {
+		var image = new Image();
+		//至关重要
+		image.crossOrigin = '';
+		image.src = img;
+		//至关重要
+		var deferred = $.Deferred();
+		if (img) {
+			image.onload = function () {
+				deferred.resolve(getBase64Image(image));//将base64传给done上传处理
+				// document.getElementById("CanvasImg").appendChild(image);
+			}
+			return deferred.promise();//问题要让onload完成后再return sessionStorage['imgTest']
+		}
+	}
+	//width、height调用时传入具体像素值，控制大小 ,不传则默认图像大小
+	function getBase64Image(img, width, height) {
+		var canvas = document.createElement("canvas");
+		canvas.width = width ? width : img.width;
+		canvas.height = height ? height : img.height;
+		var ctx = canvas.getContext("2d");
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+		var dataURL = canvas.toDataURL();
+		return dataURL;
+	}
+	//End：
 
-	function updateDecalTransform() {
+	function updateDecalTransform() { //旋转decal  移除原有的，改变角度，再shoot到原位置
 		var lastDecal = decals[decals.length - 1];
-		console.log("updateDecalTransform1 : " + decals);
 		scene.remove(lastDecal);
-		console.log("updateDecalTransform2 : " + decals);
-		lastShootrotation.z=params.rotation;
+		console.log(lastShootrotation.z);
+		console.log(params.rotation);
+		lastShootrotation.z=params.rotation/100;
 		shoot(1,lastShootrotation,lastShootPostion);
-		console.log("Update Decal Transform")
 	}
 
 	function initGUI(){
@@ -570,11 +667,15 @@
 		// gui.add( params, 'downloadSTL' );
 		// gui.add( params, 'minScale', 1, 30 );
 		gui.add( params, 'maxScale', 1, 30 );
-		gui.add( params, 'rotation', - 3.5, 3.5 ).name( 'rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
+		gui.add( params, 'rotation', -180, 180).name( 'rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
 		gui.add( params, 'back' );
 		gui.add( params, 'forward' );
 		gui.add( params, 'clear' );
 		gui.open();
+		$(".dg ul li:nth-of-type(1)").addClass("decal_size");
+		$(".dg ul li:nth-of-type(2)").addClass("rotation");
+		$(".dg ul li:nth-of-type(3)").addClass("back_btn");
+		$(".dg ul li:nth-of-type(4)").addClass("forward_btn");
 	}
 </script>
 
