@@ -214,7 +214,7 @@
 		scene.add( meshGround );
 		// sky + ground end
 
-		scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置辅助线 Coordinate system
+		// scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置辅助线 Coordinate system
 
 		// 相机位置距离
 		camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -233,46 +233,46 @@
 
 		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面上
 		dirLight.position.set( 0,75, 100 );
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面下
 		dirLight.position.set( 0,-75,100 );
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( 0, 75, -100 ); //背部 上
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( 0, -75, -100 ); //背部 上
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( 0, 100, 0 ); //顶部
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( 100, 0, 0 ); //右侧
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( 0, -100, 0 ); //底部
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
 		dirLight.position.set( -100, 0, 0 );//左侧
-		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		scene.add( dirLightHeper );
+		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		// scene.add( dirLightHeper );
 		scene.add( dirLight );
 
 
