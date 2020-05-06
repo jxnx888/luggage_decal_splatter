@@ -118,4 +118,10 @@ p.open_upload { margin: 0; }
 .forward_btn,.forward_btn:hover{background-image: url("../img/forward_dark.png")!important;}
 .back_btn.active_back{background-image: url("../img/back_grey.png")!important;}
 .forward_btn.active_forward{background-image: url("../img/forward_grey.png")!important;}
-.dg.main.a,.close-button{min-width: 250px;}
+.dg.main.a,.close-button{min-width: 250px;min-width: 320px;}
+.exportSTL{display: none}
+.ie_notice{	display: none;}
+
+.rotation_no { pointer-events: none; z-index: 4; cursor: not-allowed!important;} /*首次进入不能操作*/
+.input_no { pointer-events: none; z-index: 4;cursor: not-allowed!important; } /*首次进入不能操作*/
+.rotation_cover{cursor: not-allowed!important; }

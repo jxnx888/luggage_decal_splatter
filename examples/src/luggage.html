@@ -4,6 +4,7 @@
 	<title>Imp decal splatter</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=11,chrome=1">
 	<link type="text/css" rel="stylesheet" href="../css/main.css">
 </head>
 <body>
@@ -33,6 +34,7 @@
 
 	<div id="info">
 		Imp decal splatter
+		<div class="ie_notice">We highly recommend you open current page in Chrome or Firefox.</div>
 	</div>
 </div>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
@@ -43,9 +45,41 @@
 <script src='../js/DecalGeometry.js'></script>
 <script src='../js/OrbitControls.js'></script>
 <script src='../js/dat.gui.min.js'></script>
+<script src='../js/STLExporter.js'></script>
 <script src='../js/fastclick.js'></script>
 <script>
-	$(".show_more").click(function (  ) {
+	if(IEVersion()!=-1){
+		$(".ie_notice").show();
+	}
+	function IEVersion() {
+		var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+		var isIE = userAgent.indexOf( "compatible" ) > - 1 && userAgent.indexOf( "MSIE" ) > - 1; //判断是否IE<11浏览器
+		var isEdge = userAgent.indexOf( "Edge" ) > - 1 && ! isIE; //判断是否IE的Edge浏览器
+		var isIE11 = userAgent.indexOf( 'Trident' ) > - 1 && userAgent.indexOf( "rv:11.0" ) > - 1;
+		if (isIE) {
+			var reIE = new RegExp( "MSIE (\\d+\\.\\d+);" );
+			reIE.test( userAgent );
+			var fIEVersion = parseFloat( RegExp["$1"] );
+			if (fIEVersion == 7) {
+				return 7;
+			} else if (fIEVersion == 8) {
+				return 8;
+			} else if (fIEVersion == 9) {
+				return 9;
+			} else if (fIEVersion == 10) {
+				return 10;
+			} else {
+				return 6;//IE版本<=7
+			}
+		} else if (isEdge) {
+			return 'edge';//edge
+		} else if (isIE11) {
+			return 11; //IE11
+		} else {
+			return - 1;//不是ie浏览器
+		}
+	}
+		$(".show_more").click(function (  ) {
 		$("#decals").toggleClass("close");
 		$(".show_more").toggleClass("show_more_close");
 		$(".map").toggleClass("map_btn_close");
@@ -84,6 +118,7 @@
 	var mesh;
 	var raycaster;
 	var line;
+	var currentDecal;
 	var intersection = {
 		intersects: false,
 		point: new THREE.Vector3(),
@@ -120,12 +155,15 @@
 	var position = new THREE.Vector3();
 	var orientation = new THREE.Euler();
 	var size = new THREE.Vector3( 10, 10, 10 );
+	var currentSize = new THREE.Vector3( 10, 10, 10 ); //当前鼠标decal的大小
+	var currentPosition = new THREE.Vector3(0,0,0);//当前鼠标decal的位置
+	var currentmaterial;;//当前鼠标decal的材质
 	var dirLight, dirLightHeper, hemiLight, hemiLightHelper;
 	var params = {
-		/*downloadSTL:function (){
+		SUBMIT:function (){
 			exportASCII();
 		},
-		minScale: 10,*/
+		/*minScale: 10,*/
 		maxScale: 30,
 		rotation: Math.PI /180, // positive is counter-clockwise   Math.PI = 3.14 = 180°
 		back: function () {
@@ -153,8 +191,6 @@
 		/*stats = new Stats(); //网络帧数
         container.appendChild( stats.dom );*/
 
-		// helper
-
 		scene = new THREE.Scene();
 
 		// sky + ground
@@ -176,9 +212,11 @@
 		meshGround.rotation.x = - Math.PI / 2;
 		meshGround.receiveShadow = true;
 		scene.add( meshGround );
+		// sky + ground end
 
-		scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置
+		scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置辅助线 Coordinate system
 
+		// 相机位置距离
 		camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
 		camera.position.z = 120;
 		camera.target = new THREE.Vector3();
@@ -187,51 +225,76 @@
 		controls.minDistance = 50; //设置相机距离原点的最近距离
 		controls.maxDistance = 200;//设置相机距离原点的最远距离
 
-		// exporter = new THREE.STLExporter(); //导出工具
+		exporter = new THREE.STLExporter(); //导出工具
 
-		scene.add( new THREE.AmbientLight( 0xCDCDCD ) );//（环境光）
 
 		// LIGHTS
+		scene.add( new THREE.AmbientLight( 0xFFFFFFF,1.2) );//（环境光）
 
-		dirLight = new THREE.DirectionalLight( 0xffffff, .5 );
-		// dirLight.color.setHSL( 0.1, 1, 0.95 );
-		dirLight.position.set( 100, 0, 100 );
+		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面上
+		dirLight.position.set( 0,75, 100 );
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
+		scene.add( dirLightHeper );
 		scene.add( dirLight );
-		/*dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 10 );
-        scene.add( dirLightHeper );*/
-
-		dirLight = new THREE.DirectionalLight( 0xffffff, .5 );
-		// dirLight.color.setHSL( 0.1, 1, 0.95 );
-		dirLight.position.set( - 100, 0, - 100 );
+		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面下
+		dirLight.position.set( 0,-75,100 );
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
+		scene.add( dirLightHeper );
 		scene.add( dirLight );
-		/*dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 10 );
-        scene.add( dirLightHeper );*/
 
-		dirLight = new THREE.DirectionalLight( 0xCDCDCD, .13 );
-		// dirLight.color.setHSL( 0.1, 1, 0.95 );
-		dirLight.position.set( 0, - 30, 100 ); //箱子正面
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( 0, 75, -100 ); //背部 上
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
 		scene.add( dirLight );
-		/*dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 10 );
-        scene.add( dirLightHeper );*/
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( 0, -75, -100 ); //背部 上
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
+		scene.add( dirLight );
 
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( 0, 100, 0 ); //顶部
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
+		scene.add( dirLight );
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( 100, 0, 0 ); //右侧
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
+		scene.add( dirLight );
+
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( 0, -100, 0 ); //底部
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
+		scene.add( dirLight );
+		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
+		dirLight.position.set( -100, 0, 0 );//左侧
+		dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
+		scene.add( dirLightHeper );
+		scene.add( dirLight );
+
+
+		// 鼠标红线
 		var geometry = new THREE.BufferGeometry();
 		geometry.setFromPoints( [new THREE.Vector3(), new THREE.Vector3()] );
 
 		var lineMaterial = new THREE.LineBasicMaterial( {
 			color: 0xFF0000,
-			linewidth: 1,
+			linewidth: 100,
 			linecap: 'round',
 			linejoin: 'round'
 		} );
 		line = new THREE.Line( geometry, lineMaterial );
-		scene.add( line );
+		// scene.add( line ); //鼠标辅助线
 
 		loadSTL(defaultSTL,decals);
 		raycaster = new THREE.Raycaster();
-
-		mouseHelper = new THREE.Mesh( new THREE.BoxBufferGeometry( 1, 1, 10 ), new THREE.MeshNormalMaterial() );
-		mouseHelper.visible = false;
-		scene.add( mouseHelper );
+		initGUI();//右上角操作栏
+		// mouseHelper = new THREE.Mesh( new THREE.BoxBufferGeometry( 1, 1, 0 ), new THREE.MeshNormalMaterial() );
+		// mouseHelper.visible = false; //隐藏显示矩形
+		// scene.add( mouseHelper );
 
 		window.addEventListener( 'resize', onWindowResize, false );
 
@@ -259,70 +322,66 @@
 		window.addEventListener( 'mousemove', onTouchMove );
 		window.addEventListener( 'touchmove', onTouchMove );
 
-		function onTouchMove( event ) {
 
-			var x, y;
-
-			if (event.changedTouches) {
-
-				x = event.changedTouches[0].pageX;
-				y = event.changedTouches[0].pageY;
-
-			} else {
-
-				x = event.clientX;
-				y = event.clientY;
-
-			}
-
-			mouse.x = ( x / window.innerWidth ) * 2 - 1;
-			mouse.y = - ( y / window.innerHeight ) * 2 + 1;
-			checkIntersection();
-
-		}
-
-		function checkIntersection() {
-
-			if (! mesh) return;
-
-			raycaster.setFromCamera( mouse, camera );
-			raycaster.intersectObject( mesh, false, intersects );
-
-			if (intersects.length > 0) {
-
-				var p = intersects[0].point;
-				mouseHelper.position.copy( p );
-				intersection.point.copy( p );
-
-				var n = intersects[0].face.normal.clone();
-				n.transformDirection( mesh.matrixWorld );
-				n.multiplyScalar( 10 );
-				n.add( intersects[0].point );
-
-				intersection.normal.copy( intersects[0].face.normal );
-				mouseHelper.lookAt( n );
-
-				var positions = line.geometry.attributes.position;
-				positions.setXYZ( 0, p.x, p.y, p.z );
-				positions.setXYZ( 1, n.x, n.y, n.z );
-				positions.needsUpdate = true;
-
-				intersection.intersects = true;
-
-				intersects.length = 0;
-
-			} else {
-
-				intersection.intersects = false;
-
-			}
-
-		}
-
-		initGUI();//右上角操作栏
 		onWindowResize();
 		animate(); //render 等
 
+	}
+	function onTouchMove( event ) {
+
+		var x, y;
+
+		if (event.changedTouches) {
+
+			x = event.changedTouches[0].pageX;
+			y = event.changedTouches[0].pageY;
+
+		} else {
+
+			x = event.clientX;
+			y = event.clientY;
+
+		}
+
+		mouse.x = ( x / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+		checkIntersection();
+
+	}
+
+	function checkIntersection() {
+
+		if (! mesh) return;
+
+		raycaster.setFromCamera( mouse, camera );
+		raycaster.intersectObject( mesh, false, intersects );
+
+		if (intersects.length > 0) {
+
+			var p = intersects[0].point;
+			mouseHelper.position.copy( p );
+			intersection.point.copy( p );
+			/*1.克隆旧的法线 2.旧法线乘以模型的世界矩阵得到归一化后的法线 3.和一个标量相乘，放大10倍。 4.加上点击点的坐标，进行平移。*/
+			var n = intersects[0].face.normal.clone();
+			n.transformDirection( mesh.matrixWorld );
+			n.multiplyScalar( 10 );
+			n.add( intersects[0].point );
+
+			intersection.normal.copy( intersects[0].face.normal );
+			mouseHelper.lookAt( n );
+
+			var positions = line.geometry.attributes.position;
+			positions.setXYZ( 0, p.x, p.y, p.z );
+			positions.setXYZ( 1, n.x, n.y, n.z );
+			positions.needsUpdate = true;
+
+			intersection.intersects = true;
+
+			intersects.length = 0;
+
+		} else {
+			intersection.intersects = false;
+		}
 	}
 
 	function loadSTL( file,decalMapArr ) {
@@ -332,7 +391,7 @@
 		} else {
 			file = './models/stl/ascii/grey.stl';
 		}
-
+		// file = '';
 		var loader = new THREE.STLLoader();
 		loader.load( file, function ( geometry ) {
 			var material = new THREE.MeshPhongMaterial( { color: 0x9B9EA1 } );
@@ -349,6 +408,14 @@
 					scene.add( decalMapArr[i] );
 				}
 			}
+			var currentscale = params.maxScale;
+			currentSize.set( currentscale, currentscale, currentscale );
+			var currentmaterial = decalMaterial.clone();
+			mouseHelper= new THREE.Mesh( new THREE.DecalGeometry(mesh, position, orientation, currentSize ), currentmaterial );
+			scene.add( mouseHelper );
+			setTimeout(function () {
+				$(".activeDecal").trigger("click"); //激活鼠标首次decal显示
+			},200)
 		} );
 	}
 
@@ -363,21 +430,7 @@
 		if(sameImgNum == 0){
 			recentlyUsedDecal.push(currentDecal);
 		}
-		decalDiffuse = textureLoader.load( currentDecal );
-		decalNormal =  textureLoader.load( currentDecal );
-		decalMaterial = new THREE.MeshPhongMaterial( {
-			specular: 0x444444,
-			map: decalDiffuse,
-			normalMap: decalNormal,
-			normalScale: new THREE.Vector2( 1, 1 ),
-			shininess: 30,
-			transparent: true,
-			depthTest: true,
-			depthWrite: false,
-			polygonOffset: true,
-			polygonOffsetFactor: - 4,
-			wireframe: false
-		} );
+
 		// 当前选择贴图替换end
 		if(type==1){
 			position.copy( lastPosition );
@@ -405,6 +458,11 @@
 			}
 		}
 		createMap("recently_wrapper",recentlyUsedDecal);
+
+		// 恢复操作rotation，否则报错
+		$(".rotation").removeClass("rotation_cover");
+		$(".rotation div:eq(0)").removeClass("rotation_no");
+		$(".rotation").find("input").removeClass("input_no");
 	}
 
 	function animate() {
@@ -428,7 +486,7 @@
 	function removeDecals() {
 
 		decals.forEach( function ( d ) {
-
+			clearCache(d);
 			scene.remove( d );
 
 		} );
@@ -441,6 +499,7 @@
 
 	function removeLastDecals() {
 		if (decals[decals.length - 1]) {
+			clearCache(decals[decals.length - 1]);
 			scene.remove( decals[decals.length - 1] );
 			removedDecals.push( decals[decals.length - 1] );
 			decals.pop();
@@ -514,40 +573,40 @@
 
 	}
 	// 导出相关 end
-	// document.getElementsByClassName("each_decal").addEventListener('click', changeCurrentDecalModule(this));
 	function changeCurrentDecal(obj){
 		// return function(obj){
-			// console.log(img);
-			$(".each_decal").removeClass("activeDecal");
-			// $(obj).siblings().removeClass("activeDecal");
-			$(obj).addClass("activeDecal");
-			var img = $(obj).find("img").attr("src");
-			/*var sameImgNum=0;
-			for(var i in recentlyUsedDecal){
-				if(recentlyUsedDecal[i] == img){
-					sameImgNum++;
-				}
-			}
-			if(sameImgNum == 0){
-				recentlyUsedDecal.push(img);
-			}*/
-		currentDecal = img
-			/*decalDiffuse = textureLoader.load( img );
-			decalNormal =  textureLoader.load( img );
-			decalMaterial = new THREE.MeshPhongMaterial( {
-				specular: 0x444444,
-				map: decalDiffuse,
-				normalMap: decalNormal,
-				normalScale: new THREE.Vector2( 1, 1 ),
-				shininess: 30,
-				transparent: true,
-				depthTest: true,
-				depthWrite: false,
-				polygonOffset: true,
-				polygonOffsetFactor: - 4,
-				wireframe: false
-			} );*/
-		// }
+		// console.log(img);
+		$(".each_decal").removeClass("activeDecal");
+		// $(obj).siblings().removeClass("activeDecal");
+		$(obj).addClass("activeDecal");
+		var img = $(obj).find("img").attr("src");
+
+		currentDecal = img;
+		decalDiffuse = textureLoader.load( currentDecal );
+		decalNormal =  textureLoader.load( currentDecal );
+		decalMaterial = new THREE.MeshPhongMaterial( {
+			specular: 0x444444,
+			map: decalDiffuse,
+			normalMap: decalNormal,
+			normalScale: new THREE.Vector2( 1, 1 ),
+			shininess: 30,
+			transparent: true,
+			depthTest: true,
+			depthWrite: false,
+			polygonOffset: true,
+			polygonOffsetFactor: - 4,
+			wireframe: false
+		} );
+		// 改变鼠标decal
+		var currentscale = params.maxScale;
+		currentSize.set( currentscale, currentscale, 30 );
+		currentmaterial = decalMaterial.clone();
+		position.set(0, 0, 0);
+		clearCache(mouseHelper);
+		scene.remove(mouseHelper);
+		mouseHelper= new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
+		scene.add(mouseHelper)
+		// 改变鼠标decal end
 	}
 
 	function createMap(id,arr) {  //展示贴图，并赋予点击事件
@@ -566,17 +625,7 @@
 			reverseArr = arr;
 			reveseHTML+=""
 		}
-		// var map = document.getElementById(id);
-		// map.innerHTML='';
-
 		for ( var m in reverseArr ) {
-			/*var eachDecal = document.createElement( 'button' );
-			var eachDecalImg = document.createElement( 'img' );
-			eachDecalImg.setAttribute('src',reverseArr[m]);
-			eachDecal.className = 'each_decal';
-			eachDecal.appendChild(eachDecalImg);
-			map.appendChild( eachDecal );
-			eachDecal.addEventListener( 'click', changeCurrentDecal( reverseArr[m] ), false );*/
 			var eachDecal;
 			if(m==1 && id=="map_wrapper"){
 				eachDecal = '<div class="each_decal activeDecal" onclick="changeCurrentDecal(this)"><img src="'+reverseArr[m]+'" alt=""></div>';
@@ -589,7 +638,7 @@
 		}
 		$("#"+id).html(reveseHTML)
 	}
-	function uploadMap(file){
+	function uploadMap(file){ //上传图片
 		if(file.length>1){
 			alert('Please drag only one image.');
 			document.getElementById('upload_input').value = null;
@@ -607,7 +656,7 @@
 		}
 		else{
 
-			var imgsrc;
+			var imgsrc; //上传图片，并创建url
 			if(window.webkitURL){
 				imgsrc=window.webkitURL.createObjectURL(file[0]);
 			}
@@ -656,26 +705,52 @@
 	function updateDecalTransform() { //旋转decal  移除原有的，改变角度，再shoot到原位置
 		var lastDecal = decals[decals.length - 1];
 		scene.remove(lastDecal);
-		console.log(lastShootrotation.z);
-		console.log(params.rotation);
-		lastShootrotation.z=params.rotation/100;
+		lastShootrotation.z=params.rotation/60;
 		shoot(1,lastShootrotation,lastShootPostion);
+	}
+
+	function updateDecalSize() { //改变decal大小
+		// 改变鼠标decal
+		var currentscale = params.maxScale;
+		currentSize.set( currentscale, currentscale,30 );
+		currentmaterial = decalMaterial.clone();
+		clearCache(mouseHelper);
+		scene.remove(mouseHelper);
+		mouseHelper= new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
+		scene.add(mouseHelper)
+		// 改变鼠标decal end
 	}
 
 	function initGUI(){
 		var gui = new dat.GUI();
-		// gui.add( params, 'downloadSTL' );
+		gui.add( params, 'SUBMIT' );
 		// gui.add( params, 'minScale', 1, 30 );
-		gui.add( params, 'maxScale', 1, 30 );
+		gui.add( params, 'maxScale', 1, 30 ).name( 'maxScale' ).onChange( updateDecalSize );
 		gui.add( params, 'rotation', -180, 180).name( 'rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
 		gui.add( params, 'back' );
 		gui.add( params, 'forward' );
 		gui.add( params, 'clear' );
 		gui.open();
-		$(".dg ul li:nth-of-type(1)").addClass("decal_size");
-		$(".dg ul li:nth-of-type(2)").addClass("rotation");
-		$(".dg ul li:nth-of-type(3)").addClass("back_btn");
-		$(".dg ul li:nth-of-type(4)").addClass("forward_btn");
+		$(".dg ul li:nth-of-type(1)").addClass("exportSTL");
+		$(".dg ul li:nth-of-type(2)").addClass("decal_size");
+		$(".dg ul li:nth-of-type(3)").addClass("rotation");
+		$(".dg ul li:nth-of-type(4)").addClass("back_btn");
+		$(".dg ul li:nth-of-type(5)").addClass("forward_btn");
+		// 首次禁止操作rotation，否则报错
+		$(".rotation").find(".property-name").text("rotation( -180°- 180° )");
+		$(".rotation").addClass("rotation_cover");
+		$(".rotation div:eq(0)").addClass("rotation_no");
+		$(".rotation").find("input").addClass("input_no");
+		// 首次禁止操作rotation，否则报错 end
+
+	}
+	/**
+	 * 清空当前obj对象的缓存
+	 * @param mesh  mesh对象
+	 * */
+	function clearCache(currentMesh) {
+		currentMesh.geometry.dispose();
+		currentMesh.material.dispose();
 	}
 </script>
 
