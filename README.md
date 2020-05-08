@@ -23,7 +23,6 @@ This project used `DecalGeometry`, `OrbitControls`, `dat.gui(GUI)`, `STLLoader`.
 <script src='../js/OrbitControls.js'></script>
 <script src='../js/dat.gui.min.js'></script>
 <script src='../js/STLExporter.js'></script>
-<script src='../js/fastclick.js'></script>
 var renderer, scene, camera, stats;
 	var mesh;
 	var raycaster;

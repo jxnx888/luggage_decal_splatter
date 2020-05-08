@@ -37,17 +37,24 @@
 		<div class="ie_notice">We highly recommend you open current page in Chrome or Firefox.</div>
 	</div>
 </div>
+<div class="right_menu dg">
+	<ul class="right_menu_ul"></ul>
+</div>
+<div class="right_menu_bg"></div>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery_lazyload/1.9.3/jquery.lazyload.min.js'></script>
 <script src='../js/three.js'></script>
-<!--<script src='../js/three.module.js'></script>-->
 <script src='../js/STLLoader.js'></script>
 <script src='../js/DecalGeometry.js'></script>
 <script src='../js/OrbitControls.js'></script>
 <script src='../js/dat.gui.min.js'></script>
 <script src='../js/STLExporter.js'></script>
-<script src='../js/fastclick.js'></script>
 <script>
+	var mouseX=0;
+	var mouseY=0;
+	$(document).bind("contextmenu",function(e){
+		return false;
+	});
 	if(IEVersion()!=-1){
 		$(".ie_notice").show();
 	}
@@ -99,6 +106,13 @@
 		$("#decal_upload").hide(); //上传隐藏
 		$("#map_decals #recently_wrapper").show();
 	})
+	$('#container').mousemove(function (e) {
+		mouseX = e.originalEvent.x || e.originalEvent.layerX || 0;
+		mouseY = e.originalEvent.y || e.originalEvent.layerY || 0;
+	});
+	$(".right_menu_bg").click(function(){
+		showNhideMenu(0)
+	})
 </script>
 <script>
 	var container = document.getElementById( 'container' );
@@ -136,6 +150,7 @@
 		map: decalDiffuse,
 		normalMap: decalNormal,
 		normalScale: new THREE.Vector2( 1, 1 ),
+		name:"decalMaterial",
 		shininess: 30,
 		transparent: true,
 		depthTest: true,
@@ -148,7 +163,7 @@
 	var lastShootrotation;
 	var decals = [];
 	var removedDecals = [];
-	var currentObj=[];//当前主体 行李箱
+	var decalsPRobj={};//decal的position 和rotation
 	var currentDecalObj=[];//当前主体的decal
 	var recentlyUsedDecal= new Array();//使用过的的decal
 	var mouseHelper;
@@ -165,7 +180,10 @@
 		},
 		/*minScale: 10,*/
 		maxScale: 30,
+		maxScaleHide: 30,
+		Size: 30,
 		rotation: Math.PI /180, // positive is counter-clockwise   Math.PI = 3.14 = 180°
+		rotationHide: Math.PI /180, // positive is counter-clockwise   Math.PI = 3.14 = 180°
 		back: function () {
 			removeLastDecals();
 		},
@@ -178,7 +196,14 @@
 
 		}
 	};
-
+	var leftClick =false; //是否左键点击
+	var shooted =true; //是否已经shoot
+	var focusedDecals=[];//鼠标位置的decal集合
+	var focusedDecalFlag;//鼠标位置的decal Flag
+	var focusedDecalUUID;//鼠标位置的decal uuid
+	var rightClickSavedDecalUUID;//鼠标右键确认当前的decal uuid
+	var menuShowFlag = false; //current mene status flag
+	var menuStatus = false;//当前右键menu状态 false关闭，true打开
 	window.addEventListener( 'load', init );
 
 	function init( file ) {
@@ -192,7 +217,7 @@
         container.appendChild( stats.dom );*/
 
 		scene = new THREE.Scene();
-
+		scene.name = "scene";
 		// sky + ground
 		//sky
 		scene.background = new THREE.Color( 0xcce0ff );
@@ -221,6 +246,9 @@
 		camera.position.z = 120;
 		camera.target = new THREE.Vector3();
 
+		var lights = new THREE.PointLight( 0xffffff, 0.2 ); //camera light， You do not need any other lights in your scene if you use this pattern.
+		camera.add( lights );
+		scene.add( camera );
 		var controls = new THREE.OrbitControls( camera, renderer.domElement );
 		controls.minDistance = 50; //设置相机距离原点的最近距离
 		controls.maxDistance = 200;//设置相机距离原点的最远距离
@@ -231,7 +259,7 @@
 		// LIGHTS
 		scene.add( new THREE.AmbientLight( 0xFFFFFFF,1.2) );//（环境光）
 
-		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面上
+		/*dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面上
 		dirLight.position.set( 0,75, 100 );
 		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
 		// scene.add( dirLightHeper );
@@ -274,7 +302,7 @@
 		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
 		// scene.add( dirLightHeper );
 		scene.add( dirLight );
-
+*/
 
 		// 鼠标红线
 		var geometry = new THREE.BufferGeometry();
@@ -287,7 +315,8 @@
 			linejoin: 'round'
 		} );
 		line = new THREE.Line( geometry, lineMaterial );
-		// scene.add( line ); //鼠标辅助线
+		line.visible = false;
+		scene.add( line ); //鼠标辅助线
 
 		loadSTL(defaultSTL,decals);
 		raycaster = new THREE.Raycaster();
@@ -312,11 +341,32 @@
 
 		}, false );
 
-		window.addEventListener( 'mouseup', function () {
-
-			checkIntersection();
-			if (! moved && intersection.intersects) shoot(0);
-
+		window.addEventListener( 'mouseup', function (e) {
+			if (e.button == 0) {
+				// showNhideMenu(0);
+				menuShowFlag = true;
+				// console.log("鼠标左键!")
+				var menuStatus = $(".right_click_menu").css("display");
+				if (menuStatus != 'block') {
+					checkIntersection();
+					if (! moved && intersection.intersects && shooted) {
+						shoot( 0 );
+						// 做点shoot后，取消鼠标decal，remove decal after shoot
+						leftClick = true;
+						shooted = false;
+						clearCache( mouseHelper );
+						scene.remove( mouseHelper );
+						$( ".activeDecal" ).removeClass( 'activeDecal' );
+					}
+				}
+			}else if (e.button == 2){
+				// console.log("鼠标右键!");
+				if(focusedDecalFlag){
+					if(focusedDecalUUID){
+						showNhideMenu(1);
+					}
+				}
+			}
 		} );
 
 		window.addEventListener( 'mousemove', onTouchMove );
@@ -345,10 +395,11 @@
 
 		mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
-		checkIntersection();
+		if(!menuShowFlag){
+			checkIntersection();
+		}
 
 	}
-
 	function checkIntersection() {
 
 		if (! mesh) return;
@@ -359,6 +410,7 @@
 		if (intersects.length > 0) {
 
 			var p = intersects[0].point;
+			mouseHelper.position.set( 0, 0, 0 );
 			mouseHelper.position.copy( p );
 			intersection.point.copy( p );
 			/*1.克隆旧的法线 2.旧法线乘以模型的世界矩阵得到归一化后的法线 3.和一个标量相乘，放大10倍。 4.加上点击点的坐标，进行平移。*/
@@ -375,12 +427,59 @@
 			positions.setXYZ( 1, n.x, n.y, n.z );
 			positions.needsUpdate = true;
 
-			intersection.intersects = true;
 
+			if(!shooted){
+				// var sceneChilds = scene.children;
+				var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
+				for(var i in sceneChilds){
+					if(sceneChilds[i]["object"]){
+						var currentObj =  sceneChilds[i]["object"];
+					if(currentObj["name"] == "decal"){ //get all objects whose name is decal in the current position of your mouse;
+						focusedDecals.push(currentObj)
+					}
+					}
+				}
+				if(focusedDecals.length>0){
+					var topDecal = focusedDecals[focusedDecals.length-1]; //get last shot decal object in the current position of your mouse;
+					if(focusedDecalUUID){
+						for(var i in decals){
+							if(decals[i].uuid == focusedDecalUUID){ //reset the last focused decal object color
+								decals[i].material.color.set("#fff");
+								break;
+							}
+						}
+					}
+					focusedDecalUUID = topDecal.uuid; //reset the current focused decal object uuid
+					focusedDecalFlag = true;
+					topDecal.material.color.set( '#f00' ); //set the current focused decal object color
+				}
+				else{
+					showNhideMenu(0)
+					if(focusedDecalUUID){ //if current position of your mouse do not have decal, reset all decal color;
+						for(var i in decals){
+							if(decals[i].uuid == focusedDecalUUID){//reset the last focused decal object color
+								decals[i].material.color.set("#fff");
+								break;
+							}
+						}
+					}
+				}
+			}
+			focusedDecals = []; //reset decals array
+			intersection.intersects = true;
 			intersects.length = 0;
 
 		} else {
 			intersection.intersects = false;
+			line.visible = false;
+			focusedDecals = [];
+			showNhideMenu(0);
+			for(var i in decals){
+				if(decals[i].uuid == focusedDecalUUID){//if current position of your mouse do not have decal, reset all decal color;
+					decals[i].material.color.set("#fff");//reset the last focused decal object color
+					break;
+				}
+			}
 		}
 	}
 
@@ -419,7 +518,8 @@
 		} );
 	}
 
-	function shoot(type,lastRotation,lastPosition) { //type:0 第一次点击 1，旋转贴图
+	function shoot(type,lastRotation,lastPosition) { //type:0 第一次点击 1，旋转贴图 3: 选中贴图的旋转 4, 选中贴图改变大小尺寸
+
 		// 当前选择贴图替换
 		var sameImgNum=0;
 		for(var i in recentlyUsedDecal){
@@ -432,10 +532,15 @@
 		}
 
 		// 当前选择贴图替换end
-		if(type==1){
+		if(type==1 || type == 3){
 			position.copy( lastPosition );
 			orientation.copy( lastRotation);
 		}
+		// else if(type == 4){
+		// 	position.copy( lastPosition );
+		// 	lastRotation.z = params.rotation / 60;
+		// 	orientation.copy( lastRotation);
+		// }
 		else{
 			position.copy( intersection.point );
 			orientation.copy( mouseHelper.rotation );
@@ -443,15 +548,26 @@
 			lastShootrotation =orientation;
 		}
 		// if ( params.rotate ) orientation.z = Math.random() * 2 * Math.PI;
-
 		var scale = params.maxScale;
+		if(type == 3 || type == 4){ //type 3，4 is change selected decal, so using other size attr
+			scale = params.Size;
+		}
 		size.set( scale, scale, scale );
 		var material = decalMaterial.clone();
 
 		var m = new THREE.Mesh( new THREE.DecalGeometry( mesh, position, orientation, size ), material );
+		m.name = 'decal';
 		decals.push( m );
 		currentDecalObj = decals;
 		scene.add( m );
+		var prObj = {};
+		prObj["position"]=position.clone();
+		prObj["orientation"]=orientation.clone();
+		prObj["uuid"]=m.uuid;
+		decalsPRobj[m.uuid] = prObj;
+		if(type == 3 || type == 4){ //each time reshoot, the decalGeometry is the new one, so the uuid changed
+			focusedDecalUUID = m.uuid;
+		}
 		if(decals.length>0){
 			if(decals.length>0){
 				$(".back_btn").addClass("active_back")
@@ -597,16 +713,8 @@
 			polygonOffsetFactor: - 4,
 			wireframe: false
 		} );
-		// 改变鼠标decal
-		var currentscale = params.maxScale;
-		currentSize.set( currentscale, currentscale, 30 );
-		currentmaterial = decalMaterial.clone();
-		position.set(0, 0, 0);
-		clearCache(mouseHelper);
-		scene.remove(mouseHelper);
-		mouseHelper= new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
-		scene.add(mouseHelper)
-		// 改变鼠标decal end
+		changeMouseDecal();
+		shooted = true; //恢复可点击shoot
 	}
 
 	function createMap(id,arr) {  //展示贴图，并赋予点击事件
@@ -704,21 +812,76 @@
 
 	function updateDecalTransform() { //旋转decal  移除原有的，改变角度，再shoot到原位置
 		var lastDecal = decals[decals.length - 1];
+		clearCache(lastDecal);
 		scene.remove(lastDecal);
-		lastShootrotation.z=params.rotation/60;
-		shoot(1,lastShootrotation,lastShootPostion);
+		decals.pop(); //remove last element in array decals
+		lastShootrotation.z = params.rotation / 60;
+		shoot( 1, lastShootrotation, lastShootPostion );
 	}
 
 	function updateDecalSize() { //改变decal大小
-		// 改变鼠标decal
-		var currentscale = params.maxScale;
-		currentSize.set( currentscale, currentscale,30 );
-		currentmaterial = decalMaterial.clone();
-		clearCache(mouseHelper);
-		scene.remove(mouseHelper);
-		mouseHelper= new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
-		scene.add(mouseHelper)
-		// 改变鼠标decal end
+		if (shooted) { //only resize after picked the decal
+			// 改变鼠标decal
+			var currentscale = params.maxScale;
+			currentSize.set( currentscale, currentscale, 30 );
+			currentmaterial = decalMaterial.clone();
+			clearCache( mouseHelper );
+			scene.remove( mouseHelper );
+			mouseHelper = new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
+			scene.add( mouseHelper );
+			// 改变鼠标decal end
+		}
+	}
+
+	function updateDecalTransformMenu() { //旋转decal  移除原有的，改变角度，再shoot到原位置
+		if(focusedDecalUUID){
+			for(var i in decals){
+				var currentDecal = decals[i];
+				if(currentDecal.uuid == focusedDecalUUID){
+					for(var j in decalsPRobj){
+						if(focusedDecalUUID == decalsPRobj[j].uuid){
+							lastShootPostion = decalsPRobj[j].position;
+							lastShootrotation =decalsPRobj[j].orientation;
+							lastShootrotation.z=params.rotationHide/60;
+							delete decalsPRobj[j];
+							break;
+						}
+					}
+					decalMaterial = currentDecal.material;
+					clearCache( currentDecal );
+					scene.remove(currentDecal);
+					decals.splice(i,1); //remove element that index is i in array decals
+					shoot(3,lastShootrotation,lastShootPostion);
+					break;
+				}
+			}
+		}
+	}
+
+	function updateDecalSizeMenu() { //改变decal大小
+		if(focusedDecalUUID){
+			for(var i in decals){
+				var currentDecal = decals[i];
+				if(currentDecal.uuid == focusedDecalUUID){
+					for(var j in decalsPRobj){
+						if(focusedDecalUUID == decalsPRobj[j].uuid){
+							lastShootPostion = decalsPRobj[j].position;
+							lastShootrotation =decalsPRobj[j].orientation;
+							delete decalsPRobj[j];
+							break;
+						}
+					}
+					lastShootrotation._z = params.rotationHide / 60;
+					decalMaterial = currentDecal.material;
+					clearCache(currentDecal);
+					scene.remove(currentDecal);
+					decals.splice(i,1); //remove element that index is i in array decals
+					shoot(3,lastShootrotation,lastShootPostion);
+					break;
+				}
+			}
+
+		}
 	}
 
 	function initGUI(){
@@ -730,18 +893,38 @@
 		gui.add( params, 'back' );
 		gui.add( params, 'forward' );
 		gui.add( params, 'clear' );
+		// gui.add( params, 'maxScaleHide', 1, 30 ).name( 'maxScaleHide' ).onChange( updateDecalSizeMenu);
+		// gui.add( params, 'rotationHide', -180, 180).name( 'rotationHide' ).onChange( updateDecalTransformMenu); //.name( 'rotation' ).onChange( updateDecalTransform )
 		gui.open();
 		$(".dg ul li:nth-of-type(1)").addClass("exportSTL");
 		$(".dg ul li:nth-of-type(2)").addClass("decal_size");
 		$(".dg ul li:nth-of-type(3)").addClass("rotation");
 		$(".dg ul li:nth-of-type(4)").addClass("back_btn");
 		$(".dg ul li:nth-of-type(5)").addClass("forward_btn");
+		// $(".dg ul li:nth-of-type(7)").addClass("menu_rotation needHide");
+		// $(".dg ul li:nth-of-type(8)").addClass("menu_decal_size needHide");
 		// 首次禁止操作rotation，否则报错
 		$(".rotation").find(".property-name").text("rotation( -180°- 180° )");
 		$(".rotation").addClass("rotation_cover");
 		$(".rotation div:eq(0)").addClass("rotation_no");
 		$(".rotation").find("input").addClass("input_no");
 		// 首次禁止操作rotation，否则报错 end
+		$(".dg.ac .dg.main.a:eq(0)").addClass("main_menu");
+		var rightMenuGUI = new dat.GUI();
+		rightMenuGUI.add( params, 'Size', 1, 30 ).name( 'Size' ).onChange( updateDecalSizeMenu);
+		rightMenuGUI.add( params, 'rotationHide', -180, 180).name( 'Rotation' ).onChange( updateDecalTransformMenu); //.name( 'rotation' ).onChange( updateDecalTransform )
+		rightMenuGUI.open();
+		$(".dg.ac .dg.main.a:eq(1)").addClass("right_click_menu");
+		$(".right_click_menu .close-button").addClass("needHide");
+		$(".right_click_menu ul li:nth-of-type(0)").addClass("menu_rotation");
+		$(".right_click_menu ul li:nth-of-type(1)").addClass("menu_decal_size");
+/*
+		// right click menu
+		var currentSize = $(".menu_decal_size").clone(true);
+		var currentRotation = $(".menu_rotation").clone(true);
+		$(".right_menu_ul").append(currentSize);
+		$(".right_menu_ul").append(currentRotation);
+		// right click menu end*/
 
 	}
 	/**
@@ -751,6 +934,48 @@
 	function clearCache(currentMesh) {
 		currentMesh.geometry.dispose();
 		currentMesh.material.dispose();
+	}
+
+	/**
+	 * 清空渲染器缓存，该demo中无需使用
+	 * 在Vue+threejs的项目中，使用了组件切换，页面并没有刷新，但是每次都会重载一次场景，致使场景异常的卡顿，
+	 * 所以在每次切换组件后，调用了下列方法来清空上一个组件中的缓存，使得项目大幅度优化
+	 */
+	function clearRenderer(){
+		renderer.dispose();
+		renderer.forceContextLoss();
+		renderer.context = null;
+		renderer.domElement = null;
+		renderer = null;
+	}
+
+	function changeMouseDecal(){
+		// 改变鼠标decal
+		var currentscale = params.maxScale;
+		currentSize.set( currentscale, currentscale, 30 );
+		currentmaterial = decalMaterial.clone();
+		position.set(0, 0, 0);
+		clearCache(mouseHelper);
+		scene.remove(mouseHelper);
+		mouseHelper= new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
+		scene.add(mouseHelper)
+		// 改变鼠标decal end
+	}
+
+	function showNhideMenu(type){ //type 1: show 0:hide
+		if(type == 0){
+			menuShowFlag = false;
+			focusedDecalFlag = false; //mouse focus or not
+			$(".right_click_menu,.right_menu_bg").hide(); //if flag == false, hide menu
+			$(".main_menu").show();
+		}
+		else {
+			menuShowFlag = true;
+			$( ".right_click_menu" ).css( { "left": mouseX, "top": mouseY } );
+			$( ".right_click_menu,.right_menu_bg" ).show(); //show menu
+			$(".main_menu").hide();
+			rightClickSavedDecalUUID = focusedDecalUUID;
+		}
 	}
 </script>
 
