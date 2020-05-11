@@ -156,7 +156,10 @@
 	var decalDiffuse = textureLoader.load( decalMap[1] );  // set decal decalMaterial map
 	var decalNormal = textureLoader.load( decalMap[1] ); // set decal decalMaterial normalMap
 	var decalMaterial = new THREE.MeshPhongMaterial( {
-		specular: 0x444444,
+		// ambient:0x444444,//环境光颜色）
+		specular: 0x444444, //（镜面反射光颜色）
+		// shininess:30, //（镜面反射光强度）此属性指定 specular 镜面反射光部分的亮度。默认值是 30
+		// emissive:0x444444, //（自发光颜色）
 		map: decalDiffuse,
 		normalMap: decalNormal,
 		normalScale: new THREE.Vector2( 1, 1 ),
@@ -168,6 +171,7 @@
 		polygonOffset: true,
 		polygonOffsetFactor: - 4,
 		wireframe: false,
+		color:0xC3C3C3,
 	} );
 	var lastShootPostion; //the last shot decal position
 	var lastShootrotation;//the last shot decal rotation or orientation
@@ -176,6 +180,7 @@
 	var decalsPRobj={};// all shot decals' position and rotation
 	var recentlyUsedDecal= new Array();//to save all recently used decals
 	var mouseHelper;
+	var mouseOrientation;//the orientation of mouse decal
 	var position = new THREE.Vector3();  // shot postion
 	var orientation = new THREE.Euler(); // shot orientation
 	var size = new THREE.Vector3( 10, 10, 10 );  // decal size
@@ -355,7 +360,7 @@
 				if (menuStatus != 'block') {
 					checkIntersection();
 					if (! moved && intersection.intersects && !shotFlag) {
-						shoot( 0 );
+						shoot(0);
 						// 做点shoot后，取消鼠标decal，remove decal after shoot
 						leftClick = true;
 						shotFlag = true;
@@ -448,7 +453,7 @@
 					if(focusedDecalUUID){
 						for(var i in decals){
 							if(decals[i].uuid == focusedDecalUUID){ //reset the last focused decal object color
-								decals[i].material.color.set("#fff");
+								decals[i].material.color.set("#C3C3C3");
 								break;
 							}
 						}
@@ -462,7 +467,7 @@
 					if(focusedDecalUUID){ //if current position of your mouse do not have decal, reset all decal color;
 						for(var i in decals){
 							if(decals[i].uuid == focusedDecalUUID){//reset the last focused decal object color
-								decals[i].material.color.set("#fff");
+								decals[i].material.color.set("#C3C3C3");
 								break;
 							}
 						}
@@ -480,7 +485,7 @@
 			showNhideMenu(0);
 			for(var i in decals){
 				if(decals[i].uuid == focusedDecalUUID){//if current position of your mouse do not have decal, reset all decal color;
-					decals[i].material.color.set("#fff");//reset the last focused decal object color
+					decals[i].material.color.set("#C3C3C3");//reset the last focused decal object color
 					break;
 				}
 			}
@@ -543,6 +548,9 @@
 		else{
 			position.copy( intersection.point );
 			orientation.copy( mouseHelper.rotation );
+			if(orientation._z == 0 && params.rotation !=0){ //default orientation z is 0, if
+				orientation._z = params.rotation / 60;
+			}
 			lastShootPostion = position;
 			lastShootrotation =orientation;
 		}
@@ -553,7 +561,6 @@
 		}
 		size.set( scale, scale, scale );
 		var material = decalMaterial.clone();
-
 		var m = new THREE.Mesh( new THREE.DecalGeometry( mesh, position, orientation, size ), material );
 		m.name = 'decal';
 		decals.push( m );
@@ -575,9 +582,9 @@
 		createMap("recently_wrapper",recentlyUsedDecal);
 
 		// 恢复操作rotation，否则报错
-		$(".rotation").removeClass("rotation_cover");
+		/*$(".rotation").removeClass("rotation_cover");
 		$(".rotation div:eq(0)").removeClass("rotation_no");
-		$(".rotation").find("input").removeClass("input_no");
+		$(".rotation").find("input").removeClass("input_no");*/
 	}
 
 	function animate() {
@@ -710,7 +717,8 @@
 			depthWrite: false,
 			polygonOffset: true,
 			polygonOffsetFactor: - 4,
-			wireframe: false
+			wireframe: false,
+			color:0xC3C3C3,
 		} );
 		changeMouseDecal();
 		shotFlag = false; //恢复可点击shoot
@@ -810,12 +818,25 @@
 	//End：
 
 	function updateDecalTransform() { //旋转decal  移除原有的，改变角度，再shoot到原位置
-		var lastDecal = decals[decals.length - 1];
+		/*var lastDecal = decals[decals.length - 1];
 		clearCache(lastDecal);
 		scene.remove(lastDecal);
 		decals.pop(); //remove last element in array decals
 		lastShootrotation.z = params.rotation / 60;
-		shoot( 1, lastShootrotation, lastShootPostion );
+		shoot( 1, lastShootrotation, lastShootPostion );*/
+		if (!shotFlag) { //only rerote before shoot the decal
+			// 改变鼠标decal
+			var currentscale = params.maxScale;
+			currentSize.set( currentscale, currentscale, 30 );
+			currentmaterial = decalMaterial.clone();
+			orientation._z = params.rotation / 60;
+			mouseOrientation = params.rotation / 60;
+			clearCache( mouseHelper );
+			scene.remove( mouseHelper );
+			mouseHelper = new THREE.Mesh( new THREE.DecalGeometry( mesh, currentPosition, orientation, currentSize ), currentmaterial );
+			scene.add( mouseHelper );
+			// 改变鼠标decal end
+		}
 	}
 
 	function updateDecalSize() { //改变decal大小
@@ -891,8 +912,8 @@
 		var gui = new dat.GUI();
 		gui.add( params, 'SUBMIT' );
 		// gui.add( params, 'minScale', 1, 30 );
-		gui.add( params, 'maxScale', 1, 30 ).name( 'maxScale' ).onChange( updateDecalSize );
-		gui.add( params, 'rotation', -180, 180).name( 'rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
+		gui.add( params, 'maxScale', 1, 30 ).name( 'Mouse Decal Size' ).onChange( updateDecalSize );
+		gui.add( params, 'rotation', -180, 180).name( 'Mouse Decal Rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
 		gui.add( params, 'back' );
 		gui.add( params, 'forward' );
 		gui.add( params, 'clear' );
@@ -903,10 +924,10 @@
 		$(".dg ul li:nth-of-type(4)").addClass("back_btn");
 		$(".dg ul li:nth-of-type(5)").addClass("forward_btn");
 		// 首次禁止操作rotation，否则报错
-		$(".rotation").find(".property-name").text("rotation( -180°- 180° )");
-		$(".rotation").addClass("rotation_cover");
-		$(".rotation div:eq(0)").addClass("rotation_no");
-		$(".rotation").find("input").addClass("input_no");
+		// $(".rotation").find(".property-name").text("rotation( -180°- 180° )");
+		// $(".rotation").addClass("rotation_cover");
+		// $(".rotation div:eq(0)").addClass("rotation_no");
+		// $(".rotation").find("input").addClass("input_no");
 		// 首次禁止操作rotation，否则报错 end
 		$(".dg.ac .dg.main.a:eq(0)").addClass("main_menu");
 
