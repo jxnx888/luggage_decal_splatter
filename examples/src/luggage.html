@@ -219,7 +219,9 @@
 	var focusedDecalFlag;//鼠标位置的decal Flag
 	var focusedDecalUUID;//鼠标位置的decal uuid    top decal uuid of mouse position/focused decal uuid
 	var menuShowFlag = false; //current menu status flag
-
+	var controlRotate = true; // the controls enableRotate
+	var controls; // project controller
+	var clickedLeftMouse = false;//mouse left click
 	window.addEventListener( 'load', init );
 
 	/**
@@ -266,7 +268,7 @@
 		var lights = new THREE.PointLight( 0xffffff, 0.2 ); //camera light， You do not need any other lights in your scene if you use this pattern.
 		camera.add( lights );
 		scene.add( camera );
-		var controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
+		controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
 		controls.minDistance = 50; //设置相机距离原点的最近距离 min distance of camera to coordinate origin
 		controls.maxDistance = 200;//设置相机距离原点的最远距离 max distance of camera to coordinate origin
 
@@ -348,15 +350,27 @@
 
 		} );
 
-		window.addEventListener( 'mousedown', function () {
+		window.addEventListener( 'mousedown', function (e) {
 
 			moved = false;
+			if (e.button == 0) { //mouse left button
+				if(focusedDecalFlag){
+					controls.enableRotate = false; //disable the controls'Rotate
+					controlRotate = false;
+				}
+				clickedLeftMouse = true;
+			}
 
 		}, false );
 
 		window.addEventListener( 'mouseup', function (e) {
 			if (e.button == 0) { //mouse left button
 				menuShowFlag = true;
+				clickedLeftMouse = false;
+				if(!focusedDecalFlag){
+					controls.enableRotate = true; //enable the controls'Rotate
+					controlRotate = true;
+				}
 				// console.log("鼠标左键!")
 				var menuStatus = $(".right_click_menu").css("display"); //check the right clicked menu show or not
 				if (menuStatus != 'block') {
@@ -406,10 +420,53 @@
 
 		mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+		console.log(x,y)
+		console.log(mouse.x, mouse.y)
 		if(!menuShowFlag){
 			checkIntersection();
 		}
+		if(!controlRotate && clickedLeftMouse){
+			if(focusedDecalUUID){
+				for(var i in decals){
+					var currentDecal = decals[i];
+					if(currentDecal.uuid == focusedDecalUUID){
+						for(var j in decalsPRobj){
+							if(focusedDecalUUID == decalsPRobj[j].uuid){
+								// var thisShootPostion = decalsPRobj[j].position;
+								// console.log("decalsPRobj x: "+JSON.stringify(decalsPRobj[j].position.x))
+								// console.log("decalsPRobj y: "+JSON.stringify(decalsPRobj[j].position.y))
+								// decalsPRobj[j].position.x = x;
+								// decalsPRobj[j].position.y = y;
+								// currentDecal.position.x = ( x / window.innerWidth ) * 2-1;
+								// currentDecal.position.y = - ( y / window.innerHeight ) * 2+1;
+								//
+								// console.log("decalsPRobj x: "+JSON.stringify(decalsPRobj[j].position.x))
+								// console.log("decalsPRobj y: "+JSON.stringify(decalsPRobj[j].position.y))
+								// console.log("currentDecal x: "+JSON.stringify(decalsPRobj[j].position.x))
+								// console.log("currentDecal y: "+JSON.stringify(decalsPRobj[j].position.y))
+								// console.log("decal x: "+JSON.stringify(mouse.x))
+								// console.log("decal y: "+JSON.stringify(mouse.y))
+								// var thisShootrotation =decalsPRobj[j].orientation;
+								// delete decalsPRobj[j];
 
+								var thisShootPostion = decalsPRobj[j].position;
+								var thisShootrotation =decalsPRobj[j].orientation;
+								var this_size = decalsPRobj[j].size;
+								thisShootPostion.copy(mouseHelper.position);
+								params.Size = this_size;
+								break;
+							}
+						}
+						decalMaterial = currentDecal.material;
+						clearCache( currentDecal );
+						scene.remove(currentDecal);
+						decals.splice(i,1); //remove element that index is i in array decals
+						shoot(5,thisShootrotation,thisShootPostion);
+						break;
+					}
+				}
+			}
+		}
 	}
 	function checkIntersection() {
 
@@ -458,6 +515,9 @@
 								decals[i].material.color.set("#C3C3C3");
 								break;
 							}
+							else{
+								decals[i].material.color.set("#C3C3C3");
+							}
 						}
 					}
 					focusedDecalUUID = topDecal.uuid; //reset the current focused decal object uuid
@@ -465,15 +525,19 @@
 					topDecal.material.color.set( '#f00' ); //set the current focused decal object color
 				}
 				else{
-					showNhideMenu(0)
+					showNhideMenu(0);
 					if(focusedDecalUUID){ //if current position of your mouse do not have decal, reset all decal color;
 						for(var i in decals){
 							if(decals[i].uuid == focusedDecalUUID){//reset the last focused decal object color
 								decals[i].material.color.set("#C3C3C3");
 								break;
 							}
+							else{
+								decals[i].material.color.set("#C3C3C3");
+							}
 						}
 					}
+					focusedDecalFlag = false;
 				}
 			}
 			focusedDecals = []; //reset decals array
@@ -483,14 +547,18 @@
 		} else {
 			intersection.intersects = false;
 			line.visible = false;
-			focusedDecals = [];
 			showNhideMenu(0);
-			for(var i in decals){
+			for(var i in decals){ //if do not have intersects, clean the select status and clean the focusedDecalUUID
 				if(decals[i].uuid == focusedDecalUUID){//if current position of your mouse do not have decal, reset all decal color;
 					decals[i].material.color.set("#C3C3C3");//reset the last focused decal object color
 					break;
 				}
 			}
+			focusedDecals = [];
+			focusedDecalFlag =false;
+			focusedDecalUUID = "";
+			controls.enableRotate = true; //enable the controls'Rotate
+			controlRotate = true;
 		}
 	}
 
@@ -544,7 +612,7 @@
 		}
 
 		// 当前选择贴图替换end
-		if(type==1 || type == 3|| type == 4){
+		if(type==1 || type == 3|| type == 4|| type == 5){
 			position.copy( lastPosition );
 			orientation.copy( lastRotation);
 		}
@@ -559,7 +627,7 @@
 		}
 		// if ( params.rotate ) orientation.z = Math.random() * 2 * Math.PI;
 		var scale = params.maxScale;
-		if(type == 3 || type == 4){ //type 3，4 is change selected decal, so using other size attr
+		if(type == 3 || type == 4|| type == 5){ //type 3，4 is change selected decal, so using other size attr
 			scale = params.Size;
 		}
 		size.set( scale, scale, scale );
@@ -583,11 +651,7 @@
 			}
 		}
 		createMap("recently_wrapper",recentlyUsedDecal);
-
-		// 恢复操作rotation，否则报错
-		/*$(".rotation").removeClass("rotation_cover");
-		$(".rotation div:eq(0)").removeClass("rotation_no");
-		$(".rotation").find("input").removeClass("input_no");*/
+		console.log("shot")
 	}
 
 	function animate() {
