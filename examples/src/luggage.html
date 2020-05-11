@@ -281,46 +281,7 @@
 		dirLight.position.set( 0,75, 100 );
 		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
 		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-		dirLight = new THREE.DirectionalLight( 0xffffff, .08 ); //正面下
-		dirLight.position.set( 0,-75,100 );
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );//光源辅助线
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( 0, 75, -100 ); //背部 上
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( 0, -75, -100 ); //背部 上
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( 0, 100, 0 ); //顶部
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( 100, 0, 0 ); //右侧
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( 0, -100, 0 ); //底部
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-		dirLight = new THREE.DirectionalLight( 0xffffff, .18 );
-		dirLight.position.set( -100, 0, 0 );//左侧
-		// dirLightHeper = new THREE.DirectionalLightHelper( dirLight, 5 );
-		// scene.add( dirLightHeper );
-		scene.add( dirLight );
-*/
+		scene.add( dirLight );*/
 
 		// 鼠标红线 mouse helper line
 		var geometry = new THREE.BufferGeometry();
@@ -354,9 +315,13 @@
 
 			moved = false;
 			if (e.button == 0) { //mouse left button
-				if(focusedDecalFlag){
+				if(focusedDecalFlag&&shotFlag){
 					controls.enableRotate = false; //disable the controls'Rotate
 					controlRotate = false;
+				}
+				else{
+					controls.enableRotate = true; //disable the controls'Rotate
+					controlRotate = true;
 				}
 				clickedLeftMouse = true;
 			}
@@ -365,7 +330,7 @@
 
 		window.addEventListener( 'mouseup', function (e) {
 			if (e.button == 0) { //mouse left button
-				menuShowFlag = true;
+				// menuShowFlag = true;
 				clickedLeftMouse = false;
 				if(!focusedDecalFlag){
 					controls.enableRotate = true; //enable the controls'Rotate
@@ -420,8 +385,6 @@
 
 		mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
-		console.log(x,y)
-		console.log(mouse.x, mouse.y)
 		if(!menuShowFlag){
 			checkIntersection();
 		}
@@ -432,23 +395,6 @@
 					if(currentDecal.uuid == focusedDecalUUID){
 						for(var j in decalsPRobj){
 							if(focusedDecalUUID == decalsPRobj[j].uuid){
-								// var thisShootPostion = decalsPRobj[j].position;
-								// console.log("decalsPRobj x: "+JSON.stringify(decalsPRobj[j].position.x))
-								// console.log("decalsPRobj y: "+JSON.stringify(decalsPRobj[j].position.y))
-								// decalsPRobj[j].position.x = x;
-								// decalsPRobj[j].position.y = y;
-								// currentDecal.position.x = ( x / window.innerWidth ) * 2-1;
-								// currentDecal.position.y = - ( y / window.innerHeight ) * 2+1;
-								//
-								// console.log("decalsPRobj x: "+JSON.stringify(decalsPRobj[j].position.x))
-								// console.log("decalsPRobj y: "+JSON.stringify(decalsPRobj[j].position.y))
-								// console.log("currentDecal x: "+JSON.stringify(decalsPRobj[j].position.x))
-								// console.log("currentDecal y: "+JSON.stringify(decalsPRobj[j].position.y))
-								// console.log("decal x: "+JSON.stringify(mouse.x))
-								// console.log("decal y: "+JSON.stringify(mouse.y))
-								// var thisShootrotation =decalsPRobj[j].orientation;
-								// delete decalsPRobj[j];
-
 								var thisShootPostion = decalsPRobj[j].position;
 								var thisShootrotation =decalsPRobj[j].orientation;
 								var this_size = decalsPRobj[j].size;
@@ -651,7 +597,6 @@
 			}
 		}
 		createMap("recently_wrapper",recentlyUsedDecal);
-		console.log("shot")
 	}
 
 	function animate() {
@@ -807,16 +752,15 @@
 			reverseArr = arr;
 			reveseHTML+=""
 		}
-		for ( var m in reverseArr ) {
-			var eachDecal;
-			if(m==1 && id=="map_wrapper"){
-				eachDecal = '<div class="each_decal activeDecal" onclick="changeCurrentDecal(this)"><img src="'+reverseArr[m]+'" alt=""></div>';
-
+		if (id == "map_wrapper") {
+			for (var m in reverseArr) {
+				if(m==1){
+					reveseHTML += '<div class="each_decal activeDecal" onclick="changeCurrentDecal(this)"><img src="' + reverseArr[m] + '" alt=""></div>';
+				}
+				else{
+					reveseHTML += '<div class="each_decal" onclick="changeCurrentDecal(this)"><img src="' + reverseArr[m] + '" alt=""></div>';
+				}
 			}
-			else{
-				eachDecal = '<div class="each_decal" onclick="changeCurrentDecal(this)"><img src="'+reverseArr[m]+'" alt=""></div>';
-			}
-			reveseHTML+=eachDecal;
 		}
 		$("#"+id).html(reveseHTML)
 	}
