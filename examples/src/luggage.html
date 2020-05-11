@@ -41,6 +41,8 @@
 	<ul class="right_menu_ul"></ul>
 </div>
 <div class="right_menu_bg"></div>
+<div id="loading_data"><img src="../img/loading.gif" alt=""></div>
+
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery_lazyload/1.9.3/jquery.lazyload.min.js'></script>
 <script src='../js/three.js'></script>
@@ -516,6 +518,7 @@
 					scene.add( decalMapArr[i] );
 				}
 			}
+			$("#loading_data").fadeOut(500);
 			var currentscale = params.maxScale;
 			currentSize.set( currentscale, currentscale, currentscale );
 			var currentmaterial = decalMaterial.clone();
@@ -914,9 +917,9 @@
 		// gui.add( params, 'minScale', 1, 30 );
 		gui.add( params, 'maxScale', 1, 30 ).name( 'Mouse Decal Size' ).onChange( updateDecalSize );
 		gui.add( params, 'rotation', -180, 180).name( 'Mouse Decal Rotation' ).onChange( updateDecalTransform ); //.name( 'rotation' ).onChange( updateDecalTransform )
-		gui.add( params, 'back' );
-		gui.add( params, 'forward' );
-		gui.add( params, 'clear' );
+		gui.add( params, 'back' ).name("Back");
+		gui.add( params, 'forward' ).name("Forward");
+		gui.add( params, 'clear' ).name("Clear All");
 		gui.open();
 		$(".dg ul li:nth-of-type(1)").addClass("exportSTL");
 		$(".dg ul li:nth-of-type(2)").addClass("decal_size");
