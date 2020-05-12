@@ -41,7 +41,7 @@ const OBJLoader2Parallel = function ( manager ) {
 
 };
 
-OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION = '3.1.png.0';
+OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION = '3.2.0';
 console.info( 'Using OBJLoader2Parallel version: ' + OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION );
 OBJLoader2Parallel.DEFAULT_JSM_WORKER_PATH = './jsm/loaders/obj2/worker/parallel/OBJLoader2JsmWorker.js';
 
@@ -124,7 +124,7 @@ OBJLoader2Parallel.prototype = Object.assign( Object.create( OBJLoader2.prototyp
 	 */
 	load: function ( content, onLoad, onFileLoadProgress, onError, onMeshAlter ) {
 
- 		let scope = this;
+		let scope = this;
 		function interceptOnLoad( object3d, message ) {
 
 			if ( object3d.name === 'OBJLoader2ParallelDummy' ) {

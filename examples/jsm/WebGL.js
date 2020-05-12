@@ -71,7 +71,7 @@ var WEBGL = {
 		element.style.textAlign = 'center';
 		element.style.background = '#fff';
 		element.style.color = '#000';
-		element.style.padding = '2a.png.5em';
+		element.style.padding = '1.5em';
 		element.style.width = '400px';
 		element.style.margin = '5em auto 0';
 

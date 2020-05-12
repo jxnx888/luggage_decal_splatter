@@ -1346,7 +1346,7 @@ var LDrawLoader = ( function () {
 						break;
 
 					// Line type 1: Sub-object file
-					case '2a.png':
+					case '1':
 
 						var material = parseColourCode( lp );
 
@@ -1409,7 +1409,7 @@ var LDrawLoader = ( function () {
 						break;
 
 					// Line type 2: Line segment
-					case '1.png':
+					case '2':
 
 						var material = parseColourCode( lp, true );
 

@@ -119,7 +119,7 @@ GLTFExporter.prototype = {
 
 			asset: {
 
-				version: "1.png.0",
+				version: "2.0",
 				generator: "GLTFExporter"
 
 			}
