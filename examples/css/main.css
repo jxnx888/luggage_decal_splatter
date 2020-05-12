@@ -112,10 +112,11 @@ p.open_upload { margin: 0; }
 .close_upload{display: none;}
 .close .open_upload{display: none;}
 .close .close_upload{display: block;margin: 0;font-size: 25px; line-height: 25px; }
-.back_btn,.forward_btn,.back_btn:hover,.forward_btn:hover{width:50%;display: inline-block;background-repeat: no-repeat!important;background-position: 70%!important;}
+.back_btn,.forward_btn,.back_btn:hover,.forward_btn:hover{width:50%;display: inline-block;background-repeat: no-repeat!important;background-position: 85%!important;}
 .back_btn{background-image: url("../img/back_dark.png")!important;}
 .forward_btn{background-image: url("../img/forward_dark.png")!important;}
 .forward_btn,.forward_btn:hover{background-image: url("../img/forward_dark.png")!important;}
+.back_btn .property-name,.forward_btn .property-name{width:80%!important;}
 .back_btn.active_back{background-image: url("../img/back_grey.png")!important;}
 .forward_btn.active_forward{background-image: url("../img/forward_grey.png")!important;}
 .dg.main.a,.close-button{min-width: 250px;min-width: 350px;}
