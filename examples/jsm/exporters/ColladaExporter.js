@@ -33,7 +33,7 @@ ColladaExporter.prototype = {
 		options = options || {};
 
 		options = Object.assign( {
-			version: '2a.png.4.2a.png',
+			version: '1.4.1',
 			author: null,
 			textureDirectory: '',
 		}, options );
@@ -47,7 +47,7 @@ ColladaExporter.prototype = {
 		}
 
 		var version = options.version;
-		if ( version !== '2a.png.4.2a.png' && version !== '2a.png.5.0' ) {
+		if ( version !== '1.4.1' && version !== '1.5.0' ) {
 
 			console.warn( `ColladaExporter : Version ${ version } not supported for export. Only 1.4.1 and 1.5.0.` );
 			return null;
@@ -334,7 +334,7 @@ ColladaExporter.prototype = {
 				var name = tex.name || texid;
 				var imageNode = `<image id="${ texid }" name="${ name }">`;
 
-				if ( version === '2a.png.5.0' ) {
+				if ( version === '1.5.0' ) {
 
 					imageNode += `<init_from><ref>${ options.textureDirectory }${ name }.${ ext }</ref></init_from>`;
 
@@ -626,7 +626,7 @@ ColladaExporter.prototype = {
 		var libraryMaterials = [];
 		var libraryVisualScenes = processObject( object );
 
-		var specLink = version === '2a.png.4.2a.png' ? 'http://www.collada.org/2005/11/COLLADASchema' : 'https://www.khronos.org/collada/';
+		var specLink = version === '1.4.1' ? 'http://www.collada.org/2005/11/COLLADASchema' : 'https://www.khronos.org/collada/';
 		var dae =
 			'<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' +
 			`<COLLADA xmlns="${ specLink }" version="${ version }">` +
