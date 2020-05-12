@@ -134,7 +134,7 @@
 	 * **/
 	function getDecalMap(){
 		var imgPath = '../img/decals/';
-		var totalNum = 51;
+		var totalNum = 52;
 		for(var i=1;i<totalNum; i++){
 			decalMap[i] = imgPath+i+'.png'
 		}
@@ -388,7 +388,7 @@
 		if(!menuShowFlag){
 			checkIntersection();
 		}
-		if(!controlRotate && clickedLeftMouse){
+		if(!controlRotate && clickedLeftMouse){ // https://github.com/spite/THREE.DecalGeometry/issues/9
 			if(focusedDecalUUID){
 				for(var i in decals){
 					var currentDecal = decals[i];
@@ -746,6 +746,9 @@
 					reverseArr.push(arr[i])
 				}
 				reverseArr=reverseArr.reverse();
+				for (var j in reverseArr){
+					reveseHTML += '<div class="each_decal" onclick="changeCurrentDecal(this)"><img src="' + reverseArr[j] + '" alt=""></div>';
+				}
 			}
 		}
 		else{
