@@ -136,12 +136,8 @@ p.open_upload { margin: 0; }
 #loading_data img{position: absolute;top: 48%;left: 48%;}
 
 
-/*.main_wrapper{width: 100%;position: relative;}
-.iframeContainer{position: absolute;border: 0px;left: 0;right: 0;width: 100%;height: 100%;overflow: auto;padding-left: var(--decals-width);}
-#decals {position: fixed;z-index: 100;left: 0px;width: var(--decals-width);height: 100%;overflow: auto;border-right: var(--decals-style);display: flex;flex-direction: column;transition: 0s 0s height;}
-#loading_data{
-	display: none;}*/
-/*@media only screen and (max-width:1200px) and (min-width:1000px){*/
+.main_wrapper{width: 100%;position: relative;}
+#container canvas{float:right;}
 @media only screen and (max-width:1200px){
 	div#decals{width:237px;}
 	.show_more{left: 235px;}

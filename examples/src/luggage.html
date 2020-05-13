@@ -88,11 +88,13 @@
 			return - 1;//不是ie浏览器
 		}
 	}
-		$(".show_more").click(function (  ) {
+
+	$(".show_more").click(function (  ) {
 		$("#decals").toggleClass("close");
 		$(".show_more").toggleClass("show_more_close");
 		$(".map").toggleClass("map_btn_close");
-		$(".map").trigger("click")
+		$(".map").trigger("click");
+		onWindowResize();
 	});
 	//decal map menu click
 	$(".map").click(function(){
@@ -382,8 +384,9 @@
 			y = event.clientY;
 
 		}
-
-		mouse.x = ( x / window.innerWidth ) * 2 - 1;
+		var leftDecalWidth = $("#decals").width();
+		mouse.x = ( x / (window.innerWidth+leftDecalWidth) ) * 2 - 1;
+		// mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
 		if(!menuShowFlag){
 			checkIntersection();
@@ -609,12 +612,12 @@
 
 	}
 	function onWindowResize() {
-
-		camera.aspect = window.innerWidth / window.innerHeight;
+		var leftDecalWidth = $("#decals").width();
+		camera.aspect = (window.innerWidth-leftDecalWidth) / window.innerHeight;
+		renderer.setSize( window.innerWidth-leftDecalWidth, window.innerHeight );
+		// camera.aspect = window.innerWidth / window.innerHeight;
 		camera.updateProjectionMatrix();
-
-		renderer.setSize( window.innerWidth, window.innerHeight );
-
+		// renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 
 	function removeDecals() {
