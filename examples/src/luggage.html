@@ -94,7 +94,7 @@
 		$(".show_more").toggleClass("show_more_close");
 		$(".map").toggleClass("map_btn_close");
 		$(".map").trigger("click");
-		onWindowResize();
+		onWindowResize(); //canvas floats to right side,in case the show_more close, there were dark side
 	});
 	//decal map menu click
 	$(".map").click(function(){
@@ -384,7 +384,7 @@
 			y = event.clientY;
 
 		}
-		var leftDecalWidth = $("#decals").width();
+		var leftDecalWidth = $("#decals").width(); //left decal side width
 		mouse.x = ( x / (window.innerWidth+leftDecalWidth) ) * 2 - 1;
 		// mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
@@ -612,7 +612,7 @@
 
 	}
 	function onWindowResize() {
-		var leftDecalWidth = $("#decals").width();
+		var leftDecalWidth = $("#decals").width(); //left decal side width
 		camera.aspect = (window.innerWidth-leftDecalWidth) / window.innerHeight;
 		renderer.setSize( window.innerWidth-leftDecalWidth, window.innerHeight );
 		// camera.aspect = window.innerWidth / window.innerHeight;
