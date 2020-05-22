@@ -28,7 +28,7 @@
 				<div class="no_recently">No recently used decals!</div>
 			</div>
 		</div>
-		<div class="show_more"><img src="../img/decal/arrow.png" alt="" width="7" height="14"></div>
+		<div class="show_more"><img src="../img/arrow.png" alt="" width="7" height="14"></div>
 	</div>
 	<div id="container"></div>
 
@@ -154,7 +154,7 @@
 	};
 	var mouse = new THREE.Vector2();
 	var intersects = [];
-	var defaultSTL = '../models/stl/ascii/grey.stl';
+	var defaultSTL = '../models/stl/ascii/luggage.stl';
 	var textureLoader = new THREE.TextureLoader();
 	var currentDecal=decalMap[1]; // set first decal as default decal
 	var decalDiffuse = textureLoader.load( decalMap[1] );  // set decal decalMaterial map
@@ -230,7 +230,7 @@
 	 * initial project
 	 * */
 	function init( file ) {
-
+		$("#loading_data").show();
 		renderer = new THREE.WebGLRenderer( { antialias: true } );  //new a three renderer
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight);
@@ -322,7 +322,7 @@
 					controlRotate = false;
 				}
 				else{
-					controls.enableRotate = true; //disable the controls'Rotate
+					controls.enableRotate = true; //enable the controls'Rotate
 					controlRotate = true;
 				}
 				clickedLeftMouse = true;
@@ -446,6 +446,7 @@
 
 
 			if(shotFlag){ //if shot, we can pick decal
+
 				// var sceneChilds = scene.children;
 				var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
 				for(var i in sceneChilds){
@@ -516,7 +517,7 @@
 		if (file) {
 			file = file;
 		} else {
-			file = './models/stl/ascii/grey.stl';
+			file = './models/stl/ascii/luggage.stl';
 		}
 		// file = '';
 		var loader = new THREE.STLLoader();

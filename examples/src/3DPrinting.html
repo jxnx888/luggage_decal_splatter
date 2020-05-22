@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>three.js webgl - interactive - voxel painter</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="../css/main.css">
+	<style>
+		body {
+			background-color: #f0f0f0;
+			color: #444;
+		}
+		a {
+			color: #08f;
+		}
+	</style>
+</head>
+<body>
+
+<div id="info">
+	<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - voxel painter - webgl<br>
+	<strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel
+</div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery_lazyload/1.9.3/jquery.lazyload.min.js'></script>
+<script src='../js/three.js'></script>
+<script src='../js/STLLoader.js'></script>
+<script src='../js/DecalGeometry.js'></script>
+<script src='../js/OrbitControls.js'></script>
+<script src='../js/dat.gui.min.js'></script>
+<script src='../js/STLExporter.js'></script>
+<script src='../js/DragControls.js'></script>
+<script src='../js/TransformControls.js'></script>
+<script src='../js/GLTFExporter.js'></script>
+<script>
+	var mobile=/Android|webOS|iPhone|iPad|BlackBerry/i.test(navigator.userAgent);
+	var camera, scene, renderer;
+	var plane;
+	var mouse, raycaster, isShiftDown = false;
+	var moved=false;
+	var mouseHelper, mouseHelperMaterial;
+	var cubeGeo, cubeMaterial;
+
+	var objects = [];
+	var currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 ); //当前形状
+	var currentObjMaterial;
+	var currentShapeType;
+	var currentColor;
+	var currentColorFlag = 0;
+	var currentObjMesh; //当前obj mesh
+	var shapeHelperObjects = [];
+	var shapesObj = []; //所有的当前已放置的obj
+	var transformControl;
+	var intersectsSelect = [];
+	var intersection = {
+		intersects: false,
+		point: new THREE.Vector3(),
+		normal: new THREE.Vector3()
+	};
+	var params = {  //params for GUI
+		SUBMIT:function (){
+			if(objects.length>1) {
+				exportASCII();
+			}
+		},
+		SUBMITGLTFE:function (){
+			if(objects.length>1) {
+				exportGLTF();
+			}
+		},
+		Geometry:0,//选中的形状
+		Cube:function(){
+			changeShapes(0);
+		},
+		Cylinder:function(){
+			changeShapes(1);
+		},
+		Cone:function(){
+			changeShapes(2);
+		},
+		Ball:function(){
+			changeShapes(3);
+		},
+		Doughnut:function(){
+			changeShapes(4);
+		},
+		color:0,
+		selectShape:false,
+		changeCurrentSize:false,
+		removeLast:function(){
+			removeLastShape();
+		},
+		clear:function(){
+			removeAllShapes();
+		},
+	};
+	var colorsObj = {
+		White:0,
+		Yellow:1
+	}
+	var navParams = {
+		front:function(){
+			cameraSides(0);
+		},
+		back:function(){
+			cameraSides(1);
+		},
+		left:function(){
+			cameraSides(2);
+		},
+		right:function(){
+			cameraSides(3);
+		},
+		top:function(){
+			cameraSides(4);
+		},
+		bottom:function(){
+			cameraSides(5);
+		},
+		reset:function(){
+			cameraSides(6);
+		},
+	}
+
+	init();
+	render();
+
+	function init() {
+
+		camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+		camera.position.set( 500, 800, 1300 );
+		camera.lookAt( 0, 0, 0 );
+
+		scene = new THREE.Scene();
+		// scene.background = new THREE.Color( 0xf0f0f0 );
+		scene.background = new THREE.Color( 0x000000 );
+
+		// roll-over helpers
+
+		var rollOverGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
+		mouseHelperMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
+		mouseHelper = new THREE.Mesh( rollOverGeo, mouseHelperMaterial );
+		if(!mobile) {
+			scene.add( mouseHelper );
+		}
+		// cubes
+
+		cubeGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
+		cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xfeb74c, map: new THREE.TextureLoader().load( 'textures/square-outline-textured.png' ) } );
+
+		// grid
+
+		var gridHelper = new THREE.GridHelper( 1000, 20, 0xffffff,0x30b030);
+		scene.add( gridHelper );
+
+		//
+
+		raycaster = new THREE.Raycaster();
+		mouse = new THREE.Vector2();
+
+		var geometry = new THREE.PlaneBufferGeometry( 1000, 1000 );
+		geometry.rotateX( - Math.PI / 2 );
+
+		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: false } ) );
+		plane.name="plane";
+		scene.add( plane );
+
+		objects.push( plane );
+
+		// lights
+
+		var ambientLight = new THREE.AmbientLight( 0x606060 );
+		scene.add( ambientLight );
+
+		var directionalLight = new THREE.DirectionalLight( 0xffffff );
+		directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
+		scene.add( directionalLight );
+
+		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+
+
+		//移动shape
+		transformControl = new THREE.TransformControls( camera, renderer.domElement );
+		scene.add( transformControl );
+		transformControl.addEventListener( 'change', render );
+		transformControl.addEventListener( 'change', function () {
+			if(params.selectShape) {
+				cancelHideTransform();
+			}
+		} );
+		transformControl.addEventListener( 'mouseDown', function () {
+			if(params.selectShape) {
+				cancelHideTransform();
+			}
+		} );
+		transformControl.addEventListener( 'mouseUp', function () {
+			if(params.selectShape) {
+				delayHideTransform();
+			}
+		} );
+		transformControl.addEventListener( 'objectChange', function () {
+			if(params.selectShape) {
+				updateShapePosition();
+			}
+		} );
+
+		//移动shape End
+		/*document.addEventListener( 'mousemove', function(){
+			moved = true;
+			onDocumentMouseMove();
+		});*/
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		window.addEventListener( 'touchmove', onTouchMove );
+		document.addEventListener( 'mousedown',  function (e) {
+			moved = false;
+		});
+		document.addEventListener( 'mouseup', onDocumentMouseDown, false );
+		document.addEventListener( 'keydown', onDocumentKeyDown, false );
+		document.addEventListener( 'keyup', onDocumentKeyUp, false );
+
+		//
+		initGUI();
+		window.addEventListener( 'resize', onWindowResize, false );
+		animate();
+	}
+	function animate() {
+		requestAnimationFrame( animate );
+		renderer.render( scene, camera );
+		// stats.update();
+	}
+	function onWindowResize() {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+	}
+
+	function onDocumentMouseMove( event ) {
+
+		event.preventDefault();
+
+		mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
+
+		raycaster.setFromCamera( mouse, camera );
+
+		var intersects = raycaster.intersectObjects( objects );
+
+		if ( intersects.length > 0 ) {
+
+			var intersect = intersects[ 0 ];
+
+			mouseHelper.position.copy( intersect.point ).add( intersect.face.normal );
+			mouseHelper.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+
+		}
+		if(moved){
+			// 旋转控制
+			controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
+			controls.minDistance = 10; //设置相机距离原点的最近距离 min distance of camera to coordinate origin
+			controls.maxDistance = 1300;//设置相机距离原点的最远距离 max distance of camera to coordinate origin
+			// 旋转控制end
+		}
+		render();
+
+	}
+
+	function onDocumentMouseDown( event ) {
+
+		if(!params.selectShape) {
+			event.preventDefault();
+
+			mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
+
+			raycaster.setFromCamera( mouse, camera );
+
+			var intersects = raycaster.intersectObjects( objects );
+
+			if (intersects.length > 0) {
+
+				var intersect = intersects[0];
+
+				// delete cube
+
+				if (isShiftDown) {
+
+					if (intersect.object !== plane) {
+
+						scene.remove( intersect.object );
+
+						objects.splice( objects.indexOf( intersect.object ), 1 );
+
+					}
+
+					// create cube
+
+				} else {
+					if (objects.length < 11) {
+						var voxel = new THREE.Mesh( currentObj, currentObjMaterial );
+						voxel.position.copy( intersect.point ).add( intersect.face.normal );
+						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+						voxel.name = "shapes";
+						scene.add( voxel );
+						objects.push( voxel );
+						shapeHelperObjects.push( voxel );
+						shapesObj.push( voxel );
+					} else {
+						console.log( "The max shapes are 10." )
+					}
+				}
+
+				render();
+
+			}
+		}
+		else{
+			checkIntersection()
+			moved = false;
+		}
+	}
+
+	function onDocumentKeyDown( event ) {
+
+		switch ( event.keyCode ) {
+
+			case 16: isShiftDown = true; break;
+
+		}
+
+	}
+
+	function onDocumentKeyUp( event ) {
+
+		switch ( event.keyCode ) {
+
+			case 16: isShiftDown = false; break;
+
+		}
+
+	}
+	function onTouchMove(event){
+
+	}
+	function render() {
+
+		renderer.render( scene, camera );
+
+	}
+	/**
+	 * 清空当前obj对象的缓存
+	 * @param mesh  mesh对象
+	 * */
+	function clearCache(currentMesh) {
+		currentMesh.geometry.dispose();
+		currentMesh.material.dispose();
+	}
+
+	function initGUI(){
+
+		var gui = new dat.GUI();
+		/*gui.add( params, 'SUBMIT' );
+		gui.add( params, 'Geometry', geometries ).onChange( function () {
+			// changeShapes(geometries[ params.Geometry ]);
+			changeShapes();
+		} );
+		gui.add( params, 'color', shapeColor ).name('Color').onChange( function () {
+			changeCurrentColor(shapeColor[params.color]);
+		} );*/
+		var shapess = gui.addFolder("Shapes");
+		shapess.add(params,'Cube');
+		shapess.add(params,'Cylinder');
+		shapess.add(params,'Cone');
+		shapess.add(params,'Ball');
+		shapess.add(params,'Doughnut');
+		shapess.open();
+
+		gui.add( params, 'color', colorsObj ).name("Color").onChange(function(){
+			changeCurrentColor()
+		});
+
+		/*var colorss = gui.addFolder("Color");
+		colorss.add(params,'white');
+		colorss.add(params,'yellow');
+		colorss.open();*/
+		gui.add(params,'selectShape').onChange(function(){
+			selectShapeModule();
+		});
+		gui.add(params,'changeCurrentSize').onChange(function(){
+			if(params.changeCurrentSize){
+				transformControl.setMode( "scale" );
+			}
+			else {
+				transformControl.setMode( "translate" );
+			}
+		});
+
+		gui.add(params,'removeLast').name("Remove Last Shape");
+		gui.add(params,'clear').name("Remove All");
+		gui.add( params, 'SUBMIT' ).name("exportSTL");
+		gui.add( params, 'SUBMITGLTFE' ).name("exportGLTF");
+
+		/*	var navGUI = new dat.GUI();
+            var side = navGUI.addFolder("Sides");
+            side.add(navParams,'front').name("Front");
+            side.add(navParams,'back').name("Back");
+            side.add(navParams,'left').name("Left");
+            side.add(navParams,'right').name("Right");
+            side.add(navParams,'top').name("Top");
+            side.add(navParams,'bottom').name("Bottom");
+            side.add(navParams,'reset').name("Reset");
+            side.close();*/
+	}
+	function changeShapes(geo){//geo: 当前类型
+		switch (geo) {
+			case 0:
+				// 正方形
+				currentShapeType = 0;
+				currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 );
+				break;
+			case 1:
+				//圆柱
+				currentShapeType = 1;
+				currentObj = new THREE.CylinderBufferGeometry( 25, 25, 50, 32 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
+				break;
+			case 2:
+				// 圆锥形
+				currentShapeType = 2;
+				currentObj = new THREE.ConeBufferGeometry( 25, 50, 32 ); //ConeBufferGeometry(radius : Float, height : Float, radialSegments : Integer, heightSegments : Integer, openEnded : Boolean, thetaStart : Float, thetaLength : Float)
+				break;
+			case 3:
+				// 球形
+				currentShapeType = 3;
+				currentObj =  new THREE.SphereBufferGeometry( 25, 25, 32);//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+				break;
+			case 4:
+				// 环形
+				currentShapeType = 4;
+				currentObj =  new THREE.TorusGeometry(20, 5, 16, 100 );//TorusGeometry(radius : Float, tube : Float, radialSegments : Integer, tubularSegments : Integer, arc : Float)
+				break;
+			default:
+				// 正方形
+				currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 );
+		}
+
+		changeMouseHelper(currentColorFlag);
+		currentObjMesh = new THREE.Mesh(currentObj,currentObjMaterial);
+		// scene.add( currentObjMesh );
+	}
+	function changeCurrentColor(){
+		var color =params.color;
+		if(color == 0) {
+			currentColor = 0xFFFFFF;
+			currentColorFlag = 0;
+			currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xFFFFFF } );
+			changeMouseHelper(0)
+		}
+		else{
+			currentColorFlag = 1;
+			currentColor=0xf2f545
+			currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xf2f545 } );
+			changeMouseHelper(1)
+		}
+	}
+	function changeMouseHelper(type){ //type 0: 颜色改为白色 1：颜色改为黄色
+		if (type == 0) {
+			mouseHelperMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 1, transparent: true } );
+		} else {
+			mouseHelperMaterial = new THREE.MeshBasicMaterial( { color: 0xf2f545, opacity: 1, transparent: true } );
+		}
+		clearCache( mouseHelper );
+		scene.remove( mouseHelper );
+		mouseHelper = new THREE.Mesh( currentObj, mouseHelperMaterial );
+		mouseHelper.name = "mouseHelper";
+		if(!mobile) {
+			scene.add( mouseHelper );
+		}
+	}
+	function selectShapeModule(){
+		if(params.selectShape) {
+			console.log( "remove" );
+			clearCache( mouseHelper );
+			scene.remove( mouseHelper );
+			camera.position.set( 500, 800, 1000 );
+			camera.lookAt( 0, 0, 0 );
+			render();
+		}
+		else{
+			transformControl.detach( transformControl.object ); //隐藏控制控件
+			selectedShapeFlag = false;
+			if(!mobile) {
+				scene.add( mouseHelper );
+			}
+		}
+	}
+	function removeAllShapes(){
+		shapesObj.forEach( function ( d ) {
+			clearCache(d);
+			scene.remove( d );
+			for(var i in objects){
+				if(objects[i].uuid == d.uuid) {
+					objects.splice( i, 1 ); //remove element that index is i in array decals
+				}
+			}
+		} );
+		shapesObj = [];
+	}
+	function removeLastShape(){
+		if (objects[objects.length - 1]) {
+			clearCache( objects[objects.length - 1] );
+			scene.remove( objects[objects.length - 1] );
+			objects.pop();
+		}
+	}
+
+	function checkIntersection(){
+		var x, y;
+
+		if ( event.changedTouches ) {
+
+			x = event.changedTouches[ 0 ].pageX;
+			y = event.changedTouches[ 0 ].pageY;
+
+		} else {
+
+			x = event.clientX;
+			y = event.clientY;
+
+		}
+
+		mouse.x = ( x / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+
+		if (! plane) return;
+		raycaster.setFromCamera( mouse, camera );
+		raycaster.intersectObject( plane, false, intersectsSelect );
+		if (intersectsSelect.length > 0) {
+
+			var p = intersectsSelect[0].point;
+			mouseHelper.position.set( 0, 0, 0 );
+			mouseHelper.position.copy( p );  //copy intersection position to mouseHelper
+			intersection.point.copy( p );
+			/*1.克隆旧的法线 2.旧法线乘以模型的世界矩阵得到归一化后的法线 3.和一个标量相乘，放大10倍。 4.加上点击点的坐标，进行平移。*/
+			var n = intersectsSelect[0].face.normal.clone();
+			n.transformDirection( plane.matrixWorld );
+			n.multiplyScalar( 10 );
+			n.add( intersectsSelect[0].point );
+
+			intersection.normal.copy( intersectsSelect[0].face.normal );
+			mouseHelper.lookAt( n );
+
+			var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
+			if(sceneChilds.length>1) {
+				if (sceneChilds && sceneChilds[0].object.name == "shapes") {
+					transformControl.detach( transformControl.object );
+					transformControl.attach( sceneChilds[0].object );
+				} else if (sceneChilds[0].object.name == "plane") {
+					transformControl.detach( transformControl.object );
+					transformControl.attach( sceneChilds[0].object );
+				}
+			}
+			intersection.intersects = true;
+			intersectsSelect.length = 0;
+
+		} else {
+			intersection.intersects = false;
+			transformControl.detach( transformControl.object );
+			focusedShape = null;
+		}
+		render();
+	}
+
+	// 移动shape
+	var hiding;
+
+	function delayHideTransform() {
+
+		cancelHideTransform();
+		hideTransform();
+
+	}
+
+	function hideTransform() {
+
+		hiding = setTimeout( function () {
+
+			transformControl.detach( transformControl.object );
+
+		}, 2500 );
+
+	}
+
+	function cancelHideTransform() {
+
+		if ( hiding ) clearTimeout( hiding );
+
+	}
+	function updateShapePosition() {
+
+		console.log("updateShapePosition")
+	}
+	// 移动shape End
+
+	// 导出相关
+	function exportASCII() {
+		scene.remove(transformControl);
+		scene.remove(mouseHelper);
+		exporter = new THREE.STLExporter(); //导出工具  exporter tool
+		var result = exporter.parse( scene );
+		var date= Date.parse(new Date());
+		saveString( result, date+'.stl' );
+
+		scene.add(transformControl);
+		scene.add(mouseHelper);
+	}
+	var link = document.createElement( 'a' );
+	link.style.display = 'none';
+	document.body.appendChild( link );
+
+	function save( blob, filename ) {
+
+		link.href = URL.createObjectURL( blob );
+		link.download = filename;
+		link.click();
+
+	}
+	function saveString( text, filename ) {
+
+		save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+
+	}
+	function exportGLTF(  ) {
+		scene.remove(transformControl);
+		scene.remove(mouseHelper);
+		var input = scene;
+		var gltfExporter = new THREE.GLTFExporter();
+
+		var options = {
+			trs: false,
+			onlyVisible: true,
+			truncateDrawRange: true,
+			binary: false,
+			forcePowerOfTwoTextures: false,
+			maxTextureSize: 4096
+		};
+		gltfExporter.parse( input, function ( result ) {
+			var output = JSON.stringify( result, null, 2 );
+			console.log( output );
+			saveString( output, 'scene.gltf' );
+		}, options );
+		scene.add(transformControl);
+		scene.add(mouseHelper);
+	}
+	// 导出相关 end
+	//camera 方向
+	function cameraSides(type){
+		controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
+		camera.position.set( 0, 0, 1400 );
+		switch (type) {
+			case 0: //front
+				break;
+			case 1://rear
+				break;
+			case 2://left
+				break;
+			case 3://right
+				break;
+			case 4://top
+				break;
+			case 5://bottom
+				break;
+			default://reset
+				camera.position.set( 500, 800, 1300 );
+		}
+		controls.update();
+		controls.dispose();
+	}
+	//camera 方向
+</script>
+
+</body>
+</html>

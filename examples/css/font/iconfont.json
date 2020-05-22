@@ -1,0 +1,93 @@
+{
+  "id": "1835704",
+  "name": "3D Printng",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "2325945",
+      "name": "移动",
+      "font_class": "yidong",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "3216106",
+      "name": "放大",
+      "font_class": "icon--",
+      "unicode": "e725",
+      "unicode_decimal": 59173
+    },
+    {
+      "icon_id": "5357321",
+      "name": "人机交互3D-三维旋转",
+      "font_class": "renjijiaohuD-sanweixuanzhuan",
+      "unicode": "e6e2",
+      "unicode_decimal": 59106
+    },
+    {
+      "icon_id": "5716004",
+      "name": "旋转轴",
+      "font_class": "xuanzhuanzhou",
+      "unicode": "e677",
+      "unicode_decimal": 58999
+    },
+    {
+      "icon_id": "10905172",
+      "name": "旋转",
+      "font_class": "rotate",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "5809239",
+      "name": "左箭头",
+      "font_class": "zuojiantou1",
+      "unicode": "e6a5",
+      "unicode_decimal": 59045
+    },
+    {
+      "icon_id": "5809234",
+      "name": "右箭头",
+      "font_class": "youjiantou",
+      "unicode": "e6a3",
+      "unicode_decimal": 59043
+    },
+    {
+      "icon_id": "609744",
+      "name": "圆",
+      "font_class": "yuancircle46",
+      "unicode": "e75d",
+      "unicode_decimal": 59229
+    },
+    {
+      "icon_id": "1335516",
+      "name": "圆柱体",
+      "font_class": "icon-yuanzhuti",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "1335521",
+      "name": "圆锥体",
+      "font_class": "icon-yuanzhuiti",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "6401234",
+      "name": "方块",
+      "font_class": "weibiaoti--",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "7639355",
+      "name": "实心正方形",
+      "font_class": "shixinzhengfangxing",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    }
+  ]
+}

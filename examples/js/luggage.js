@@ -14,7 +14,7 @@ var intersection = {
 };
 var mouse = new THREE.Vector2();
 var intersects = [];
-var defaultSTL = '../models/stl/ascii/grey.stl';
+var defaultSTL = '../models/stl/ascii/luggage.stl';
 var textureLoader = new THREE.TextureLoader();
 var currentDecal; //当前贴图默认第一个
 var decalDiffuse = textureLoader.load( decalMap[1] );
@@ -281,7 +281,7 @@ function loadSTL( file,decalMapArr ) {
 	if (file) {
 		file = file;
 	} else {
-		file = './models/stl/ascii/grey.stl';
+		file = './models/stl/ascii/luggage.stl';
 	}
 
 	var loader = new THREE.STLLoader();
