@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "772809",
+      "name": "放大镜1",
+      "font_class": "fangdajing1",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    },
+    {
+      "icon_id": "772832",
+      "name": "放大镜2",
+      "font_class": "fangdajing2",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    },
+    {
+      "icon_id": "1624907",
+      "name": "删除",
+      "font_class": "icon-test",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "7007275",
+      "name": "后退-22",
+      "font_class": "houtui-",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "7007290",
+      "name": "前进-22",
+      "font_class": "qianjin-",
+      "unicode": "e67e",
+      "unicode_decimal": 59006
+    },
+    {
       "icon_id": "2325945",
       "name": "移动",
       "font_class": "yidong",
