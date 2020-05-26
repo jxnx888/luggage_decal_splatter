@@ -141,6 +141,22 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 .zoom_control .iconfont { font-size: .2rem;}
 .zoom_control .zoom_index { font-size: .13rem;line-height: .35rem; padding: 0 .03rem;width: .4rem; text-align: center;}
 
-.side_control{position: fixed;top: .1rem; left: .1rem;}
+.side_control,.save_control{position: fixed;top: .1rem; left: .1rem;}
 .sides_wrapper{display: none;position: absolute;}
 .side_control_btn.iconfont { font-size: .2rem; color: #fff;}
+
+.save_control{left:.5rem}
+.save_stl.iconfont { font-size: .2rem; color: #fff;}
+.save_control .save_stl.iconfont.noActive_save { font-size: .2rem; color: #a5a3a3;}
+
+.color_control { display: none; position: fixed; top: 0; right: 1.05rem; background: #FFF; width: 1.5rem; text-align: center; line-height: .2rem; }
+.color_title {}
+.color_selection .color_option{width:50%;float: left;}
+.color_circle { width: .35rem; height: .35rem; background: #f2f545; margin: auto; border-radius: 50%; }
+.color_white .color_circle{background: #fff;border:1px solid #eee}
+
+
+/*lego*/
+.dg.ac.lego_constrution{right: .9rem;}
+.dg .cr.string,.dg .cr.number{border-left: none!important;}
+/*.dg li:not(.folder){background:#fff!important;}*/
