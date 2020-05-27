@@ -16,22 +16,23 @@
 			<div class="shapes_options normal" onclick="showModule(0)">标准模型 <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 			<div class="shapes_options cartoon" onclick="showModule(1)">卡通模型 <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 			<div class="shapes_options lego" onclick="showModule(2)">Lego <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
+			<div class="shapes_options pose" onclick="showModule(3)">Pose <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 		</div>
 		<div class="child_wrapper normal_wrapper">
 			<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i> 标准模型</div>
-			<div class="module shapes cube" onclick="changeShapes(0,this)">
+			<div class="module shapes cube" onclick="changeShapes(0)">
 				<img src="../img/3dPrinting/cube.png" alt="Cube">
 				<div class="name">正方形</div>
 			</div>
-			<div class="module shapes cylinder" onclick="changeShapes(1,this)">
+			<div class="module shapes cylinder" onclick="changeShapes(1)">
 				<img src="../img/3dPrinting/cylinder.png" alt="Cylinder">
 				<div class="name">圆柱形</div>
 			</div>
-			<div class="module shapes cone" onclick="changeShapes(2,this)">
+			<div class="module shapes cone" onclick="changeShapes(2)">
 				<img src="../img/3dPrinting/cone.png" alt="Cone">
 				<div class="name">圆锥形</div>
 			</div>
-			<div class="module shapes ball" onclick="changeShapes(3,this)">
+			<div class="module shapes ball" onclick="changeShapes(3)">
 				<img src="../img/3dPrinting/ball.png" alt="Ball">
 				<div class="name">球形</div>
 			</div>
@@ -61,10 +62,20 @@
 			<div class="module shapes doughnut" onclick="loadSTL(4)">
 				<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">
 				<div class="name">霸王龙</div></div>
-			</div>
-		<div class="child_wrapper ldraw_wrapper"></div>
-		<div class="child_wrapper vpd_wrapper"></div>
 		</div>
+		<div class="child_wrapper ldraw_wrapper"></div>
+		<div class="child_wrapper vpd_wrapper" id="vpd_wrapper">
+			<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>Pose</div>
+			<div class="module pose miku" id="miku">
+				<img src="../img/3dPrinting/doughnut.png">
+				<div class="name">Miku</div>
+			</div>
+		<div class="module pose miku" id="miku">
+				<img src="../img/3dPrinting/doughnut.png">
+				<div class="name">Miku</div>
+			</div>
+		</div>
+	</div>
 	<div class="obj_control">
 		<div class="obj_control_wrapper clearfix">
 			<div class="control_btn iconfont undo_control noActive_control" onclick="redoUndo(0)">&#xe67a;</div>
@@ -131,6 +142,7 @@
 <script src='../js/MMDLoader.js'></script>
 <script src='../js/MMDAnimationHelper.js'></script>
 <script src='../js/dialog.js'></script>
+<script src='../js/es6LoadPost.js' type="module"></script>
 <script>
 	/*$(".normal").click(function(){
 		stopProp();
@@ -167,9 +179,8 @@
 		$(obj).parents(".child_wrapper").hide()
 	}
 	listModule();
-	var listShapes=[];
 	var listLDraw=[];
-	var listSTL=[];
+	var listPost=[];
 	function listModule(type){
 		$.ajax({
 			type: "GET",
@@ -178,43 +189,19 @@
 			cache: false,
 			beforeSend: function() {},
 			success: function(res) {
-				var shapesHtml ='<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>标准模型</div>';
-				var shapesIndex = 0;
-				listShapes = res.data.shapes;
-				for(var i in listShapes){
-					shapesHtml+='<div class="module shapes '+listShapes[i].title+'" onclick="changeShapes('+shapesIndex+',this)">';
-					shapesHtml+='<img src="'+listShapes[i].url+'" alt="Doughnut">';
-					shapesHtml+='<div class="name">'+listShapes[i].name+'</div>';
-					shapesHtml+='</div>';
-					shapesIndex++
-				}
-				$(".normal_wrapper").html(shapesHtml);
-
-				var cartoonHtml ='<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>卡通模型</div>';
-				var cartoonIndex = 0;
-				listSTL = res.data.stl;
-				for(var i in listSTL){
-					cartoonHtml+='<div class="module lego '+listSTL[i].title+'" onclick="loadSTL('+cartoonIndex+',this)">';
-					cartoonHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-					cartoonHtml+='<div class="name">'+listSTL[i].name+'</div>';
-					cartoonHtml+='</div>';
-					cartoonIndex++
-				}
-				$(".cartoon_wrapper").html(cartoonHtml);
-
-
 				var legoHtml ='<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>Lego</div>';
-					var index = 0;
-					listLDraw = res.data.lego;
-					for(var i in listLDraw){
-						legoHtml+='<div class="module lego '+listLDraw[i].name+'" onclick="askDialog(0,'+index+')">';
-						legoHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-						legoHtml+='<div class="name">'+listLDraw[i].name+'</div>';
-						legoHtml+='</div>';
-						index++
-					}
-					$(".ldraw_wrapper").html(legoHtml);
-				},
+				var index = 0;
+				listLDraw = res.data.lego;
+				listPost= res.data.pose;
+				for(var i in listLDraw){
+					legoHtml+='<div class="module lego '+listLDraw[i].name+'" onclick="askDialog(0,'+index+')">';
+					legoHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
+					legoHtml+='<div class="name">'+listLDraw[i].name+'</div>';
+					legoHtml+='</div>';
+					index++
+				}
+				$(".ldraw_wrapper").html(legoHtml);
+			},
 			error: function(res) {
 				console.log(res);
 			}
@@ -223,13 +210,17 @@
 	}
 </script>
 <script>
-
+	// import {MMDmesh,MMDGui} from "../js/es6LoadPost";
 	var mobile=/Android|webOS|iPhone|iPad|BlackBerry/i.test(navigator.userAgent);
 	var container = document.getElementById( 'container' ); //
 	var camera, scene, renderer;
 	var cameraZoom = 1;
 	var plane;
 	var gridHelper;
+	var ambientLight = new THREE.AmbientLight( 0x606060);
+	var directionalLight = new THREE.DirectionalLight( 0xffffff);
+	var ambientLight = new THREE.AmbientLight( 0xFFFFFFF,1);
+	var directionalLightPose =  new THREE.DirectionalLight( 0x887766 );
 	var mouse, raycaster, isShiftDown = false;
 	var controls;
 	var mouseHelper, mouseHelperMaterial;
@@ -237,7 +228,7 @@
 	var controlsMoved = false;
 	var objects = [];
 	var currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 ); //当前形状
-	var currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );;
+	var currentObjMaterial;
 	var currentShapeType;
 	var currentColor;
 	var currentColorFlag = 0;
@@ -386,12 +377,10 @@
 
 		// lights
 
-		var ambientLight = new THREE.AmbientLight( 0x606060 );
-		scene.add( ambientLight );
-
-		var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	/*	scene.add( ambientLight );
 		directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
-		scene.add( directionalLight );
+		scene.add( directionalLight );*/
+		scene.add( ambientLight );
 
 		// 旋转控制
 		controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
@@ -690,7 +679,7 @@
 	}
 	function changeShapes(geo){//geo: 当前类型
 		currentModule = 0;//编辑模式，各种基础模型
-		enabledLego(1);
+		enabledLego(1,0);
 		shootedFlag = false;
 		/*if(controls){
 			controls.dispose();
@@ -739,7 +728,7 @@
 	function changeCurrentColor(type){
 		var color =params.color;
 		if(type == 0) {
-			transformControl.object.material.color.set("#dddddd");
+			transformControl.object.material.color.set("#FFF");
 			/*currentColor = 0xFFFFFF;
 			currentColorFlag = 0;
 			currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xFFFFFF } );
@@ -1114,12 +1103,10 @@
 		camera.updateProjectionMatrix();
 	}
 
-	function loadSTL(thisSTL,obj){
-		$(".active_shape").removeClass("active_shape");
-		$(obj).addClass("active_shape");
+	function loadSTL(thisSTL){
 		currentModule = 0; //编辑模式，各种基础模型
-		enabledLego(1);
-		$("#loading_data").show();
+		enabledLego(1,0);
+		// $("#loading_data").show();
 		shootedFlag = false;
 		/*if(controls){
 			controls.dispose();
@@ -1141,34 +1128,6 @@
 			case 3:
 				file = '../models/stl/ascii/sitting.stl';
 				currentShapeType = 8;
-				break;
-			case 4:
-				file = '../models/stl/ascii/tyrannosaurusRex.stl';
-				currentShapeType = 8;
-				break;
-			case 5:
-				file = '../models/stl/ascii/pokemon/bulbasaur_starter_1gen_flowalistik.stl';
-				currentShapeType = 9;
-				break;
-			case 6:
-				file = '../models/stl/ascii/pokemon/charmander_starter_1gen_flowalistik.stl';
-				currentShapeType = 9;
-				break;
-			case 7:
-				file = '../models/stl/ascii/pokemon/chikorita_starter_2gen_flowalistik.stl';
-				currentShapeType = 10;
-				break;
-			case 8:
-				file = '../models/stl/ascii/pokemon/pikachu_1gen_flowalistik.stl';
-				currentShapeType =11;
-				break;
-			case 9:
-				file = '../models/stl/ascii/pokemon/squirtle_starter_1gen_flowalistik.stl';
-				currentShapeType = 12;
-				break;
-			case 10:
-				file = '../models/stl/ascii/pokemon/totodile_starter_2gen_flowalistik.stl';
-				currentShapeType = 13;
 				break;
 			default:
 				file = '../models/stl/ascii/tyrannosaurusRex.stl';
@@ -1229,7 +1188,7 @@
 	}
 	function loadLDraw(thisLDraw){
 		$("#loading_data").show();
-		enabledLego(0);
+		enabledLego(0,0);
 		var currentLDraw;
 		switch (thisLDraw) {
 			case 0:
@@ -1334,7 +1293,7 @@
 		$(".dg.ac").show();
 
 	}
-	function enabledLego(type){ //type 0:enable 1:disable
+	function enabledLego(type,moduleIndex){ //type 0:enable 1:disable
 		if(type==0) {
 			removeAllShapes(); //删除所有目标
 			// $(".side_control").hide(); //
@@ -1342,20 +1301,47 @@
 			scene.background = new THREE.Color( 0xdeebed );
 			clearCache( gridHelper );
 			scene.remove( gridHelper );
+			if(moduleIndex == 1){
+				scene.remove( lDrawModul );
+				if ( lDrawModulGUI ) {
+					lDrawModulGUI.destroy();
+					lDrawModulGUI ='';
+					$(".lego_constrution").hide();
+				}
+				scene.remove(ambientLight);
+				scene.add(directionalLightPose);
+			}
+			else{
+				/*if(MMDmesh){
+					scene.remove( MMDmesh );
+					if ( MMDGui ) {
+						MMDGui.destroy();
+						MMDGui ='';
+					}
+				}*/
+				scene.add(ambientLight);
+				scene.remove(directionalLightPose);
+			}
 		}
 		else{
+			/*scene.remove( MMDmesh );
+			if ( MMDGui ) {
+				MMDGui.destroy();
+				MMDGui ='';
+			}*/
 			scene.remove( lDrawModul );
 			if ( lDrawModulGUI ) {
 				lDrawModulGUI.destroy();
 				lDrawModulGUI ='';
 				$(".lego_constrution").hide();
 			}
+
 			scene.background = new THREE.Color( 0x000000 );
 			// $(".side_control").show();
 			scene.add( gridHelper );
 		}
 	}
-//Lego end
+	//Lego end
 	function OrbitControlsFn(type){ //type=controls.enabled  0 true 1 false
 
 		if(type === 0){
@@ -1458,7 +1444,7 @@
 		}
 
 	}
+	// export {changeShapes,loadLDraw,loadSTL}
 </script>
-
 </body>
 </html>

@@ -1,5 +1,89 @@
 {
   "data": {
+    "shapes": [
+      {
+        "title": "cube",
+        "name": "正方形",
+        "url": "../img/3dPrinting/cube.png"
+      },
+      {
+        "title": "cylinder",
+        "name": "圆柱形",
+        "url": "../img/3dPrinting/cylinder.png"
+      },
+      {
+        "title": "cone",
+        "name": "圆锥形",
+        "url": "../img/3dPrinting/cone.png"
+      },
+      {
+        "title": "ball",
+        "name": "球形",
+        "url": "../img/3dPrinting/ball.png"
+      },
+      {
+        "title": "doughnut",
+        "name": "环形",
+        "url": "../img/3dPrinting/doughnut.png"
+      }
+    ],
+    "stl": [
+      {
+        "title": "standing",
+        "name": "站立",
+        "url": "../img/3dPrinting/cube.png"
+      },
+      {
+        "title": "climbing",
+        "name": "爬",
+        "url": "../img/3dPrinting/cylinder.png"
+      },
+      {
+        "title": "lying",
+        "name": "躺",
+        "url": "../img/3dPrinting/cone.png"
+      },
+      {
+        "title": "sitting",
+        "name": "坐",
+        "url": "../img/3dPrinting/ball.png"
+      },
+      {
+        "title": "tyrannosaurusRex",
+        "name": "霸王龙",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "Bulbasaur",
+        "name": "妙蛙种子",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "charmander",
+        "name": "小火龙",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "chikorita",
+        "name": "菊草叶",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "pikachu",
+        "name": "皮卡丘",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "squirtle",
+        "name": "杰尼龟",
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "totodile",
+        "name": "小锯鳄",
+        "url": "../img/3dPrinting/doughnut.png"
+      }
+    ],
     "lego": [
       {
         "name": "Car",

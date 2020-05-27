@@ -128,7 +128,7 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 .module { position: relative; width: .9rem; height: .9rem; float: left; border: 1px solid #D6DBE1; margin: 5px; background: #F4F4F4; }
 .module img { position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin:0 auto; max-width: 90%; max-height: 90%; }
 .name { position: absolute; bottom: -.07rem; text-align: center; width: .9rem; font-size: .12rem; }
-.module.shapes.cube{margin-top:.32rem;}
+.module.shapes.cube,.module.lego.standing{margin-top:.32rem;}
 
 .obj_control {position: fixed; bottom: 0; left: 0; height: .5rem;width: 100%;}
 .obj_control_wrapper{display: none;  width: 2.5rem;position: relative; margin:0 auto;background: #fff; border-radius: .2rem .2rem 0 0 ;text-align: center;top: .1rem;padding: .05rem 0;}
@@ -165,3 +165,5 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 /*dialog*/
 .dialog-wrap-show .dialog-content { width: 2.5rem; }
 /*dialog end*/
+
+.pose{display: none;}
