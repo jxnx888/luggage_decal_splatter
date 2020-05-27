@@ -159,4 +159,9 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 /*lego*/
 .dg.ac.lego_constrution{right: .9rem;}
 .dg .cr.string,.dg .cr.number{border-left: none!important;}
+.module.lego.Car { margin-top: .32rem; }
 /*.dg li:not(.folder){background:#fff!important;}*/
+
+/*dialog*/
+.dialog-wrap-show .dialog-content { width: 2.5rem; }
+/*dialog end*/

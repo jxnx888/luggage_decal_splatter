@@ -16,7 +16,6 @@
 			<div class="shapes_options normal" onclick="showModule(0)">标准模型 <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 			<div class="shapes_options cartoon" onclick="showModule(1)">卡通模型 <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 			<div class="shapes_options lego" onclick="showModule(2)">Lego <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
-			<div class="shapes_options lego" onclick="showModule(3)">Pose <i class="iconfont arrow arrow_right">&#xe6a3;</i></div>
 		</div>
 		<div class="child_wrapper normal_wrapper">
 			<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i> 标准模型</div>
@@ -167,9 +166,8 @@
 	function hideModule(obj){
 		$(obj).parents(".child_wrapper").hide()
 	}
-	listModule(0);
+	listModule();
 	var listLDraw=[];
-	var listPost=[];
 	function listModule(type){
 		$.ajax({
 			type: "GET",
@@ -182,29 +180,13 @@
 					var index = 0;
 					listLDraw = res.data.lego;
 					for(var i in listLDraw){
-						legoHtml+='<div class="module shapes doughnut" onclick="askDialog(0,'+index+')">';
+						legoHtml+='<div class="module lego '+listLDraw[i].name+'" onclick="askDialog(0,'+index+')">';
 						legoHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
 						legoHtml+='<div class="name">'+listLDraw[i].name+'</div>';
 						legoHtml+='</div>';
 						index++
 					}
 					$(".ldraw_wrapper").html(legoHtml);
-
-					var poseHtml ='<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>Pose</div>';
-				poseHtml +='<div class="miku" onclick="loadVpd(111)"></div>'
-					var index = 0;
-					listPost = res.data.pose;
-					for(var j in listPost){
-						if(j!="8" && j!="9") { //9.10不显示
-							poseHtml += '<div class="module shapes doughnut" onclick="askDialog(1,' + index + ')">';
-							poseHtml += '<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-							poseHtml += '<div class="name">' + listPost[j].name + '</div>';
-							poseHtml += '</div>';
-						}
-						index ++
-
-					}
-					$(".vpd_wrapper").html(poseHtml);
 			},
 			error: function(res) {
 				console.log(res);
@@ -308,29 +290,6 @@
 	var colorsObj = {
 		White:0,
 		Yellow:1
-	}
-	var navParams = {
-		front:function(){
-			cameraSides(0);
-		},
-		back:function(){
-			cameraSides(1);
-		},
-		left:function(){
-			cameraSides(2);
-		},
-		right:function(){
-			cameraSides(3);
-		},
-		top:function(){
-			cameraSides(4);
-		},
-		bottom:function(){
-			cameraSides(5);
-		},
-		reset:function(){
-			cameraSides(6);
-		},
 	}
 
 	//LDraw
@@ -611,9 +570,7 @@
 		}
 
 	}
-	function onTouchMove(event){
 
-	}
 	function render() {
 
 		renderer.render( scene, camera );
@@ -968,35 +925,24 @@
 		render();
 	}
 
-	// 移动shape
+	// transform controller 用于pc端
 	var hiding;
-
 	function delayHideTransform() {
-
 		cancelHideTransform();
 		hideTransform();
-
 	}
-
 	function hideTransform() {
-
 		hiding = setTimeout( function () {
-
 			transformControl.detach( transformControl.object );
-
 		}, 2500 );
-
 	}
-
 	function cancelHideTransform() {
-
 		if ( hiding ) clearTimeout( hiding );
-
 	}
 	function updateShapePosition() {
 		console.log("updateShapePosition")
 	}
-	// 移动shape End
+	// transform controller 用于pc端
 
 	// 导出相关
 	function exportASCII() {
@@ -1114,14 +1060,11 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 0, 200, 350 );
 		}
-		/*if(focusedTransfromObj &&(type == 7 || type == 8)){
-			camera.lookAt(focusedTransfromObj);
-		}
-		else{
-			camera.lookAt(scene.position);
-		}*/
 		camera.lookAt(scene.position);
 		camera.updateProjectionMatrix();
+		if(type != 7 && type !=8){
+			resetZoom();
+		}
 		// controls.update();
 		// controls.dispose();
 	}
@@ -1136,7 +1079,12 @@
 		camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000 );
 	}
 	//camera 方向
-
+	function resetZoom(){
+		$(".zoom_index").text("100%")
+		camera.zoom = 1;
+		camera.lookAt(scene.position);
+		camera.updateProjectionMatrix();
+	}
 
 	function loadSTL(thisSTL){
 		currentModule = 0; //编辑模式，各种基础模型
@@ -1173,7 +1121,7 @@
 			$("#loading_data").hide();
 		} );
 	}
-//Lego
+	//Lego
 	function askDialog(type,index){
 		if(currentModule == 0) {
 			var text = '';
@@ -1199,6 +1147,7 @@
 					cancel: 'removeBtn_cancel'
 				},
 				onClickOk: function () {
+					resetZoom();
 					if (type == 0) {
 						currentModule = 1; //lego模式
 						loadLDraw( index );
@@ -1329,232 +1278,26 @@
 	}
 	function enabledLego(type){ //type 0:enable 1:disable
 		if(type==0) {
-			removeAllShapes();
-			$(".side_control").hide();
-			shapesController(0)
+			removeAllShapes(); //删除所有目标
+			// $(".side_control").hide(); //
+			shapesController(0);//不显示所有控制
 			scene.background = new THREE.Color( 0xdeebed );
 			clearCache( gridHelper );
 			scene.remove( gridHelper );
-			/*controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
-			controls.minDistance = 10; //设置相机距离原点的最近距离 min distance of camera to coordinate origin
-			controls.maxDistance = 1300;//设置相机距离原点的最远距离 max distance of camera to coordinate origin
-			controls.enabled = true;*/
 		}
 		else{
 			scene.remove( lDrawModul );
 			if ( lDrawModulGUI ) {
 				lDrawModulGUI.destroy();
-				lDrawModulGUI =''
+				lDrawModulGUI ='';
 				$(".lego_constrution").hide();
 			}
 			scene.background = new THREE.Color( 0x000000 );
-			$(".side_control").show();
+			// $(".side_control").show();
 			scene.add( gridHelper );
-			/*if(controls){
-				controls.enabled = false;
-				controls.dispose();
-			}
-			controls='';*/
 		}
 	}
 //Lego end
-	var animationHelperhelper = new THREE.MMDAnimationHelper();
-	var mmdLoader = new THREE.MMDLoader();
-	var vpds = [];
-	var modelFile = '../models/miku/miku_v2.pmd';
-	var meshVpd;
-	function loadVpd(thisVpd){
-		$("#loading_data").show();
-		enabledLego(0);
-		var currentVpd;
-		switch (thisVpd) {
-			case 0:
-				currentVpd = listPost[0].url;
-				break;
-			case 1:
-				currentVpd = listPost[1].url;
-				break;
-			case 2:
-				currentVpd = listPost[2].url;
-				break;
-			case 3:
-				currentVpd = listPost[3].url;
-				break;
-			case 4:
-				currentVpd = listPost[4].url;
-				break;
-			case 5:
-				currentVpd = listPost[5].url;
-				break;
-			case 6:
-				currentVpd = listPost[6].url;
-				break;
-			case 7:
-				currentVpd = listPost[6].url;
-				break;
-			case 8:
-				currentVpd = listPost[6].url;
-				break;
-			case 9:
-				currentVpd = listPost[6].url;
-				break;
-			case 10:
-				currentVpd = listPost[6].url;
-				break;
-			case 11:
-				currentVpd = listPost[6].url;
-				break;
-			default:
-				currentVpd = listPost[1].url;
-		}
-		mmdLoader.load(modelFile,function(asdf){
-			scene.add(asdf);
-		})
-	/*	mmdLoader.load( modelFile, function ( object ) {
-
-			meshVpd = object;
-			meshVpd.position.y = - 10;
-			scene.add( meshVpd );
-
-			var vpdIndex = 0;
-			function loadVpd() {
-				var vpdFile = listPost[ vpdIndex ];
-
-				mmdLoader.loadVPD( vpdFile, false, function ( vpd ) {
-
-					vpds.push( vpd );
-
-					vpdIndex ++;
-
-					if ( vpdIndex < listPost.length ) {
-
-						loadVpd();
-
-					} else {
-
-						initVpdGui();
-
-					}
-
-				}, onProgress, null );
-
-			}
-
-			loadVpd();
-
-		}, null, null);*/
-	}
-	function initVpdGui() {
-
-		var gui = new dat.GUI();
-
-		var dictionary = meshVpd.morphTargetDictionary;
-
-		var controlsVpd = {};
-		var keys = [];
-
-		var poses = gui.addFolder( 'Poses' );
-		var morphs = gui.addFolder( 'Morphs' );
-
-		function getBaseName( s ) {
-
-			return s.slice( s.lastIndexOf( '/' ) + 1 );
-
-		}
-
-		function initControls() {
-
-			for ( var key in dictionary ) {
-
-				controlsVpd[ key ] = 0.0;
-
-			}
-
-			controlsVpd.pose = - 1;
-
-			for ( var i = 0; i < vpdFiles.length; i ++ ) {
-
-				controlsVpd[ getBaseName( vpdFiles[ i ] ) ] = false;
-
-			}
-
-		}
-
-		function initKeys() {
-
-			for ( var key in dictionary ) {
-
-				keys.push( key );
-
-			}
-
-		}
-
-		function initPoses() {
-
-			var files = { default: - 1 };
-
-			for ( var i = 0; i < vpdFiles.length; i ++ ) {
-
-				files[ getBaseName( vpdFiles[ i ] ) ] = i;
-
-			}
-
-			poses.add( controlsVpd, 'pose', files ).onChange( onChangePose );
-
-		}
-
-		function initMorphs() {
-
-			for ( var key in dictionary ) {
-
-				morphs.add( controlsVpd, key, 0.0, 1.0, 0.01 ).onChange( onChangeMorph );
-
-			}
-
-		}
-
-		function onChangeMorph() {
-
-			for ( var i = 0; i < keys.length; i ++ ) {
-
-				var key = keys[ i ];
-				var value = controlsVpd[ key ];
-				mesh.morphTargetInfluences[ i ] = value;
-
-			}
-
-		}
-
-		function onChangePose() {
-
-			var index = parseInt( controlsVpd.pose );
-
-			if ( index === - 1 ) {
-
-				meshVpd.pose();
-
-			} else {
-
-				animationHelperhelper.pose( meshVpd, vpds[ index ] );
-
-			}
-
-		}
-
-		initControls();
-		initKeys();
-		initPoses();
-		initMorphs();
-
-		onChangeMorph();
-		onChangePose();
-
-		poses.open();
-		morphs.open();
-
-	}
-
 	function OrbitControlsFn(type){ //type=controls.enabled  0 true 1 false
 
 		if(type === 0){
@@ -1606,15 +1349,6 @@
 				transformControl.setMode( "translate" );
 				transformControlModeType=0;
 		}
-		/*if(focusedTransfromObj){
-			transformControl.attach( focusedTransfromObj );
-		}*/
-		/*if(type == 2){
-			OrbitControlsFn(0);
-		}
-		else{
-			OrbitControlsFn(1);
-		}*/
 	}
 	function deletedSelected(){
 		if (focusedTransfromObj) {
