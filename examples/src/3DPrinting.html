@@ -21,7 +21,7 @@
 		<div class="child_wrapper cartoon_wrapper"></div>
 		<div class="child_wrapper ldraw_wrapper"></div>
 		<div class="child_wrapper vpd_wrapper"></div>
-		</div>
+	</div>
 	<div class="obj_control">
 		<div class="obj_control_wrapper clearfix">
 			<div class="control_btn iconfont undo_control noActive_control" onclick="redoUndo(0)">&#xe67a;</div>
@@ -139,9 +139,9 @@
 				var shapesIndex = 0;
 				listShapes = res.data.shapes;
 				for(var i in listShapes){
-					shapesHtml+='<div class="module shapes '+listShapes[i].title+'" onclick="changeShapes('+shapesIndex+',this)">';
-					shapesHtml+='<img src="'+listShapes[i].url+'" alt="Doughnut">';
-					shapesHtml+='<div class="name">'+listShapes[i].name+'</div>';
+					shapesHtml+='<div class="module shapes drag '+listShapes[i].title+'" onclick="changeShapes('+shapesIndex+',this)">';
+					shapesHtml+='<img src="'+listShapes[i].url+'" alt="Doughnut" class="drag">';
+					shapesHtml+='<div class="name drag">'+listShapes[i].name+'</div>';
 					shapesHtml+='</div>';
 					shapesIndex++
 				}
@@ -151,9 +151,9 @@
 				var cartoonIndex = 0;
 				listSTL = res.data.stl;
 				for(var i in listSTL){
-					cartoonHtml+='<div class="module lego '+listSTL[i].title+'" onclick="loadSTL('+cartoonIndex+',this)">';
-					cartoonHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-					cartoonHtml+='<div class="name">'+listSTL[i].name+'</div>';
+					cartoonHtml+='<div class="module lego drag '+listSTL[i].title+'" onclick="loadSTL('+cartoonIndex+',this)">';
+					cartoonHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut" class="drag">';
+					cartoonHtml+='<div class="name drag">'+listSTL[i].name+'</div>';
 					cartoonHtml+='</div>';
 					cartoonIndex++
 				}
@@ -161,23 +161,71 @@
 
 
 				var legoHtml ='<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe6a5;</i>Lego</div>';
-					var index = 0;
-					listLDraw = res.data.lego;
-					for(var i in listLDraw){
-						legoHtml+='<div class="module lego '+listLDraw[i].name+'" onclick="askDialog(0,'+index+')">';
-						legoHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-						legoHtml+='<div class="name">'+listLDraw[i].name+'</div>';
-						legoHtml+='</div>';
-						index++
-					}
-					$(".ldraw_wrapper").html(legoHtml);
-				},
+				var index = 0;
+				listLDraw = res.data.lego;
+				for(var i in listLDraw){
+					legoHtml+='<div class="module lego '+listLDraw[i].name+'" onclick="askDialog(0,'+index+')">';
+					legoHtml+='<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
+					legoHtml+='<div class="name">'+listLDraw[i].name+'</div>';
+					legoHtml+='</div>';
+					index++
+				}
+				$(".ldraw_wrapper").html(legoHtml);
+
+			},
 			error: function(res) {
 				console.log(res);
 			}
 		})
 
 	}
+	var dragObj;
+	var selectedDragObj
+	var maxW, maxH;
+	var shapesEventL = document.getElementById("shapes");
+	shapesEventL.addEventListener("touchstart",function(e){
+		selectedDragObj = $(e.target);
+		if(selectedDragObj.hasClass("drag")){
+			if(selectedDragObj[0].tagName =="DIV"){
+				dragObj = $(selectedDragObj).parents(".module").find("img").clone();
+			}
+			else{
+				dragObj = selectedDragObj.clone();
+			}
+			dragObj.addClass("startDrag");
+			$("body").append(dragObj);
+			maxW=document.body.clientWidth-selectedDragObj[0].offsetWidth;
+			maxH=document.body.clientHeight-selectedDragObj[0].offsetHeight;
+			var ev = e || window.event;
+			var touch = ev.targetTouches[0];
+		}
+	});
+	shapesEventL.addEventListener("touchmove",function(e){
+		var ev = e || window.event;
+		var touch = ev.targetTouches[0];
+		var oLeft = touch.clientX-50;
+		var oTop = touch.clientY-50;
+		if(oLeft<0){
+			oLeft=0;
+		}else if (oLeft>=maxW) {
+			oLeft=maxW;
+		}
+		if(oTop<0){
+			oTop;
+		}else if (oTop>=maxH) {
+			oTop=maxH;
+		}
+		dragObj[0].style.left = oLeft + 'px';
+		dragObj[0].style.top = oTop + 'px';
+
+	});
+	shapesEventL.addEventListener("touchend",function(e){
+		if(dragObj){
+			$(selectedDragObj).parents(".module").trigger("click");
+			$( dragObj ).remove();
+			onDocumentMouseDown(e);
+		}
+	});
 </script>
 <script>
 
@@ -194,8 +242,7 @@
 	var controlsMoved = false;
 	var objects = [];
 	var currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 ); //当前形状
-	// var currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
-	var currentObjMaterial;
+	var currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
 	var currentShapeType;
 	var currentColor;
 	var currentColorFlag = 0;
@@ -502,7 +549,8 @@
 
 				} else {
 					if (objects.length < 11) {
-						var voxel = new THREE.Mesh( currentObj, currentObjMaterial );
+						var voxelMaterial = currentObjMaterial.clone();
+						var voxel = new THREE.Mesh( currentObj, voxelMaterial );
 						voxel.position.copy( intersect.point ).add( intersect.face.normal );
 						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 						voxel.name = "shapes";
@@ -695,20 +743,11 @@
 		// scene.add( currentObjMesh );
 	}
 	function changeCurrentColor(type){
-		var color =params.color;
 		if(type == 0) {
 			transformControl.object.material.color.set("#dddddd");
-			/*currentColor = 0xFFFFFF;
-			currentColorFlag = 0;
-			currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xFFFFFF } );
-			changeMouseHelper(0)*/
 		}
 		else{
 			transformControl.object.material.color.set("#f2f545");
-			/*currentColorFlag = 1;
-			currentColor=0xf2f545
-			currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xf2f545 } );
-			changeMouseHelper(1)*/
 		}
 	}
 	function changeMouseHelper(type){ //type 0: 颜色改为白色 1：颜色改为黄色
@@ -1313,7 +1352,7 @@
 			scene.add( gridHelper );
 		}
 	}
-//Lego end
+	//Lego end
 	function OrbitControlsFn(type){ //type=controls.enabled  0 true 1 false
 
 		if(type === 0){
