@@ -39,7 +39,7 @@ import {
 	RepeatWrapping,
 	TextureLoader,
 	sRGBEncoding
-} from "../../../build/three.module.js";
+} from "../../build/three.module.js";
 
 var ThreeMFLoader = function ( manager ) {
 

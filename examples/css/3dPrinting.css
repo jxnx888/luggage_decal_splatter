@@ -167,3 +167,4 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 /*dialog end*/
 
 .pose{display: none;}
+.startDrag{max-width:.9rem;max-height: .9rem;z-index: 99999;position: absolute;}
