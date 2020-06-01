@@ -201,23 +201,24 @@
 		}
 	});
 	shapesEventL.addEventListener("touchmove",function(e){
-		var ev = e || window.event;
-		var touch = ev.targetTouches[0];
-		var oLeft = touch.clientX-50;
-		var oTop = touch.clientY-50;
-		if(oLeft<0){
-			oLeft=0;
-		}else if (oLeft>=maxW) {
-			oLeft=maxW;
+		if(dragObj){
+			var ev = e || window.event;
+			var touch = ev.targetTouches[0];
+			var oLeft = touch.clientX - 50;
+			var oTop = touch.clientY - 50;
+			if (oLeft < 0) {
+				oLeft = 0;
+			} else if (oLeft >= maxW) {
+				oLeft = maxW;
+			}
+			if (oTop < 0) {
+				oTop;
+			} else if (oTop >= maxH) {
+				oTop = maxH;
+			}
+			dragObj[0].style.left = oLeft + 'px';
+			dragObj[0].style.top = oTop + 'px';
 		}
-		if(oTop<0){
-			oTop;
-		}else if (oTop>=maxH) {
-			oTop=maxH;
-		}
-		dragObj[0].style.left = oLeft + 'px';
-		dragObj[0].style.top = oTop + 'px';
-
 	});
 	shapesEventL.addEventListener("touchend",function(e){
 		if(dragObj){
