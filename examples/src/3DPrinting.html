@@ -269,12 +269,12 @@
 		}
 	},false );
 	shapesEventL.addEventListener( "touchend", function ( e ) {
-
 		if (dragObj && dragedFlag) {
 			$( selectedDragObj ).parents( ".module" ).trigger( "click" );
 			$( dragObj ).remove();
 			onDocumentMouseDown( e );
 		}
+		dragedFlag = false;
 	},false );
 </script>
 <script>
