@@ -4,26 +4,55 @@
       {
         "title": "cube",
         "name": "正方形",
+        "code": 0,
         "url": "../img/3dPrinting/cube.png"
+      },
+      {
+        "title": "ball",
+        "name": "球形",
+        "code": 3,
+        "url": "../img/3dPrinting/ball.png"
       },
       {
         "title": "cylinder",
         "name": "圆柱形",
+        "code": 1,
+        "url": "../img/3dPrinting/cylinder.png"
+      },
+      {
+        "title": "prismatic",
+        "name": "棱柱形",
+        "code": 5,
         "url": "../img/3dPrinting/cylinder.png"
       },
       {
         "title": "cone",
         "name": "圆锥形",
+        "code": 2,
         "url": "../img/3dPrinting/cone.png"
       },
       {
-        "title": "ball",
-        "name": "球形",
-        "url": "../img/3dPrinting/ball.png"
+        "title": "pyramid",
+        "name": "棱锥形",
+        "code": 6,
+        "url": "../img/3dPrinting/cone.png"
       },
       {
         "title": "doughnut",
         "name": "环形",
+        "code": 4,
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "hollowcylinder",
+        "name": "空心圆柱",
+        "code": 7,
+        "url": "../img/3dPrinting/doughnut.png"
+      },
+      {
+        "title": "triprism",
+        "name": "三棱柱",
+        "code": 8,
         "url": "../img/3dPrinting/doughnut.png"
       }
     ],
