@@ -180,10 +180,13 @@
 				var shapesIndex = 0;
 				listShapes = res.data.shapes;
 				for (var i in listShapes) {
-					if(i!=listShapes.length-1) {
+					if(listShapes[i].module == "shape") {
 						shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="changeShapes(' + listShapes[i].code + ',this)">';
 					}
-					else{
+					else if(listShapes[i].module == "stl"){
+						shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="loadSTL(11,this)">';
+					}
+					else if(listShapes[i].module == "text") {
 						shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="showInput(0,this)">';
 					}
 					// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
@@ -1359,6 +1362,7 @@
 	}
 
 	function loadSTL( thisSTL, obj ) {
+		showInput(1);
 		$( ".active_shape" ).removeClass( "active_shape" );
 		$( obj ).addClass( "active_shape" );
 		currentModule = 0; //编辑模式，各种基础模型
@@ -1371,51 +1375,55 @@
 		var file;
 		switch (thisSTL) {
 			case 0:
-				file = '../models/stl/ascii/standing.stl';
+				file = '../models/stl/ascii/3dPrinting/standing.stl';
 				currentShapeType = 5;
 				break;
 			case 1:
-				file = '../models/stl/ascii/climbing.stl';
+				file = '../models/stl/ascii/3dPrinting/climbing.stl';
 				currentShapeType = 6;
 				break;
 			case 2:
-				file = '../models/stl/ascii/lying.stl';
+				file = '../models/stl/ascii/3dPrinting/lying.stl';
 				currentShapeType = 7;
 				break;
 			case 3:
-				file = '../models/stl/ascii/sitting.stl';
+				file = '../models/stl/ascii/3dPrinting/sitting.stl';
 				currentShapeType = 8;
 				break;
 			case 4:
-				file = '../models/stl/ascii/tyrannosaurusRex.stl';
+				file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
 				currentShapeType = 8;
 				break;
 			case 5:
-				file = '../models/stl/ascii/pokemon/bulbasaur_starter_1gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/bulbasaur_starter_1gen_flowalistik.stl';
 				currentShapeType = 9;
 				break;
 			case 6:
-				file = '../models/stl/ascii/pokemon/charmander_starter_1gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/charmander_starter_1gen_flowalistik.stl';
 				currentShapeType = 9;
 				break;
 			case 7:
-				file = '../models/stl/ascii/pokemon/chikorita_starter_2gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/chikorita_starter_2gen_flowalistik.stl';
 				currentShapeType = 10;
 				break;
 			case 8:
-				file = '../models/stl/ascii/pokemon/pikachu_1gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/pikachu_1gen_flowalistik.stl';
 				currentShapeType = 11;
 				break;
 			case 9:
-				file = '../models/stl/ascii/pokemon/squirtle_starter_1gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/squirtle_starter_1gen_flowalistik.stl';
 				currentShapeType = 12;
 				break;
 			case 10:
-				file = '../models/stl/ascii/pokemon/totodile_starter_2gen_flowalistik.stl';
+				file = '../models/stl/ascii/3dPrinting/pokemon/totodile_starter_2gen_flowalistik.stl';
 				currentShapeType = 13;
 				break;
+			case 11:
+				file = '../models/stl/ascii/3dPrinting/five-point-star.stl';
+				currentShapeType = 18;
+				break;
 			default:
-				file = '../models/stl/ascii/tyrannosaurusRex.stl';
+				file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
 		}
 		var loader = new THREE.STLLoader();
 		loader.load( file, function ( geometry ) {
