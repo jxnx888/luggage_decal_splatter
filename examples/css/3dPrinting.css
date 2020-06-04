@@ -275,3 +275,25 @@ div#shapes.closeShapes{display: none;}
 
 .note {display:none; width: 1.1rem; background: #7BB3FF; border-radius: 5px; position: fixed; top: .91rem; left: .1rem; font-size: 0.1rem; color: #426A8D; line-height: .13rem; padding: .04rem; }
 
+
+/*形状sprint*/
+.sprint {width: .5rem; height: .5rem; margin: auto;background-repeat: no-repeat;background-size: cover;background-position: -50px 0;}
+.sprint_cube{background-image: url("../img/3dPrinting/sprint_cube.png");}
+.sprint_ball{background-image: url("../img/3dPrinting/sprint_ball.png");}
+.sprint_cylinder{background-image: url("../img/3dPrinting/sprint_cylinder.png");}
+.sprint_doughnut{background-image: url("../img/3dPrinting/sprint_doughnut.png");}
+.sprint_hollowcylinder{background-image: url("../img/3dPrinting/sprint_hollowcylinder.png");}
+.sprint_prismatic{background-image: url("../img/3dPrinting/sprint_prismatic.png");}
+.sprint_pyramid{background-image: url("../img/3dPrinting/sprint_pyramid.png");}
+.sprint_triprism{background-image: url("../img/3dPrinting/sprint_triprism.png");}
+.sprint_cone{background-image: url("../img/3dPrinting/sprint_cone.png");}
+.sprint_text{background-image: url("../img/3dPrinting/sprint_text.png");}
+.sprintY{background-position: 0 0;}
+
+/*文字输入*/
+.text_window{display: none; position:fixed;top: .1rem; right: 1.1rem; width: 1.5rem; background: #fff; border-radius: 4px;font-size: .14rem; text-align: center;}
+.text_title { border-radius: 4px 4px 0 0; background: #eee; line-height: .2rem; }
+input#textContent { width: 90%; border: 1px solid #999; border-radius: 4px; margin-top: .1rem; padding: 0 .05rem; font-size: .12rem; }
+
+.text_window .btn { height: .25rem; width: .5rem; background: #79B1EA; border-radius: .1rem; line-height: .25rem; display: inline-block; margin: .05rem; color: #fff; }
+.text_window .btn_disable{background:#eee;pointer-events: none;}

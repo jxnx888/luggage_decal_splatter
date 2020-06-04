@@ -163,10 +163,10 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 	// Set current object
 	this.attach = function ( object ) {
-
-		this.object = object;
-		this.visible = true;
-
+		if(object && object.name!='plane'){
+			this.object = object;
+			this.visible = true;
+		}
 		return this;
 
 	};

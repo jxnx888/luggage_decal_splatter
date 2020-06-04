@@ -25,8 +25,8 @@
 		</div>
 		<div class="child_wrapper normal_wrapper"></div>
 		<div class="child_wrapper cartoon_wrapper"></div>
-		<div class="child_wrapper ldraw_wrapper"></div>
-		<div class="child_wrapper vpd_wrapper"></div>
+		<div class="child_wrapper mymodule_wrapper"></div>
+		<div class="child_wrapper buymodule_wrapper"></div>
 	</div>
 	<div class="obj_control has_right_menu">
 		<div class="obj_control_wrapper clearfix">
@@ -40,19 +40,19 @@
 			</div>
 			<div class="control_btn size_control" onclick="changeControls(0,this)">
 				<div class="icon_wrapper">
-				<i class="iconfont">&#xe6aa;</i>
+					<i class="iconfont">&#xe6aa;</i>
 				</div>
 				<div class="btn_name">修改大小</div>
 			</div>
 			<div class="control_btn trans_control active_control" onclick="changeControls(1,this)">
 				<div class="icon_wrapper">
-				<i class="iconfont">&#xe69b;</i>
+					<i class="iconfont">&#xe69b;</i>
 				</div>
 				<div class="btn_name">选中</div>
 			</div>
 			<div class="control_btn rotate_control" onclick="changeControls(2,this)">
 				<div class="icon_wrapper">
-				<i class="iconfont">&#xe626;</i>
+					<i class="iconfont">&#xe626;</i>
 				</div>
 				<div class="btn_name">旋转</div>
 			</div>
@@ -107,9 +107,14 @@
 	<div class="note">
 		<div class="select_module">选择一个模型，点击 箭头按 <span class="red">X</span>,<span class="green">Y</span>,<span class="blue">Z</span>单向缩 放,点击中心方块或 者双指，进行整体 缩放</div>
 	</div>
-</div>
-<div id="info" style="display: none;">
-	<strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel
+	<div class="text_window">
+		<div class="text_title">生成3D文字</div>
+		<input type="text" placeholder="请输入文字" maxlength="10" id="textContent" oninput="textInputFn(this)" onblur="textInputFn(this)">
+		<div class="btn_wrapper clearfix">
+			<div class="btn btn_ok btn_disable">确定</div>
+			<div class="btn btn_cancle" onclick="showInput(1)">取消</div>
+		</div>
+	</div>
 </div>
 <div id="loading_data"><img src="../img/loading.gif" alt=""></div>
 
@@ -178,12 +183,24 @@
 				var shapesIndex = 0;
 				listShapes = res.data.shapes;
 				for (var i in listShapes) {
-					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="changeShapes(' + listShapes[i].code + ',this)">';
-					shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
+					if(i!=listShapes.length-1) {
+						shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="changeShapes(' + listShapes[i].code + ',this)">';
+					}
+					else{
+						shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="showInput(0,this)">';
+					}
+					// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
+					shapesHtml += '<div class="drag sprint sprint_' + listShapes[i].title + '"></div>';
 					shapesHtml += '<div class="name drag">' + listShapes[i].name + '</div>';
 					shapesHtml += '<div class="color_change">';
-					shapesHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
-					shapesHtml += '<div class="color_option color_white color_circle" onclick="changeColorBeforeShoot(0,this)"></div>';
+					if(i!=listShapes.length-1) {
+						shapesHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
+						shapesHtml += '<div class="color_option color_white color_circle" onclick="changeColorBeforeShoot(0,this)"></div>';
+					}
+					else{
+						shapesHtml += '<div class="color_option color_yellow color_circle" onclick="changeTextColor(1,this)"></div>';
+						shapesHtml += '<div class="color_option color_white color_circle" onclick="changeTextColor(0,this)"></div>';
+					}
 					shapesHtml += '</div>';
 					shapesHtml += '</div>';
 					shapesIndex ++;
@@ -197,23 +214,14 @@
 					cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '" onclick="loadSTL(' + cartoonIndex + ',this)">';
 					cartoonHtml += '<img src="../img/3dPrinting/doughnut.png" alt="Doughnut" class="drag">';
 					cartoonHtml += '<div class="name drag">' + listSTL[i].name + '</div>';
+					cartoonHtml += '<div class="color_change">';
+					cartoonHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
+					cartoonHtml += '<div class="color_option color_white color_circle" onclick="changeColorBeforeShoot(0,this)"></div>';
+					cartoonHtml += '</div>';
 					cartoonHtml += '</div>';
 					cartoonIndex ++;
 				}
 				$( ".cartoon_wrapper" ).html( cartoonHtml );
-
-
-				var legoHtml = '<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>Lego</div>';
-				var index = 0;
-				listLDraw = res.data.lego;
-				for (var i in listLDraw) {
-					legoHtml += '<div class="module lego ' + listLDraw[i].name + '" onclick="askDialog(0,' + index + ')">';
-					legoHtml += '<img src="../img/3dPrinting/doughnut.png" alt="Doughnut">';
-					legoHtml += '<div class="name">' + listLDraw[i].name + '</div>';
-					legoHtml += '</div>';
-					index ++;
-				}
-				$( ".ldraw_wrapper" ).html( legoHtml );
 
 			},
 			error: function ( res ) {
@@ -231,8 +239,8 @@
 	shapesEventL.addEventListener( "touchstart", function ( e ) {
 		selectedDragObj = $( e.target );
 		if (selectedDragObj.hasClass( "drag" )) {
-			if (selectedDragObj[0].tagName == "DIV") {
-				dragObj = $( selectedDragObj ).parents( ".module" ).find( "img" ).clone();
+			if (selectedDragObj.hasClass("name")) {
+				dragObj = $( selectedDragObj ).parents( ".module" ).find( ".sprint" ).clone();
 			} else {
 				dragObj = selectedDragObj.clone();
 			}
@@ -303,7 +311,7 @@
 	var transformControl;
 	var transformControlModeType = 1;
 	var transformControlMove = false;
-	var focusedTransfromObj;
+	var focusedTransformObj;
 	var intersectsSelect = [];
 	var intersection = {
 		intersects: false,
@@ -312,6 +320,8 @@
 	};
 	var allOperation = [];//all the operated operation(undo)
 	var redoOperation = [];//all the redo operation
+	var eachObjectInfo={};//每一个对象的每一个步骤；
+	var eachRedoObjectInfo={};//每一个对象的每一个步骤；
 	var undoArr = [];
 	var redoArr = [];
 
@@ -402,7 +412,7 @@
 
 		camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 		// camera.position.set( 0, 200, 350 ); //正面
-		camera.position.set( 290, 200, 280 ); //45°
+		camera.position.set( 230, 200, 350 ); //45°
 		camera.lookAt( 0, 0, 0 );
 
 		scene = new THREE.Scene();
@@ -446,7 +456,7 @@
 		var geometry = new THREE.PlaneBufferGeometry( 300, 300 );
 		geometry.rotateX( - Math.PI / 2 );
 
-		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: false } ) );
+		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: true } ) );
 		plane.name = "plane";
 		scene.add( plane );
 
@@ -509,28 +519,30 @@
 			if (controls) {
 				controls.enabled = ! event.value;
 			}
-		} );
+			// console.log('dragging-changed')
+			transformControlMove = true;
+		},false );
 		transformControl.addEventListener( 'change', function () {
 			if (shootedFlag) {
 				shapesController( 0 );
 			}
-			transformControlMove = true;
-		} );
+
+		},false );
 		transformControl.addEventListener( 'mouseDown', function () {
 			transformControlMove = false;
-		} );
+		},false );
 		transformControl.addEventListener( 'mouseUp', function () {
 			if (transformControlMove) {
 				allOperationAdd();
 			}
-		} );
+		},false );
 		//移动shape End
 
 		container.addEventListener( 'mousemove', onDocumentMouseMove, false );
-		container.addEventListener( 'touchmove', function () {
+		container.addEventListener( 'touchmove', function (e) {
+			onDocumentMouseMove(e);
 			transformControlMove = true;
-		} );
-		container.addEventListener( 'touchmove', onDocumentMouseMove );
+		},false );
 		container.addEventListener( 'mousedown', function ( e ) {
 			controlsMoved = false;
 		}, false );
@@ -539,7 +551,7 @@
 		}, false );
 		container.addEventListener( 'mouseup', function ( e ) {
 			if (transformControl.object) {
-				focusedTransfromObj = transformControl.object;
+				focusedTransformObj = transformControl.object;
 			}
 			if (currentModule == 0 && ! controlsMoved) {
 				onDocumentMouseDown( e );
@@ -547,12 +559,12 @@
 		} );
 		container.addEventListener( 'touchend', function ( e ) {
 			if (transformControl.object) {
-				focusedTransfromObj = transformControl.object;
+				focusedTransformObj = transformControl.object;
 			}
 			if (currentModule == 0 && ! controlsMoved) {
 				onDocumentMouseDown( e );
 			}
-		} );
+		},false );
 		container.addEventListener( 'keydown', onDocumentKeyDown, false );
 		container.addEventListener( 'keyup', onDocumentKeyUp, false );
 
@@ -667,14 +679,11 @@
 						$( ".undo_control" ).removeClass( "noActive_control" );//
 						$( ".save_stl" ).removeClass( "noActive_save" );//
 						transformControl.object = voxel;
-						focusedTransfromObj = transformControl.object;
-						var obj = {};
-						obj['uuid'] = focusedTransfromObj.uuid;
-						obj['position'] = focusedTransfromObj.position.clone();
-						allOperation.push( obj );
-						if ($( ".obj_control_wrapper" ).css( "display" ) == 'block') { //if the transformControl active, so change to new object
-							transformControl.attach( focusedTransfromObj );
-						}
+						focusedTransformObj = transformControl.object;
+						createObjForOperation(voxel,'add');
+						eachObjSetps(voxel,0);
+						shapesController();
+						transformControl.attach( focusedTransformObj );
 						resetSomeThing();
 					}
 					/*else {
@@ -733,82 +742,9 @@
 		currentMesh.material.dispose();
 	}
 
-	function initGUI() {
-
-		var gui = new dat.GUI();
-		gui.close();
-
-		/*gui.add( params, 'SUBMIT' );
-		gui.add( params, 'Geometry', geometries ).onChange( function () {
-			// changeShapes(geometries[ params.Geometry ]);
-			changeShapes();
-		} );
-		gui.add( params, 'color', shapeColor ).name('Color').onChange( function () {
-			changeCurrentColor(shapeColor[params.color]);
-		} );*/
-		var shapess = gui.addFolder( "Shapes" );
-		shapess.add( params, 'Cube' );
-		shapess.add( params, 'Cylinder' );
-		shapess.add( params, 'Cone' );
-		shapess.add( params, 'Ball' );
-		shapess.add( params, 'Doughnut' );
-		shapess.add( params, 'Standing' );
-		shapess.add( params, 'Climbing' );
-		shapess.add( params, 'Lying' );
-		shapess.add( params, 'Sitting' );
-		shapess.add( params, 'TyrannosaurusRex' );
-		shapess.open();
-
-		gui.add( params, 'color', colorsObj ).name( "Color" ).onChange( function () {
-			changeCurrentColor();
-		} );
-
-		/*var colorss = gui.addFolder("Color");
-		colorss.add(params,'white');
-		colorss.add(params,'yellow');
-		colorss.open();*/
-		gui.add( params, 'selectShape' ).onChange( function () {
-			selectShapeModule();
-		} );
-		gui.add( params, 'changeCurrentSize' ).onChange( function () {
-			if (params.changeCurrentSize) {
-				transformControl.setMode( "scale" );
-			} else {
-				transformControl.setMode( "translate" );
-			}
-		} );
-		gui.add( params, 'RoteShape' ).onChange( function () {
-			if (params.RoteShape) {
-				transformControl.setMode( "rotate" );
-			} else {
-				transformControl.setMode( "translate" );
-			}
-		} );
-
-		gui.add( params, 'removeLast' ).name( "Remove Last Shape" );
-		gui.add( params, 'clear' ).name( "Remove All" );
-		gui.add( params, 'SUBMIT' ).name( "exportSTL" );
-		gui.add( params, 'SUBMITGLTFE' ).name( "exportGLTF" );
-		/*	var navGUI = new dat.GUI();
-            var side = navGUI.addFolder("Sides");
-            side.add(navParams,'front').name("Front");
-            side.add(navParams,'back').name("Back");
-            side.add(navParams,'left').name("Left");
-            side.add(navParams,'right').name("Right");
-            side.add(navParams,'top').name("Top");
-            side.add(navParams,'bottom').name("Bottom");
-            side.add(navParams,'reset').name("Reset");
-            side.close();*/
-
-		$( ".dg.ac .dg.main.a" ).addClass( "main_menu" );
-		$( ".dg.ac .dg.main.a ul:eq(0)" ).addClass( "menu_ul_main" );
-		$( ".dg.ac .dg.main.a ul:eq(1)" ).addClass( "menu_ul_shapes" );
-		$( ".menu_ul_main li:eq(1)" ).addClass( "asdf" );
-
-	}
-
 	function changeShapes( geo ) {//geo: 当前类型
 		stopPropagationFn();
+		showInput(1);
 		$(".active_color").removeClass("active_color");
 		currentModule = 0;//编辑模式，各种基础模型
 		enabledLego( 1 );
@@ -903,12 +839,15 @@
 	function changeColorBeforeShoot(type,obj){
 		stopPropagationFn();
 		$(".active_color").removeClass("active_color");
+		$(".sprintY").removeClass("sprintY");
 		if(type==0){
 			$(obj).addClass('active_color');
+			$(obj).parents(".module").find(".sprint").removeClass('sprintY');
 			currentObjMaterial =  new THREE.MeshLambertMaterial( { color: 0xdddddd } );
 		}
 		else if(type==1){
 			$(obj).addClass('active_color');
+			$(obj).parents(".module").find(".sprint").addClass('sprintY');
 			currentObjMaterial =  new THREE.MeshLambertMaterial( { color: 0xf2f545 } );
 		}
 	}
@@ -919,6 +858,8 @@
 			} else {
 				transformControl.object.material.color.set( "#f2f545" );
 			}
+			createObjForOperation(transformControl.object,'transform');
+			eachObjSetps(transformControl.object,0);
 		}
 	}
 
@@ -937,26 +878,6 @@
 		}
 	}
 
-	function selectShapeModule() {
-		if (shootedFlag) {
-			console.log( "remove" );
-			clearCache( mouseHelper );
-			scene.remove( mouseHelper );
-			camera.position.set( 150, 200, 300 );
-			camera.lookAt( 0, 0, 0 );
-			render();
-		} else {
-			transformControl.detach( transformControl.object ); //隐藏控制控件
-			selectedShapeFlag = false;
-			camera.position.set( 0, 200, 350 );
-			camera.lookAt( 0, 0, 0 );
-			render();
-			if (! mobile) {
-				scene.add( mouseHelper );
-			}
-		}
-	}
-
 	function removeAllShapes() {
 		shapesObj.forEach( function ( d ) {
 			clearCache( d );
@@ -970,8 +891,22 @@
 		shapesObj = [];
 		transformControl.detach(); //隐藏控制控件
 	}
-
-	function redoUndo( type ) { //type 0: undo 1: redo
+	function createObjForOperation(meshObj,type){
+		if(allOperation.length>=5){
+			allOperation.shift();
+		}
+		var obj = {};
+		obj['uuid'] = meshObj.uuid;
+		obj['position'] = meshObj.position.clone();
+		obj['rotation'] = meshObj.rotation.clone();
+		obj['quaternion'] = meshObj.quaternion.clone();
+		obj['scale'] = meshObj.scale.clone();
+		obj['color'] = meshObj.material.color.clone();
+		obj['operation'] = type;
+		obj['mesh'] = meshObj;
+		allOperation.push( obj );
+	}
+	function redoUndo1( type ) { //type 0: undo 1: redo
 		if (type == 0) {
 			if (objects.length > 1) {
 				scene.remove( objects[objects.length - 1] );
@@ -998,55 +933,169 @@
 		}
 
 	}
+	function eachObjSetps(e,type){ //生成json 键的行为对象; e:mesh object  type 0: undo 1: redo
+		var obj = {};
 
-	function redoUndo1( type ) { //type 0: undo 1: redo
-		if (allOperation.length > 1 && type == 0 && focusedTransfromObj) {
-			var obj = allOperation[allOperation.length - 1];
-			redoOperation.push( obj ); //add the undo to redo
-			for (var i = allOperation.length - 1; i > - 1; i --) {
-				if (transformControl.object.uuid == allOperation[i].uuid) {
-					transformControl.object.position.copy( allOperation[i].position );
-					break;
+		if(type===0) {
+			if (! eachObjectInfo[e.uuid]) {
+				eachObjectInfo[e.uuid] = [];
+			}
+			obj['uuid'] = e.uuid;
+			obj['position'] = e.position.clone();
+			obj['rotation'] = e.rotation.clone();
+			obj['quaternion'] = e.quaternion.clone();
+			obj['scale'] = e.scale.clone();
+			obj['color'] = e.material.color.clone();
+			obj['mesh'] = e;
+			obj['time'] = Date.parse( new Date() );
+			if(eachObjectInfo[e.uuid].length) {
+				obj['index'] = eachObjectInfo[e.uuid].length;
+			}
+			else{
+				obj['index'] = 0;
+			}
+			var arr = eachObjectInfo[e.uuid];
+			arr.push( obj );
+		}
+		else if(type===2){
+			if (! eachObjectInfo[e.uuid]) {
+				eachObjectInfo[e.uuid] = [];
+			}
+			obj['uuid'] = e.uuid;
+			obj['position'] = e.position.clone();
+			obj['rotation'] = e.rotation.clone();
+			obj['quaternion'] = e.quaternion.clone();
+			obj['scale'] = e.scale.clone();
+			obj['color'] = e.color.clone();
+			obj['mesh'] = e.mesh;
+			obj['time'] = Date.parse( new Date() );
+			if(eachObjectInfo[e.uuid].length) {
+				obj['index'] = eachObjectInfo[e.uuid].length;
+			}
+			else{
+				obj['index'] = 0;
+			}
+			var arr = eachObjectInfo[e.uuid];
+			arr.push( obj );
+		}
+		else if(type===1){
+			if (! eachRedoObjectInfo[e.uuid]) {
+				eachRedoObjectInfo[e.uuid] = [];
+			}
+			obj['uuid'] = e.uuid;
+			obj['position'] = e.position.clone();
+			obj['rotation'] = e.rotation.clone();
+			obj['quaternion'] = e.quaternion.clone();
+			obj['scale'] = e.scale.clone();
+			obj['color'] = e.color.clone();
+			obj['mesh'] = e.mesh;
+			obj['time'] = Date.parse( new Date() );
+			var arr = eachRedoObjectInfo[e.uuid];
+			arr.push( obj );
+		}
+
+	}
+	function redoUndo( type ) { //type 0: undo 1: redo
+		var transformFlag = false;
+		var deleteFlag = false;
+		var addFlag = false;
+		if(type===0){
+			if (allOperation.length > 0){
+				var operationL = allOperation[allOperation.length - 1];//最后一个last
+				redoOperation.push( operationL ); //add the undo to redo
+				if(operationL.operation === 'transform'){
+					transformFlag = true;
 				}
-			}
-			if (allOperation.length > 1) {
-				transformControl.object.position.copy( allOperation[allOperation.length - 2].position );
-			}
-			allOperation.pop();
-		} else if (allOperation.length == 1 && objects.length == 2) {
-			transformControl.detach( transformControl.object ); //隐藏控制控件
-			scene.remove( objects[1] );
-			scene.remove( objects[1] );
-			objects.pop();
-			allOperation.pop();
-		} else if (redoOperation.length > 0 && type == 1) {
-			if (objects.length != 0) {
-				var obj = redoOperation[redoOperation.length - 1];
-				allOperation.push( obj ); //add the redo to undo
-				for (var i = redoOperation.length - 1; i > - 1; i --) {
-					if (transformControl.object) {
-						if (transformControl.object.uuid == redoOperation[i].uuid) {
-							transformControl.object.position.copy( redoOperation[i].position );
-							break;
+				else if(operationL.operation === 'delete'){
+					deleteFlag = true;
+				}else if(operationL.operation === 'add'){
+					addFlag = true;
+				}
+				if(addFlag){
+					if(operationL.mesh){
+						eachObjSetps(operationL,1);
+						scene.remove(operationL.mesh);
+						objects.splice( objects.indexOf( operationL.mesh ), 1 );
+					}
+				}
+				else if(deleteFlag){
+					if(operationL.mesh) {
+						eachObjSetps(operationL,1);
+						scene.add( operationL.mesh );
+						objects.push( operationL.mesh );
+					}
+				}
+				else if(transformFlag){
+					var thisObj = eachObjectInfo[operationL.uuid]; //寻找对应对象步骤
+					if(thisObj){
+						if(thisObj.length>1) {
+							redoProcess( thisObj[thisObj.length - 2]);
 						}
-					} else {
-						for (var i = currentAllObjs.length - 1; i > - 1; i --) {
-							if (redoOperation[i].uuid == currentAllObjs[i].uuid) {
-								scene.add( currentAllObjs[i] );
-								objects.push( currentAllObjs[i] );
-							}
+						else{
+							redoProcess( thisObj[thisObj.length - 1]);
 						}
+						eachObjSetps(eachObjectInfo[operationL.uuid].pop(),1);
+						console.log("transform")
 					}
 				}
 				allOperation.pop();
-			} else {
-				for (var i = currentAllObjs.length - 1; i > - 1; i --) {
-					scene.add( currentAllObjs[i] );
-					objects.push( currentAllObjs[i] );
+			}
+			/*else if(allOperation.length == 1){
+				var obj = allOperation[0]; //一个元素说明是刚加入的状态,删除
+				redoOperation.push( obj ); //add the undo to redo
+				if(obj.mesh) {
+					eachObjSetps(obj,1);
+					scene.remove( obj.mesh );
+					objects.splice( objects.indexOf( obj.mesh ), 1 );
+					allOperation = [];
+					eachObjectInfo = {};
 				}
+			}*/
 
+		}
+		else if(type===1){
+			if (redoOperation.length > 0){
+				var redoOperationL = redoOperation[redoOperation.length - 1];//最后一个last
+				allOperation.push( redoOperationL ); //add the undo to redo
+				if(redoOperationL.operation === 'transform'){
+					transformFlag = true;
+				}
+				else if(redoOperationL.operation === 'delete'){
+					deleteFlag = true;
+				}else if(redoOperationL.operation === 'add'){
+					addFlag = true;
+				}
+				if(addFlag){
+					if(redoOperationL.mesh){
+						eachObjSetps(redoOperationL,2);
+						scene.add( redoOperationL.mesh );
+						objects.push( redoOperationL.mesh );
+					}
+				}
+				else if(deleteFlag){
+					if(redoOperationL.mesh) {
+						eachObjSetps(redoOperationL,2);
+						scene.remove(redoOperationL.mesh);
+						objects.splice( objects.indexOf( redoOperationL.mesh ), 1 );
+
+					}
+				}
+				else if(transformFlag){
+					var thisObj = eachRedoObjectInfo[redoOperationL.uuid]; //寻找对应对象步骤
+					if(thisObj){
+						if(thisObj.length>1) {
+							redoProcess( thisObj[thisObj.length - 2]);
+						}
+						else{
+							redoProcess( thisObj[thisObj.length - 1]);
+						}
+						eachObjSetps(eachRedoObjectInfo[redoOperationL.uuid].pop(),2);
+					}
+				}
+				redoOperation.pop();
 			}
 		}
+		transformControl.detach(); //隐藏控制控件
 		render();
 		if (allOperation.length > 0) {
 			$( ".undo_control" ).removeClass( "noActive_control" );
@@ -1060,25 +1109,42 @@
 		}
 
 	}
-
+	function redoProcess(operator, obj){
+		/*		operator.position.copy(obj.position);
+                operator.rotation._x=obj.rotation._x;
+                operator.rotation._y=obj.rotation._y;
+                operator.rotation._z=obj.rotation._z;
+                operator.quaternion._x=obj.quaternion._x;
+                operator.quaternion._y=obj.quaternion._y;
+                operator.quaternion._z=obj.quaternion._z;
+                operator.scale.set(obj.scale.x,obj.scale.y,obj.scale.z);*/
+		operator.mesh.position.copy(operator.position);
+		operator.mesh.rotation._x=operator.rotation._x;
+		operator.mesh.rotation._y=operator.rotation._y;
+		operator.mesh.rotation._z=operator.rotation._z;
+		operator.mesh.quaternion._x=operator.quaternion._x;
+		operator.mesh.quaternion._y=operator.quaternion._y;
+		operator.mesh.quaternion._z=operator.quaternion._z;
+		operator.mesh.scale.set(operator.scale.x,operator.scale.y,operator.scale.z);
+		operator.mesh.material.color.set(operator.color);
+	}
 	function checkIntersection() {
 		var x, y;
-
 		if (event.changedTouches) {
-
 			x = event.changedTouches[0].pageX;
 			y = event.changedTouches[0].pageY;
-
 		} else {
-
 			x = event.clientX;
 			y = event.clientY;
-
 		}
-
 		mouse.x = ( x / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( y / window.innerHeight ) * 2 + 1;
 
+		var controlBoardWidth = $( "#shapes" ).hasClass( "shapes_close" ); //left decal side width
+		if (!controlBoardWidth) {
+			mouse.x = ( x / (window.innerWidth-100) ) * 2 - 1;
+			mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+		}
 		if (! plane) return;
 		raycaster.setFromCamera( mouse, camera );
 		raycaster.intersectObject( plane, false, intersectsSelect );
@@ -1113,7 +1179,6 @@
 		} else {
 			intersection.intersects = false;
 			transformControl.detach( transformControl.object );
-			focusedShape = null;
 		}
 		render();
 	}
@@ -1593,10 +1658,11 @@
 	}
 
 	function deletedSelected() {
-		if (focusedTransfromObj) {
-			allOperation.push( focusedTransfromObj ); //add to opeartion arr
-			scene.remove( focusedTransfromObj );
-			objects.splice( objects.indexOf( focusedTransfromObj ), 1 );
+		if (focusedTransformObj && transformControl.object) {
+			createObjForOperation(transformControl.object,'delete');
+			eachObjSetps(transformControl.object,0);
+			scene.remove( transformControl.object );
+			objects.splice( objects.indexOf( transformControl.object ), 1 );
 		}
 		transformControl.detach();
 		// $(".active_control").removeClass("active_control");
@@ -1605,7 +1671,7 @@
 	}
 
 	function shapesController( type ) {//type 0: normal
-		if (type == 0) {
+		/*if (type == 0) {
 			if (objects.length > 1) { //objects has obj plane
 				if(!$(".show_more").hasClass("show_more_close")){
 					$(".obj_control").css({width:window.innerWidth-100})
@@ -1613,23 +1679,25 @@
 				$( ".obj_control_wrapper,.note" ).show();
 
 			} else if (redoArr.length < 1) {
-				$( ".obj_control_wrapper" ).hide();
+				$( ".obj_control_wrapper,.note" ).hide();
 			}
 			if (allOperation.length > 0) {
 
 			}
 		} else {
-			$( ".obj_control_wrapper" ).hide();
+			$( ".obj_control_wrapper,.note" ).hide();
+		}*/
+		if(!$(".show_more").hasClass("show_more_close")){
+			$(".obj_control").css({width:window.innerWidth-100})
 		}
+		$( ".obj_control_wrapper,.note" ).show();
 	}
 
 	function allOperationAdd() {
-		if (focusedTransfromObj) {
-			var obj = {};
-			obj['uuid'] = focusedTransfromObj.uuid;
-			obj['position'] = focusedTransfromObj.position.clone();
-			allOperation.push( obj ); //add to opeartion arr
-			console.log( "added: " + obj );
+		if (focusedTransformObj) {
+			var type = transformControl.getMode();
+			createObjForOperation(transformControl.object,'transform');
+			eachObjSetps(transformControl.object,0);
 		}
 		if (allOperation.length > 0) {
 			$( ".undo_control" ).removeClass( "noActive_control" );
@@ -1648,6 +1716,131 @@
 
 	}
 </script>
+<script>
+	// word
 
+	var textInput;
+	var loader = new THREE.FontLoader();
+	var group,materials;
+	var wordColor = 0xdddddd;
+	var wordFont = undefined;
+
+	function showInput(type,obj) {
+		if(type === 0){
+			currentObj =undefined;
+			$(".text_window").show();
+			$( ".active_shape" ).removeClass( "active_shape" );
+			$(obj).addClass( "active_shape" );
+		}
+		else{
+			$(".text_window").hide();
+			$(".btn_ok").addClass("btn_disable");
+			$(".btn_ok").attr('onclick',"");
+			$("#textContent").val("");
+		}
+	}
+	function textInputFn(obj,val) {
+		textInput = $(obj).val();
+		var textLength = $(obj).val().length;
+		if(textLength>0){
+			$(".btn_ok").removeClass("btn_disable");
+			$(".btn_ok").attr('onclick',"insertWord('"+textInput+"')")
+		}
+		else{
+			$(".btn_ok").addClass("btn_disable");
+			$(".btn_ok").attr('onclick',"")
+		}
+	}
+	function changeTextColor(type,obj){
+		stopPropagationFn();
+		$(".active_color").removeClass("active_color");
+		$(".sprintY").removeClass("sprintY");
+		if(type==0){
+			$(obj).addClass('active_color');
+			$(obj).parents(".module").find(".sprint").removeClass('sprintY');
+			wordColor = 0xdddddd;
+		}
+		else if(type==1){
+			$(obj).addClass('active_color');
+			$(obj).parents(".module").find(".sprint").addClass('sprintY');
+			wordColor = 0xf2f545;
+		}
+	}
+
+	function insertWord(word){
+		$( "#loading_data" ).show();
+		showInput(1);
+		loader.load( '../css/font/other/SimHei_Regular.json', function ( font ) {
+			wordFont = font;
+			createText(word);
+			$( "#loading_data" ).hide();
+		} );
+	}
+	function createText(word){
+		var xMid, text;
+		var message = word;
+		var fontSize;
+		switch(message.length){
+			case 3:
+				fontSize = 60;
+				break;
+			case 4:
+				fontSize = 55;
+				break;
+			case 5:
+				fontSize = 50;
+				break;
+			case 6:
+				fontSize = 45;
+				break;
+			case 7:
+				fontSize = 40;
+				break;
+			case 8:
+				fontSize = 40;
+				break;
+			case 9:
+				fontSize = 40;
+				break;
+			case 10:
+				fontSize = 40;
+				break;
+			default:
+				fontSize = 70;
+		}
+		var textGeo = new THREE.TextGeometry( message, {
+			font: wordFont,
+			size: fontSize,
+			height: 10, //文字厚度
+			curveSegments: 22,
+			bevelEnabled: false,
+		} );
+		textGeo.computeBoundingBox();
+		textGeo.computeVertexNormals();
+		var geometry = new THREE.BufferGeometry().fromGeometry(textGeo);
+		geometry.computeBoundingBox();
+
+		xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x ); //位置，使其居中
+		geometry.translate( xMid, 0, 0 );
+		geometry.rotateX(-(Math.PI/2)); //文字为横卧在工作台上
+		// make shape ( N.B. edge view not visible )
+		var matLite = new THREE.MeshPhongMaterial( { color: wordColor, flatShading: true } )
+		text = new THREE.Mesh( geometry, matLite );
+		text.name = 'shapes';
+		scene.add( text );
+		objects.push(text);
+		shapesObj.push( text ); //全删除使用
+		currentAllObjs.push( text ); //
+		$( ".undo_control" ).removeClass( "noActive_control" );//
+		$( ".save_stl" ).removeClass( "noActive_save" );//
+		transformControl.object = text;
+		focusedTransformObj = transformControl.object;
+		createObjForOperation(text,"add");
+		eachObjSetps(text,0);
+		shapesController();
+		transformControl.attach( focusedTransformObj );
+		resetSomeThing();
+	}
+</script>
 </body>
 </html>
