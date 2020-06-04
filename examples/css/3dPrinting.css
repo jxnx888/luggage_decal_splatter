@@ -235,12 +235,7 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 .btn_main.save_module{margin-left: .1rem;}
 .btn_main.save_module .btn_child .iconfont { font-size: .25rem; line-height: .41rem;}
 .save_module{left:.5rem}
-
-
-.save_control{left:.5rem}
-.save_stl.iconfont { font-size: .2rem; color: #fff;}
-.save_control .save_stl.iconfont.noActive_save { font-size: .2rem; color: #a5a3a3;}
-
+.save_module.noActive_save {opacity: .3}
 /*lego*/
 .dg.ac.lego_constrution{right: .9rem;}
 .dg .cr.string,.dg .cr.number{border-left: none!important;}

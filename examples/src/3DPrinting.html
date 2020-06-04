@@ -93,14 +93,11 @@
 			<div class="side_control_btn iconfont " onclick="cameraSides(8)">ZoomOut</div>
 		</div>
 	</div>
-	<div class="save_control">
-		<div class="save_stl iconfont noActive_save" onclick="exportGLTF()">&#xe780;</div>
-	</div>
 	<div class="module_btns clearfix">
 		<div class="btn_main go_mainPage">
 			<div class="btn_child btn_home"><i class="iconfont">&#xe651;</i></div>
 		</div>
-		<div class="btn_main save_module">
+		<div class="btn_main save_module save_stl noActive_save" onclick="exportMoudle(0)">
 			<div class="btn_child btn_save_module"><i class="iconfont">&#xe710;</i></div>
 		</div>
 	</div>
@@ -1208,31 +1205,55 @@
 	// transform controller 用于pc端
 
 	// 导出相关
-	function exportASCII() {
+	function exportMoudle(type) { //type 0: ASCII 1: GLTF
 		if (objects.length > 1) {
 			scene.remove( transformControl );
-			scene.remove( gridHelper );
 			scene.remove( mouseHelper );
-			clearCache(gridHelper);
+			clearCache( gridHelper );
 			scene.remove( gridHelper );
-			clearCache(gradGroundMesh);
+			clearCache( gradGroundMesh );
 			scene.remove( gradGroundMesh );
-			clearCache(gradGroundMesh1);
+			clearCache( gradGroundMesh1 );
 			scene.remove( gradGroundMesh1 );
-
-			exporter = new THREE.STLExporter(); //导出工具  exporter tool
-			var result = exporter.parse( scene );
-			var date = Date.parse( new Date() );
-			saveString( result, date + '.stl' );
-
+			clearCache( plane );
+			scene.remove( plane );
+			if(type === 0) {
+				exporter = new THREE.STLExporter(); //导出工具  exporter tool
+				var result = exporter.parse( scene );
+				var date = Date.parse( new Date() );
+				saveString( result, date + '.stl' );
+			}
+			else{
+				var input = scene;
+				var gltfExporter = new THREE.GLTFExporter();
+				var options = {
+					trs: false,
+					onlyVisible: true,
+					truncateDrawRange: true,
+					binary: false,
+					forcePowerOfTwoTextures: false,
+					maxTextureSize: 4096
+				};
+				gltfExporter.parse( input, function ( result ) {
+					var output = JSON.stringify( result, null, 2 );
+					console.log( output );
+					var date = Date.parse( new Date() );
+					saveString( output, date + '.gltf' );
+				}, options );
+			}
 			scene.add( transformControl );
-			scene.add( gridHelper );
 			scene.add( gridHelper );
 			scene.add( gradGroundMesh );
 			scene.add( gradGroundMesh1 );
+			scene.add( plane );
 			if (! mobile) {
 				scene.add( mouseHelper );
 			}
+		}
+	}
+	function exportGLTF() {
+		if (objects.length > 1) {
+
 		}
 	}
 
@@ -1254,36 +1275,6 @@
 
 	}
 
-	function exportGLTF() {
-		if (objects.length > 1) {
-			scene.remove( transformControl );
-			scene.remove( gridHelper );
-			scene.remove( mouseHelper );
-
-			var input = scene;
-			var gltfExporter = new THREE.GLTFExporter();
-
-			var options = {
-				trs: false,
-				onlyVisible: true,
-				truncateDrawRange: true,
-				binary: false,
-				forcePowerOfTwoTextures: false,
-				maxTextureSize: 4096
-			};
-			gltfExporter.parse( input, function ( result ) {
-				var output = JSON.stringify( result, null, 2 );
-				console.log( output );
-				var date = Date.parse( new Date() );
-				saveString( output, date + '.gltf' );
-			}, options );
-			scene.add( transformControl );
-			scene.add( gridHelper );
-			if (! mobile) {
-				scene.add( mouseHelper );
-			}
-		}
-	}
 
 	// 导出相关 end
 	//camera 方向
