@@ -146,6 +146,7 @@
 <script src='../js/STLLoader.js'></script>
 <script src='../js/DecalGeometry.js'></script>
 <script src='../js/OrbitControls.js'></script>
+<script src='../js/OrientationControls.js'></script>
 <script src='../js/dat.gui.min.js'></script>
 <script src='../js/STLExporter.js'></script>
 <script src='../js/DragControls.js'></script>
@@ -161,6 +162,7 @@
 		$( "#shapes" ).toggleClass( "shapes_close" );
 		$( ".show_more" ).toggleClass( "show_more_close" );
 		$( ".obj_control" ).toggleClass( "has_right_menu" );
+		$( ".orientationControls" ).toggleClass( "right_menu_hide" );
 		if($( ".obj_control" ).hasClass("has_right_menu")){
 			$( ".obj_control" ).css({width:window.innerWidth-100});
 		}
@@ -417,8 +419,10 @@
 	var eachRedoObjectInfo={};//每一个对象的每一个步骤；
 	var undoArr = [];
 	var redoArr = [];
-
 	var shootedFlag = false;
+
+	var orientationControls = new THREE.OrientationControls( 50 );
+	var DEGTORAD = THREE.Math.DEG2RAD;
 	var params = {  //params for GUI
 		SUBMIT: function () {
 			if (objects.length > 1) {
@@ -661,6 +665,32 @@
 		container.addEventListener( 'keydown', onDocumentKeyDown, false );
 		container.addEventListener( 'keyup', onDocumentKeyUp, false );
 
+		document.body.appendChild( orientationControls.element );
+		orientationControls.element.addEventListener( 'click', function( e ) {
+
+			switch ( e.target.id ) {
+				case 'front':
+					camera.position.set( 0, 0, 430 );
+					break;
+				case 'back':
+					camera.position.set( 0, 0, - 430 );
+					break;
+				case 'top':
+					camera.position.set( 0, 530, 0 );
+					break;
+				case 'bottom':
+					camera.position.set( 0, - 530, 0 );
+					break;
+				case 'left':
+					camera.position.set( - 430, 0, 0 );
+					break;
+				case 'right':
+					camera.position.set( 430, 0, 0 );
+					break;
+			}
+			camera.lookAt( scene.position );
+			camera.updateProjectionMatrix();
+		});
 		//
 		// initGUI();
 		container.addEventListener( 'resize', onWindowResize, false );
@@ -672,6 +702,7 @@
 	function animate() {
 		requestAnimationFrame( animate );
 		renderer.render( scene, camera );
+		orientationControls.update( camera );
 		// stats.update();
 	}
 

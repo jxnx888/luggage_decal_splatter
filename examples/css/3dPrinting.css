@@ -313,3 +313,11 @@ input#textContent { width: 90%; border: 1px solid #999; border-radius: 4px; marg
 
 .btn { height: .25rem; width: .5rem; background: #79B1EA; border-radius: .1rem; line-height: .25rem; display: inline-block; margin: .05rem; color: #fff; }
 .btn_disable{background:#eee;pointer-events: none;}
+
+.orientationControls { right: 1.3rem!important; left: auto!important; }
+.orientationControls.right_menu_hide { right: 0.3rem!important; left: auto!important; }
+#front {background: #ff972d;}
+#right {background: #ffde41;}
+#back {background: #d3dbff;}
+#left {background: #ff51e8;}
+#top {background: #fff;}
