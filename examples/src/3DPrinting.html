@@ -94,11 +94,35 @@
 		</div>
 	</div>
 	<div class="module_btns clearfix">
-		<div class="btn_main go_mainPage">
+		<div class="btn_main go_mainPage" onclick="goHomePage()">
 			<div class="btn_child btn_home"><i class="iconfont">&#xe651;</i></div>
+			<div class="module_btn_name">首页</div>
 		</div>
-		<div class="btn_main save_module save_stl noActive_save" onclick="exportMoudle(0)">
+		<div class="btn_main save_module save_stl noActive_save" onclick="saveModuleShow(0)">
 			<div class="btn_child btn_save_module"><i class="iconfont">&#xe710;</i></div>
+			<div class="module_btn_name">保存</div>
+		</div>
+	</div>
+	<div class="save_name_module_bg"></div>
+	<div class="save_name_module">
+		<div class="save_name_title">命名</div>
+		<div class="save_name_tip">模型还没有名字，取个名字吧</div>
+		<input type="text" placeholder="请输入模型名称" maxlength="14" id="save_name" oninput="saveModuleName(this)" onblur="saveModuleName(this)">
+		<div class="save_name_verify">请输入模型名称</div>
+		<div class="btn_wrapper clearfix">
+			<img src="../img/3dPrinting/btn_yes1.png" class="save_name_ok" onclick="exportMoudle(0)">
+			<img src="../img/3dPrinting/btn_close.png" class="imgBtn save_name_cancle" onclick="saveModuleShow(1)">
+		</div>
+	</div>
+	<div class="save_ask">
+		<div class="save_name_title">提示</div>
+		<div class="save_name_tip">
+			模型进度还没有保存哦，此时离开会丢失进度，是否保存？
+		</div>
+		<div class="btn_wrapper clearfix">
+			<img src="../img/3dPrinting/btn_no.png" class="go_home_ok" onclick="goHomeSaveModule(0)">
+			<img src="../img/3dPrinting/btn_yes.png" class="go_home_ok" onclick="goHomeSaveModule(1)">
+			<img src="../img/3dPrinting/btn_close.png" class="imgBtn save_name_cancle" onclick="hideGoHome()">
 		</div>
 	</div>
 	<div class="note">
@@ -108,10 +132,11 @@
 		<div class="text_title">生成3D文字</div>
 		<input type="text" placeholder="请输入文字" maxlength="10" id="textContent" oninput="textInputFn(this)" onblur="textInputFn(this)">
 		<div class="btn_wrapper clearfix">
-			<div class="btn btn_ok btn_disable">确定</div>
-			<div class="btn btn_cancle" onclick="showInput(1)">取消</div>
+			<div class="btn btn_ok text_ok btn_disable">确定</div>
+			<div class="btn btn_cancle text_cancle" onclick="showInput(1)">取消</div>
 		</div>
 	</div>
+
 </div>
 <div id="loading_data"><img src="../img/loading.gif" alt=""></div>
 
@@ -166,7 +191,7 @@
 	var listShapes = [];
 	var listLDraw = [];
 	var listSTL = [];
-
+	var saveFlag = false;
 	function listModule( type ) {
 		$.ajax( {
 			type: "GET",
@@ -230,7 +255,75 @@
 		} );
 
 	}
+	function getTimeStr(){
+		var date = new Date();
+		var Y = date.getFullYear();
+		var M = (date.getMonth()+1) < 10 ? ('0'+(date.getMonth()+1)):(date.getMonth()+1);
+		var D = date.getDate() < 10 ? ('0'+date.getDate()) : date.getDate();
+		var h = date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours();
+		var m = date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes();
+		var s = date.getSeconds() < 10 ? ('0'+date.getSeconds()) : date.getSeconds();
+		var dateStr = Y + M + D + h + m + s;
+		return dateStr;
+	}
+	function saveModuleShow(type) {
+		if(objects.length>1){
+			if(type == 0) {
+				$("#save_name").val(getTimeStr());
+				$(".save_name_ok").attr('onclick',"exportMoudle(0)")
+				$( ".save_name_module,.save_name_module_bg" ).show();
+			}
+			else{
+				$( ".save_name_module,.save_name_module_bg" ).hide();
+			}
+		}
+		else{
+			$( ".save_name_module,.save_name_module_bg" ).hide();
+		}
+	}
+	function saveModuleName(obj){
+		var name = $(obj).val();
+		if(name.length>0){
+			// $(".save_name_ok").removeClass("btn_disable");
+			$(".save_name_ok").attr('onclick',"exportMoudle(0)")
+		}
+		else{
+			// $(".save_name_ok").addClass("btn_disable");
+			$(".save_name_ok").attr('onclick',"validateName()")
+		}
+	}
+	function validateName(){
+		$(".save_name_verify").show();
+		setTimeout(function (  ) {
+			$(".save_name_verify").hide();
+		},2000);
+	}
+	function goHomePage(){
+		if(objects.length>1){
+			if(saveFlag){
+				alert("to home page")
+			}
+			else{
+				$(".save_ask,.save_name_module_bg").show();
+			}
+		}
+		else{
+			alert("to home page")
+		}
 
+	}
+	function goHomeSaveModule(type){//type 0:gohome 1; save
+		$(".save_ask,.save_name_module_bg").hide();
+		if(type===0){
+			alert("to home page")
+		}
+		else{
+			saveModuleShow(0);
+		}
+	}
+	function hideGoHome(){
+		$(".save_ask,.save_name_module_bg").hide();
+	}
 	var dragObj;
 	var selectedDragObj;
 	var maxW, maxH;
@@ -1220,29 +1313,34 @@
 			scene.remove( gradGroundMesh1 );
 			clearCache( plane );
 			scene.remove( plane );
-			if(type === 0) {
-				exporter = new THREE.STLExporter(); //导出工具  exporter tool
-				var result = exporter.parse( scene );
-				var date = Date.parse( new Date() );
-				saveString( result, date + '.stl' );
-			}
-			else{
-				var input = scene;
-				var gltfExporter = new THREE.GLTFExporter();
-				var options = {
-					trs: false,
-					onlyVisible: true,
-					truncateDrawRange: true,
-					binary: false,
-					forcePowerOfTwoTextures: false,
-					maxTextureSize: 4096
-				};
-				gltfExporter.parse( input, function ( result ) {
-					var output = JSON.stringify( result, null, 2 );
-					console.log( output );
+
+			var nameStr = $("#save_name").val();
+			if(nameStr) {
+				saveFlag = true;
+				if (type === 0) {
+					exporter = new THREE.STLExporter(); //导出工具  exporter tool
+					var result = exporter.parse( scene );
 					var date = Date.parse( new Date() );
-					saveString( output, date + '.gltf' );
-				}, options );
+					saveString( result, nameStr + '.stl' );
+				}
+				else {
+					var input = scene;
+					var gltfExporter = new THREE.GLTFExporter();
+					var options = {
+						trs: false,
+						onlyVisible: true,
+						truncateDrawRange: true,
+						binary: false,
+						forcePowerOfTwoTextures: false,
+						maxTextureSize: 4096
+					};
+					gltfExporter.parse( input, function ( result ) {
+						var output = JSON.stringify( result, null, 2 );
+						console.log( output );
+						var date = Date.parse( new Date() );
+						saveString( output, nameStr + '.gltf' );
+					}, options );
+				}
 			}
 			scene.add( transformControl );
 			scene.add( gridHelper );
@@ -1252,11 +1350,7 @@
 			if (! mobile) {
 				scene.add( mouseHelper );
 			}
-		}
-	}
-	function exportGLTF() {
-		if (objects.length > 1) {
-
+			saveModuleShow(1);
 		}
 	}
 
@@ -1733,21 +1827,23 @@
 		}
 		else{
 			$(".text_window").hide();
-			$(".btn_ok").addClass("btn_disable");
-			$(".btn_ok").attr('onclick',"");
+			$(".text_ok").addClass("btn_disable");
+			$(".text_ok").attr('onclick',"");
 			$("#textContent").val("");
+			textInput = '';
 		}
 	}
+
 	function textInputFn(obj,val) {
 		textInput = $(obj).val();
 		var textLength = $(obj).val().length;
 		if(textLength>0){
-			$(".btn_ok").removeClass("btn_disable");
-			$(".btn_ok").attr('onclick',"insertWord('"+textInput+"')")
+			$(".text_ok").removeClass("btn_disable");
+			$(".text_ok").attr('onclick',"insertWord('"+textInput+"')")
 		}
 		else{
-			$(".btn_ok").addClass("btn_disable");
-			$(".btn_ok").attr('onclick',"")
+			$(".text_ok").addClass("btn_disable");
+			$(".text_ok").attr('onclick',"")
 		}
 	}
 	function changeTextColor(type,obj){
