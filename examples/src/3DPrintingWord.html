@@ -3,7 +3,8 @@
 <head>
 	<title>three.js webgl - interactive - voxel painter</title>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=1, initial-scale=1">
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=1, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="IE=11,chrome=1">
 	<link rel="stylesheet" type="text/css" href="../css/dialog.css"/>
 	<link type="text/css" rel="stylesheet" href="../css/font/iconfont.css">
@@ -24,8 +25,8 @@
 		</div>
 	</div>
 	<div id="childWrapper">
-	<div class="child_wrapper normal_wrapper"></div>
-	<div class="child_wrapper cartoon_wrapper"></div>
+		<div class="child_wrapper normal_wrapper"></div>
+		<div class="child_wrapper cartoon_wrapper"></div>
 	</div>
 	<div class="child_wrapper mymodule_wrapper">
 		<div class="shapes_options cartoon" onclick="showModule(2)">购买模型 <i
@@ -37,7 +38,8 @@
 			<div class="drag sprint sprint_"></div>
 			<div class="name drag">模型一</div>
 		</div>
-		<div class="shapes_options cartoon" onclick="showModule(3)">购买模型 <i class="iconfont arrow arrow_right">&#xe6f8;</i></div>
+		<div class="shapes_options cartoon" onclick="showModule(3)">购买模型 <i
+			class="iconfont arrow arrow_right">&#xe6f8;</i></div>
 	</div>
 </div>
 <div class="obj_control has_right_menu">
@@ -199,7 +201,7 @@
 <script src='../js/MMDAnimationHelper.js'></script>
 <script src='../js/dialog.js'></script>
 <script>
-	window.addEventListener( "touchmove", function(event) {
+	window.addEventListener( "touchmove", function ( event ) {
 			if (event.scale !== 1) {
 				event.preventDefault();
 			}
@@ -230,7 +232,7 @@
 		} else if (type == 2) {
 			$( ".buymodule_wrapper" ).show();
 		} else if (type == 3) {
-			alert("购买跳转")
+			alert( "购买跳转" );
 		}
 	}
 
@@ -452,12 +454,12 @@
 	// var mobile = /Android|webOS|iPhone|iPad|BlackBerry/i.test( navigator.userAgent );
 	var mobile = true;
 	var container = document.getElementById( 'container' ); //
-	var twoPointTouchFlag=false;
-	var pointOneFlag,pointTwoFlag, touchScale;
+	var twoPointTouchFlag = false;
+	var pointOneFlag, pointTwoFlag, touchScale;
 	var camera, scene, renderer;
-	var directionalLight,spotLight;
+	var directionalLight, spotLight;
 	var cameraZoom = 1;
-	var outlinePass, composer, effectFXAA,renderPass;
+	var outlinePass, composer, effectFXAA, renderPass;
 	var plane;
 	var gridHelper, gradGroundMesh, gradGroundMesh1;
 	var mouse, raycaster, isShiftDown = false;
@@ -476,7 +478,9 @@
 	var shapesObj = []; //所有的当前已放置的obj
 	var currentAllObjs = []; //所有的当前已放置的obj
 	var transformControl;
-	var tcX,tcY,tcZ;
+	var WORK_SPACE_SIZE = 300;
+	var SHAPE_SIZE = 50;
+	var tcX, tcY, tcZ;
 	var transformControlModeType = 1;
 	var transformControlMove = false;
 	var transformDragFlag = true;
@@ -574,6 +578,7 @@
 	init();
 	render();
 	var LIMIT_SIZE = 4;
+
 	function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 		// renderer.setPixelRatio( window.devicePixelRatio );
@@ -598,24 +603,20 @@
 
 		// roll-over helpers
 
-		var rollOverGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
+		var rollOverGeo = new THREE.BoxBufferGeometry( SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE );
 		mouseHelperMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
 		mouseHelper = new THREE.Mesh( rollOverGeo, mouseHelperMaterial );
 		if (! mobile) {
 			scene.add( mouseHelper );
 		}
-		// cubes
-
-		cubeGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
-		cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xfeb74c } );
 
 		raycaster = new THREE.Raycaster();
 		mouse = new THREE.Vector2();
 
-		var geometry = new THREE.PlaneBufferGeometry( 300, 300 );
+		var geometry = new THREE.PlaneBufferGeometry( WORK_SPACE_SIZE, WORK_SPACE_SIZE );
 		geometry.rotateX( - Math.PI / 2 );
 
-		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color:0xe5e4df, visible: true } ) );
+		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0xe5e4df, visible: true } ) );
 		plane.name = "plane";
 		plane.receiveShadow = true;
 		plane.castShadow = true;
@@ -634,7 +635,7 @@
 		gradGroundMesh.receiveShadow = true;
 		gradGroundMesh.castShadow = true;
 		scene.add( gradGroundMesh );
-		gradGroundMesh1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 300, 5,300), new THREE.MeshLambertMaterial( { color: 0xffc869 } ) );
+		gradGroundMesh1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 300, 5, 300 ), new THREE.MeshLambertMaterial( { color: 0xffc869 } ) );
 		gradGroundMesh1.position.y = - 3.8;
 		gradGroundMesh1.name = 'GridHelper';
 		gradGroundMesh1.receiveShadow = true;
@@ -643,9 +644,9 @@
 		//grid end
 
 		// lights
-		var ambientLight = new THREE.AmbientLight( 0x606060 , 1.2); //0x606060
+		var ambientLight = new THREE.AmbientLight( 0x606060, 1.2 ); //0x606060
 		scene.add( ambientLight );
-		directionalLight = new THREE.DirectionalLight( 0xFFFFFF,.5);
+		directionalLight = new THREE.DirectionalLight( 0xFFFFFF, .5 );
 		directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
 		// dirLightHeper = new THREE.DirectionalLightHelper( directionalLight, 215 );//光源辅助线
 		// scene.add( dirLightHeper );
@@ -660,12 +661,12 @@
 		outlinePass.edgeThickness = 1;
 		outlinePass.visibleEdgeColor.set( '#00ff00' );// 边缘可见部分发光颜色
 		outlinePass.hiddenEdgeColor.set( '#00ff00' );//边缘遮挡部分发光颜色
-		outlinePass.edgeGlow= 1;//发光颜色虚边
+		outlinePass.edgeGlow = 1;//发光颜色虚边
 		// outlinePass.pulsePeriod= 3;//发光颜色闪烁频率
 
 		composer.addPass( outlinePass );
 		effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-		effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+		effectFXAA.uniforms['resolution'].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
 		// outline end
 
 
@@ -720,7 +721,6 @@
 			}
 			// console.log('dragging-changed')
 			transformControlMove = true;
-
 		}, false );
 		transformControl.addEventListener( 'change', function () {
 			if (shootedFlag) {
@@ -744,42 +744,42 @@
 		container.addEventListener( 'touchmove', function ( e ) {
 			onDocumentMouseMove( e );
 			transformControlMove = true;
-			if(e.touches.length>=2 && twoPointTouchFlag){ //判断是否有两个点在屏幕上
-				twoPointTouchFlag=true;
-				pointTwoFlag=e.touches; //得到第一组两个点
-				touchScale=getDistance(pointTwoFlag[0],pointTwoFlag[1])/getDistance(pointOneFlag[0],pointOneFlag[1]); //得到缩放比例，getDistance是勾股定理的一个方法
-				if(transformControl.object && touchScale){
+			if (e.touches.length >= 2 && twoPointTouchFlag) { //判断是否有两个点在屏幕上
+				twoPointTouchFlag = true;
+				pointTwoFlag = e.touches; //得到第一组两个点
+				touchScale = getDistance( pointTwoFlag[0], pointTwoFlag[1] ) / getDistance( pointOneFlag[0], pointOneFlag[1] ); //得到缩放比例，getDistance是勾股定理的一个方法
+				if (transformControl.object && touchScale) {
 					var scaleXX = tcX * touchScale;
 					var scaleYY = tcY * touchScale;
 					var scaleZZ = tcZ * touchScale;
-					if(scaleXX >LIMIT_SIZE){
+					if (scaleXX > LIMIT_SIZE) {
 						scaleXX = LIMIT_SIZE;
 						scaleYY = LIMIT_SIZE;
 						scaleZZ = LIMIT_SIZE;
 					}
-					transformControl.object.scale.set(scaleXX,scaleYY,scaleZZ)
+					transformControl.object.scale.set( scaleXX, scaleYY, scaleZZ );
 				}
-			};
+			}
+			;
 		}, false );
 		container.addEventListener( 'mousedown', function ( e ) {
 			controlsMoved = false;
 		}, false );
 		container.addEventListener( 'touchstart', function ( e ) {
 			controlsMoved = false;
-			if(e.touches.length>=2){ //判断是否有两个点在屏幕上
+			if (e.touches.length >= 2) { //判断是否有两个点在屏幕上
 				controls.enabled = false;
-				twoPointTouchFlag=true;
-				pointOneFlag=e.touches; //得到第一组两个点
-				if(transformControl.object){
+				twoPointTouchFlag = true;
+				pointOneFlag = e.touches; //得到第一组两个点
+				if (transformControl.object) {
 					tcX = transformControl.object.scale.x;
 					tcY = transformControl.object.scale.y;
 					tcZ = transformControl.object.scale.z;
 				}
-			}
-			else{
+			} else {
 				controls.enabled = transformDragFlag;
-				twoPointTouchFlag=false;
-				touchScale =''
+				twoPointTouchFlag = false;
+				touchScale = '';
 			}
 		}, false );
 		container.addEventListener( 'mouseup', function ( e ) {
@@ -850,13 +850,13 @@
 			camera.aspect = ( window.innerWidth ) / window.innerHeight;
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			composer.setSize( window.innerWidth, window.innerHeight );
-			effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+			effectFXAA.uniforms['resolution'].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
 
 		} else {
 			camera.aspect = ( window.innerWidth - 100 ) / window.innerHeight;
 			renderer.setSize( window.innerWidth - 100, window.innerHeight );
 			composer.setSize( window.innerWidth - 100, window.innerHeight );
-			effectFXAA.uniforms[ 'resolution' ].value.set( 1 / (window.innerWidth-100), 1 / window.innerHeight );
+			effectFXAA.uniforms['resolution'].value.set( 1 / ( window.innerWidth - 100 ), 1 / window.innerHeight );
 		}
 		camera.updateProjectionMatrix();
 
@@ -948,7 +948,7 @@
 						eachObjSetps( voxel, 0 );
 						shapesController();
 						transformControl.attach( focusedTransformObj );
-						cleanSelectedObject(voxel);
+						cleanSelectedObject( voxel );
 						showCurrentColor();
 						resetSomeThing();
 					}
@@ -1025,25 +1025,25 @@
 			case 0:
 				// 正方形
 				currentShapeType = 0;
-				currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 );
+				currentObj = new THREE.BoxBufferGeometry( SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE );
 				$( ".cube" ).addClass( "active_shape" );
 				break;
 			case 1:
 				//圆柱
 				currentShapeType = 1;
-				currentObj = new THREE.CylinderBufferGeometry( 25, 25, 50, 32 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
+				currentObj = new THREE.CylinderBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, SHAPE_SIZE, 32 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
 				$( ".cylinder" ).addClass( "active_shape" );
 				break;
 			case 2:
 				// 圆锥形
 				currentShapeType = 2;
-				currentObj = new THREE.ConeBufferGeometry( 25, 50, 32 ); //ConeBufferGeometry(radius : Float, height : Float, radialSegments : Integer, heightSegments : Integer, openEnded : Boolean, thetaStart : Float, thetaLength : Float)
+				currentObj = new THREE.ConeBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE, 32 ); //ConeBufferGeometry(radius : Float, height : Float, radialSegments : Integer, heightSegments : Integer, openEnded : Boolean, thetaStart : Float, thetaLength : Float)
 				$( ".cone" ).addClass( "active_shape" );
 				break;
 			case 3:
 				// 球形
 				currentShapeType = 3;
-				currentObj = new THREE.SphereBufferGeometry( 25, 25, 32 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+				currentObj = new THREE.SphereBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, 32 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
 				$( ".ball" ).addClass( "active_shape" );
 				break;
 			case 4:
@@ -1055,21 +1055,21 @@
 			case 5:
 				// 棱柱形prismatic
 				currentShapeType = 14;
-				currentObj = new THREE.CylinderBufferGeometry( 25, 25, 50, 5 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
+				currentObj = new THREE.CylinderBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, SHAPE_SIZE, 5 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
 				$( ".prismatic" ).addClass( "active_shape" );
 				break;
 			case 6:
 				// 棱锥形Pyramid
 				currentShapeType = 15;
-				currentObj = new THREE.ConeBufferGeometry( 25, 50, 4 ); //ConeBufferGeometry(radius : Float, height : Float, radialSegments : Integer, heightSegments : Integer, openEnded : Boolean, thetaStart : Float, thetaLength : Float)
+				currentObj = new THREE.ConeBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE, 4 ); //ConeBufferGeometry(radius : Float, height : Float, radialSegments : Integer, heightSegments : Integer, openEnded : Boolean, thetaStart : Float, thetaLength : Float)
 				$( ".pyramid" ).addClass( "active_shape" );
 				break;
 			case 7:
 				// 空心圆柱Hollow cylinder
 				currentShapeType = 16;
-				var outerRadius = 25;
+				var outerRadius = SHAPE_SIZE / 2;
 				var innerRadius = 13;
-				var height = 50;
+				var height = SHAPE_SIZE;
 
 				var arcShape = new THREE.Shape();
 				arcShape.moveTo( outerRadius * 2, outerRadius );
@@ -1092,12 +1092,12 @@
 			case 8:
 				// 三棱柱
 				currentShapeType = 17;
-				currentObj = new THREE.CylinderBufferGeometry( 25, 25, 50, 3 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
+				currentObj = new THREE.CylinderBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, SHAPE_SIZE, 3 ); //CylinderGeometry(radiusTop : 浮点类型, radiusBottom : 浮点类型, height : 浮点类型, radialSegments : 整数类型, heightSegments : 整数类型, openEnded : 布尔类型, thetaStart : 浮点类型, thetaLength : 浮点类型)
 				$( ".triprism" ).addClass( "active_shape" );
 				break;
 			default:
 				// 正方形
-				currentObj = new THREE.BoxBufferGeometry( 50, 50, 50 );
+				currentObj = new THREE.BoxBufferGeometry( SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE );
 		}
 
 		changeMouseHelper( currentColorFlag );
@@ -1179,6 +1179,7 @@
 		obj['mesh'] = meshObj;
 		allOperation.push( obj );
 	}
+
 	function eachObjSetps( e, type ) { //生成json 键的行为对象; e:mesh object  type 0: undo 1: redo
 		var obj = {};
 
@@ -1416,19 +1417,23 @@
 		}
 		render();
 	}
+
 	var selectedObjects = [];
+
 	function addSelectedObject( object ) {
 
 		selectedObjects = [];
 		selectedObjects.push( object );
 
 	}
-	function cleanSelectedObject(obj){
+
+	function cleanSelectedObject( obj ) {
 		if (obj) {
 			addSelectedObject( obj );
 			outlinePass.selectedObjects = selectedObjects;
 		}
 	}
+
 	// transform controller 用于pc端
 	var hiding;
 
@@ -1888,22 +1893,22 @@
 		switch (type) {
 			case 0:
 				transformControl.setMode( "scale" );
-				$(".control_type").text(textSC);
+				$( ".control_type" ).text( textSC );
 				transformControlModeType = 0;
 				break;
 			case 1:
 				transformControl.setMode( "translate" );
-				$(".control_type").text(textTR);
+				$( ".control_type" ).text( textTR );
 				transformControlModeType = 1;
 				break;
 			case 2:
 				transformControl.setMode( "rotate" );
-				$(".control_type").text(textRO);
+				$( ".control_type" ).text( textRO );
 				transformControlModeType = 2;
 				break;
 			default:
 				transformControl.setMode( "translate" );
-				$(".control_type").text(textTR);
+				$( ".control_type" ).text( textTR );
 				transformControlModeType = 0;
 		}
 	}
@@ -1961,34 +1966,62 @@
 			} else {
 				$( ".outside_color" ).removeClass( "white_color_circle" );
 			}
-			cleanSelectedObject(transformControl.object);
+			cleanSelectedObject( transformControl.object );
 			switch (transformControlModeType) {
 				case 0:
-					$(".control_type").text(textSC);
+					$( ".control_type" ).text( textSC );
 					break;
 				case 1:
-					$(".control_type").text(textTR);
+					$( ".control_type" ).text( textTR );
 					break;
 				case 2:
-					$(".control_type").text(textRO);
+					$( ".control_type" ).text( textRO );
 					break;
 			}
-			$(".control_type").show();
-		}
-		else{
-			$(".control_type").hide();
+			$( ".control_type" ).show();
+		} else {
+			$( ".control_type" ).hide();
 		}
 	}
 
-	function getDistance(p1, p2) {
+	function getDistance( p1, p2 ) {
 		var x = p2.pageX - p1.pageX,
 			y = p2.pageY - p1.pageY;
-		return Math.sqrt((x * x) + (y * y));
+		return Math.sqrt( ( x * x ) + ( y * y ) );
 	};
 
 	function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之间
 		if (transformControl.object) {
-			transformControl.object.scale.clampScalar(0.1, LIMIT_SIZE);
+			var getMode = transformControl.getMode();
+			var currentObj = transformControl.object;
+			switch (getMode) {
+				case "scale":
+					currentObj.scale.clampScalar( 0.1, LIMIT_SIZE );
+					break;
+				case "translate":
+					// console.log( transformControl.axis, currentObj.position );
+					if (transformControl.axis == "X") {
+						if (currentObj.position.x >= 0 && currentObj.position.x + ( ( SHAPE_SIZE * currentObj.scale.x ) / 2 ) >= ( WORK_SPACE_SIZE / 2 )) {
+							currentObj.position.x = ( WORK_SPACE_SIZE / 2 ) - ( ( SHAPE_SIZE * currentObj.scale.x ) / 2 );
+						} else if (currentObj.position.x < 0 && currentObj.position.x - ( ( SHAPE_SIZE * currentObj.scale.x ) / 2 ) <= - ( WORK_SPACE_SIZE / 2 )) {
+							currentObj.position.x = - ( WORK_SPACE_SIZE / 2 ) + ( ( SHAPE_SIZE * currentObj.scale.x ) / 2 );
+						}
+					} else if (transformControl.axis == "Z") {
+						if (currentObj.position.z >= 0 && currentObj.position.z + ( ( SHAPE_SIZE * currentObj.scale.z ) / 2 ) >= ( WORK_SPACE_SIZE / 2 )) {
+							currentObj.position.z = ( WORK_SPACE_SIZE / 2 ) - ( ( SHAPE_SIZE * currentObj.scale.z ) / 2 );
+						} else if (currentObj.position.z < 0 && currentObj.position.z - ( ( SHAPE_SIZE * currentObj.scale.z ) / 2 ) <= - ( WORK_SPACE_SIZE / 2 )) {
+							currentObj.position.z = - ( WORK_SPACE_SIZE / 2 ) + ( ( SHAPE_SIZE * currentObj.scale.z ) / 2 );
+						}
+					} else if (transformControl.axis == "Y") {
+						if (currentObj.position.y >= 0 && currentObj.position.y <= ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 )) {
+							currentObj.position.y =  ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
+						} else if (currentObj.position.y < 0) {
+							currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
+						}
+					}
+
+					break;
+			}
 		}
 	}
 </script>
@@ -2114,7 +2147,7 @@
 		$( ".save_stl" ).removeClass( "noActive_save" );//
 		transformControl.object = text;
 		focusedTransformObj = transformControl.object;
-		cleanSelectedObject(text);
+		cleanSelectedObject( text );
 		createObjForOperation( text, "add" );
 		eachObjSetps( text, 0 );
 		shapesController();
