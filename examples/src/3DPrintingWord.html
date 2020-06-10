@@ -23,8 +23,10 @@
 			</div>
 		</div>
 	</div>
+	<div id="childWrapper">
 	<div class="child_wrapper normal_wrapper"></div>
 	<div class="child_wrapper cartoon_wrapper"></div>
+	</div>
 	<div class="child_wrapper mymodule_wrapper">
 		<div class="shapes_options cartoon" onclick="showModule(2)">购买模型 <i
 			class="iconfont arrow arrow_right">&#xe6f8;</i></div>
@@ -394,7 +396,7 @@
 	var dragObj;
 	var selectedDragObj;
 	var maxW, maxH;
-	var shapesEventL = document.getElementById( "shapes" );
+	var shapesEventL = document.getElementById( "childWrapper" );
 	var dragedFlag = false;
 	shapesEventL.addEventListener( "touchstart", function ( e ) {
 		selectedDragObj = $( e.target );
@@ -656,8 +658,8 @@
 		outlinePass = new THREE.OutlinePass( new THREE.Vector2( window.innerWidth - 100, window.innerHeight ), scene, camera );
 		outlinePass.edgeStrength = 4;//强度 默认3
 		outlinePass.edgeThickness = 1;
-		outlinePass.visibleEdgeColor.set( '#8a8a89' );// 边缘可见部分发光颜色
-		outlinePass.hiddenEdgeColor.set( '#8a8a89' );//边缘遮挡部分发光颜色
+		outlinePass.visibleEdgeColor.set( '#00ff00' );// 边缘可见部分发光颜色
+		outlinePass.hiddenEdgeColor.set( '#00ff00' );//边缘遮挡部分发光颜色
 		outlinePass.edgeGlow= 1;//发光颜色虚边
 		// outlinePass.pulsePeriod= 3;//发光颜色闪烁频率
 
