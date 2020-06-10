@@ -453,8 +453,9 @@
 	var twoPointTouchFlag=false;
 	var pointOneFlag,pointTwoFlag, touchScale;
 	var camera, scene, renderer;
+	var directionalLight,spotLight;
 	var cameraZoom = 1;
-	var outlinePass, composer, effectFXAA;
+	var outlinePass, composer, effectFXAA,renderPass;
 	var plane;
 	var gridHelper, gradGroundMesh, gradGroundMesh1;
 	var mouse, raycaster, isShiftDown = false;
@@ -570,7 +571,7 @@
 
 	init();
 	render();
-
+	var LIMIT_SIZE = 4;
 	function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 		// renderer.setPixelRatio( window.devicePixelRatio );
@@ -589,7 +590,7 @@
 		scene = new THREE.Scene();
 		// scene.background = new THREE.Color( 0xf0f0f0 );
 		// scene.background = new THREE.Color( 0xf8f8f9 );
-		// scene.background = new THREE.Color( 0xfff );
+		// scene.background = new THREE.Color( 0x000000 );
 		// scene.userData.outlineEnabled = true;
 		// scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置辅助线 Coordinate system
 
@@ -612,7 +613,7 @@
 		var geometry = new THREE.PlaneBufferGeometry( 300, 300 );
 		geometry.rotateX( - Math.PI / 2 );
 
-		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color:0xFFFFFF, visible: true } ) );
+		plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color:0xe5e4df, visible: true } ) );
 		plane.name = "plane";
 		plane.receiveShadow = true;
 		plane.castShadow = true;
@@ -638,27 +639,27 @@
 		gradGroundMesh1.castShadow = true;
 		scene.add( gradGroundMesh1 );
 		//grid end
+
 		// lights
-
-		var ambientLight = new THREE.AmbientLight( 0x606060 ); //0x606060
+		var ambientLight = new THREE.AmbientLight( 0x606060 , 1.2); //0x606060
 		scene.add( ambientLight );
-
-		var directionalLight = new THREE.DirectionalLight( 0xffffff );
+		directionalLight = new THREE.DirectionalLight( 0xFFFFFF,.5);
 		directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
-		// dirLightHeper = new THREE.DirectionalLightHelper( directionalLight, 115 );//光源辅助线
+		// dirLightHeper = new THREE.DirectionalLightHelper( directionalLight, 215 );//光源辅助线
 		// scene.add( dirLightHeper );
 		scene.add( directionalLight );
 
 		// outline
 		composer = new THREE.EffectComposer( renderer );
-		var renderPass = new THREE.RenderPass( scene, camera );
+		renderPass = new THREE.RenderPass( scene, camera );
 		composer.addPass( renderPass );
 		outlinePass = new THREE.OutlinePass( new THREE.Vector2( window.innerWidth - 100, window.innerHeight ), scene, camera );
-		outlinePass.edgeStrength = 3;//强度 默认3
+		outlinePass.edgeStrength = 4;//强度 默认3
 		outlinePass.edgeThickness = 1;
-		outlinePass.visibleEdgeColor.set( '#1936f7' );// 边缘可见部分发光颜色
-		outlinePass.hiddenEdgeColor.set( '#1936f7' );//边缘遮挡部分发光颜色
-		outlinePass.edgeGlow= 5;//边缘遮挡部分发光颜色
+		outlinePass.visibleEdgeColor.set( '#8a8a89' );// 边缘可见部分发光颜色
+		outlinePass.hiddenEdgeColor.set( '#8a8a89' );//边缘遮挡部分发光颜色
+		outlinePass.edgeGlow= 1;//发光颜色虚边
+		// outlinePass.pulsePeriod= 3;//发光颜色闪烁频率
 
 		composer.addPass( outlinePass );
 		effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
@@ -717,12 +718,14 @@
 			}
 			// console.log('dragging-changed')
 			transformControlMove = true;
+
 		}, false );
 		transformControl.addEventListener( 'change', function () {
 			if (shootedFlag) {
 				shapesController( 0 );
 			}
 			showCurrentColor();
+			onAnimationStep();
 		}, false );
 		transformControl.addEventListener( 'mouseDown', function () {
 			transformControlMove = false;
@@ -747,10 +750,10 @@
 					var scaleXX = tcX * touchScale;
 					var scaleYY = tcY * touchScale;
 					var scaleZZ = tcZ * touchScale;
-					if(scaleXX >4){
-						scaleXX = 4;
-						scaleYY = 4;
-						scaleZZ = 4;
+					if(scaleXX >LIMIT_SIZE){
+						scaleXX = LIMIT_SIZE;
+						scaleYY = LIMIT_SIZE;
+						scaleZZ = LIMIT_SIZE;
 					}
 					transformControl.object.scale.set(scaleXX,scaleYY,scaleZZ)
 				}
@@ -1274,17 +1277,6 @@
 				}
 				allOperation.pop();
 			}
-			/*else if(allOperation.length == 1){
-				var obj = allOperation[0]; //一个元素说明是刚加入的状态,删除
-				redoOperation.push( obj ); //add the undo to redo
-				if(obj.mesh) {
-					eachObjSetps(obj,1);
-					scene.remove( obj.mesh );
-					objects.splice( objects.indexOf( obj.mesh ), 1 );
-					allOperation = [];
-					eachObjectInfo = {};
-				}
-			}*/
 
 		} else if (type === 1) {
 			if (redoOperation.length > 0) {
@@ -1991,6 +1983,12 @@
 			y = p2.pageY - p1.pageY;
 		return Math.sqrt((x * x) + (y * y));
 	};
+
+	function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之间
+		if (transformControl.object) {
+			transformControl.object.scale.clampScalar(0.1, LIMIT_SIZE);
+		}
+	}
 </script>
 <script>
 	// word
