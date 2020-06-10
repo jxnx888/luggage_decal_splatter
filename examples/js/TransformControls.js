@@ -986,7 +986,8 @@ THREE.TransformControlsGizmo = function () {
 		Z: [
 			[ new THREE.Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 0.8 ], [ Math.PI / 2, 0, 0 ]],
 			[ new THREE.Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0 ], [ 0.8, 1, 1 ]]
-		],
+		]
+		/*,
 		XY: [
 			[ new THREE.Mesh( scaleHandleGeometry, matYellowTransparent ), [ 0.85, 0.85, 0 ], null, [ 2, 2, 0.2 ]],
 			[ new THREE.Line( lineGeometry, matLineYellow ), [ 0.855, 0.98, 0 ], null, [ 0.125, 1, 1 ]],
@@ -1010,7 +1011,7 @@ THREE.TransformControlsGizmo = function () {
 		],
 		XYZZ: [
 			[ new THREE.Mesh( new THREE.BoxBufferGeometry( 0.125, 0.125, 0.125 ), matWhiteTransparent.clone() ), [ 0, 0, 1.1 ]],
-		]
+		]*/
 	};
 
 	var pickerScale = {
@@ -1022,7 +1023,7 @@ THREE.TransformControlsGizmo = function () {
 		],
 		Z: [
 			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0, 0.8, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ]]
-		],
+		]/*,
 		XY: [
 			[ new THREE.Mesh( scaleHandleGeometry, matInvisible ), [ 0.85, 0.85, 0 ], null, [ 3, 3, 0.2 ]],
 		],
@@ -1040,7 +1041,7 @@ THREE.TransformControlsGizmo = function () {
 		],
 		XYZZ: [
 			[ new THREE.Mesh( new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 ), matInvisible ), [ 0, 0, 1.1 ]],
-		]
+		]*/
 	};
 
 	var helperScale = {
