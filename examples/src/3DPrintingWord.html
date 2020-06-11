@@ -209,14 +209,31 @@
 		},
 		{ passive: false }
 	);
+	//input标签 软键盘打开和收起
 	$("#save_name").focus(function(){
-		$(".save_name_module").css({"top":"-.85rem"})
+		$(".save_name_module").css({"top":"-.85rem"});
 		$(".obj_control").hide();
 	});
 	$("#save_name").blur(function(){
-		$(".save_name_module").css({"top":"23%"})
+		$(".save_name_module").css({"top":"23%"});
 		$(".obj_control").show();
 	});
+	//以下代码针对安卓收起，关闭软键盘，是不会失去焦点的
+	var winHeight = $(window).height();   //获取当前页面高度
+	$(window).resize(function(){
+		var thisHeight=$(this).height();
+		if(winHeight - thisHeight >50){
+			//当软键盘弹出，在这里面操作
+			$(".save_name_module").css({"top":"-.85rem"});
+			$(".obj_control").hide();
+
+		}else{
+			//当软键盘收起，在此处操作
+			$(".save_name_module").css({"top":"23%"});
+			$(".obj_control").show();
+		}
+	});
+	//input标签 软键盘打开和收起 end
 	$( ".show_more" ).click( function () {
 		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		$( "#shapes" ).toggle();
