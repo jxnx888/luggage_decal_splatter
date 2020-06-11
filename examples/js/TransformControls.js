@@ -163,9 +163,14 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 	// Set current object
 	this.attach = function ( object ) {
-		if(object && object.name!='plane'){
+		if(object && object.name!='plane'){ //plane不可被选中移动
 			this.object = object;
 			this.visible = true;
+		}
+		else{
+			if(outlinePass){  //如果当前目标是plane，则取消选中轮廓效果
+				outlinePass.selectedObjects = []
+			}
 		}
 		return this;
 
