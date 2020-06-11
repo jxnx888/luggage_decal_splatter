@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>three.js webgl - interactive - voxel painter</title>
+	<title>MagicBox</title>
 	<meta charset="utf-8">
 	<meta name="viewport"
 		  content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=1, initial-scale=1">
@@ -142,8 +142,8 @@
 <div class="save_name_module">
 	<div class="save_name_title">命名</div>
 	<div class="save_name_tip">模型还没有名字，取个名字吧</div>
-	<input type="text" placeholder="请输入模型名称" maxlength="14" id="save_name" oninput="saveModuleName(this)"
-		   onblur="saveModuleName(this)">
+	<input type="text" placeholder="请输入模型名称" maxlength="14" id="save_name" oninput="saveModuleName(this,'oninput')"
+		   onblur="saveModuleName(this,'onblur')" onFocus="saveModuleName(this,'onFocus')" blur="saveModuleName(this,'blur')">
 	<div class="save_name_verify">请输入模型名称</div>
 	<div class="btn_wrapper clearfix">
 		<img src="../img/3dPrinting/btn_yes1.png" class="save_name_ok" onclick="exportMoudle(0)">
@@ -209,6 +209,14 @@
 		},
 		{ passive: false }
 	);
+	$("#save_name").focus(function(){
+		$(".save_name_module").css({"top":"-.85rem"})
+		$(".obj_control").hide();
+	});
+	$("#save_name").blur(function(){
+		$(".save_name_module").css({"top":"23%"})
+		$(".obj_control").show();
+	});
 	$( ".show_more" ).click( function () {
 		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		$( "#shapes" ).toggle();
@@ -336,7 +344,7 @@
 		}
 	}
 
-	function saveModuleName( obj ) {
+	function saveModuleName( obj,type ) {
 		var name = $( obj ).val();
 		if (name.length > 0) {
 			// $(".save_name_ok").removeClass("btn_disable");
