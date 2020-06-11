@@ -10,6 +10,7 @@
 	<link type="text/css" rel="stylesheet" href="../css/font/iconfont.css">
 	<link type="text/css" rel="stylesheet" href="../css/3dPrinting.css">
 </head>
+
 <body>
 <div class="main_wrapper">
 	<div id="container" class="clearfix"></div>
@@ -209,6 +210,7 @@
 		{ passive: false }
 	);
 	$( ".show_more" ).click( function () {
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		$( "#shapes" ).toggle();
 		$( "#shapes" ).toggleClass( "shapes_close" );
 		$( ".show_more" ).toggleClass( "show_more_close" );
@@ -381,8 +383,10 @@
 	function showChild( type ) {
 		if (type === 0) {
 			$( ".zoom_options" ).toggle();
+			$( ".color_wrapper" ).hide();
 		} else if (type === 1) {
 			$( ".color_wrapper" ).toggle();
+			$( ".zoom_options" ).hide();
 		}
 	}
 
@@ -399,8 +403,13 @@
 	var selectedDragObj;
 	var maxW, maxH;
 	var shapesEventL = document.getElementById( "childWrapper" );
+	var shapesMain = document.getElementById( "shapes" );
 	var dragedFlag = false;
+	shapesMain.addEventListener( "touchstart", function ( e ) {
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+	})
 	shapesEventL.addEventListener( "touchstart", function ( e ) {
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		selectedDragObj = $( e.target );
 		if (selectedDragObj.hasClass( "drag" )) {
 			if (selectedDragObj.hasClass( "name" )) {
@@ -480,6 +489,7 @@
 	var transformControl;
 	var WORK_SPACE_SIZE = 300;
 	var SHAPE_SIZE = 50;
+	var LIMIT_SIZE = 4;
 	var tcX, tcY, tcZ;
 	var transformControlModeType = 1;
 	var transformControlMove = false;
@@ -577,7 +587,6 @@
 
 	init();
 	render();
-	var LIMIT_SIZE = 4;
 
 	function init() {
 		renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
@@ -626,6 +635,7 @@
 		// grid
 
 		gridHelper = new THREE.GridHelper( 300, 30, 0x999999, 0xc999999 );
+		// gridHelper = new THREE.GridHelper( 300, 6, 0x999999, 0xc999999 );
 		gridHelper.name = 'GridHelper';
 		scene.add( gridHelper );
 
@@ -706,6 +716,17 @@
 					scene.add( gradGroundMesh1 );
 				}
 			}
+			else{
+				clearCache( gridHelper );
+				scene.remove( gridHelper );
+				clearCache( gradGroundMesh );
+				scene.remove( gradGroundMesh );
+				clearCache( gradGroundMesh1 );
+				scene.remove( gradGroundMesh1 );
+				scene.add( gridHelper );
+				scene.add( gradGroundMesh );
+				scene.add( gradGroundMesh1 );
+			}
 		} );
 		// controls.enabled = false;
 		//移动shape
@@ -737,6 +758,9 @@
 				allOperationAdd();
 			}
 			showCurrentColor();
+			if(focusedTransformObj){
+				transformControl.object = focusedTransformObj;
+			}
 		}, false );
 		//移动shape End
 
@@ -758,14 +782,17 @@
 						scaleZZ = LIMIT_SIZE;
 					}
 					transformControl.object.scale.set( scaleXX, scaleYY, scaleZZ );
+					checkAxis("scale",transformControl.object);
 				}
 			}
 			;
 		}, false );
 		container.addEventListener( 'mousedown', function ( e ) {
 			controlsMoved = false;
+			$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		}, false );
 		container.addEventListener( 'touchstart', function ( e ) {
+			$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 			controlsMoved = false;
 			if (e.touches.length >= 2) { //判断是否有两个点在屏幕上
 				controls.enabled = false;
@@ -1240,6 +1267,7 @@
 	}
 
 	function redoUndo( type ) { //type 0: undo 1: redo
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		var transformFlag = false;
 		var deleteFlag = false;
 		var addFlag = false;
@@ -1320,6 +1348,9 @@
 			}
 		}
 		transformControl.detach(); //隐藏控制控件
+		outlinePass.selectedObjects=[];
+		$(".color_control_wrapper").hide();
+		$(".active_control").removeClass("active_control");
 		render();
 		if (allOperation.length > 0) {
 			$( ".undo_control" ).removeClass( "noActive_control" );
@@ -1330,6 +1361,12 @@
 			$( ".redo_control" ).removeClass( "noActive_control" );
 		} else {
 			$( ".redo_control" ).addClass( "noActive_control" );
+		}
+		if (objects.length >1 ) {
+			$( ".save_stl" ).removeClass( "noActive_save" );
+		}
+		else{
+			$( ".save_stl" ).removeClass( "noActive_save" ).addClass( "noActive_save" );
 		}
 
 	}
@@ -1873,6 +1910,7 @@
 	}
 
 	function changeControls( type, obj ) {
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		if (transformControlModeType == 0 && type == 0) {
 			$( obj ).toggleClass( "active_control" );
 		} else if (transformControlModeType == 1 && type == 1) {
@@ -1887,6 +1925,7 @@
 		}
 		if (! $( obj ).hasClass( "active_control" )) {
 			transformControl.detach( transformControl.object ); //隐藏控制控件
+			outlinePass.selectedObjects = [];
 		} else {
 			transformControl.attach( transformControl.object ); //隐藏控制控件
 		}
@@ -1911,9 +1950,12 @@
 				$( ".control_type" ).text( textTR );
 				transformControlModeType = 0;
 		}
+		transformControl.object ? $(".color_control_wrapper").show():$(".color_control_wrapper").hide();
+
 	}
 
 	function deletedSelected() {
+		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
 		if (focusedTransformObj && transformControl.object) {
 			createObjForOperation( transformControl.object, 'delete' );
 			eachObjSetps( transformControl.object, 0 );
@@ -1924,6 +1966,13 @@
 		// $(".active_control").removeClass("active_control");
 		shapesController( 0 );
 		render();
+		if (objects.length >1 ) {
+			$( ".save_stl" ).removeClass( "noActive_save" );
+		}
+		else{
+			$( ".save_stl" ).removeClass( "noActive_save" ).addClass( "noActive_save" );
+		}
+
 	}
 
 	function shapesController( type ) {//type 0: normal
@@ -1997,6 +2046,7 @@
 			switch (getMode) {
 				case "scale":
 					currentObj.scale.clampScalar( 0.1, LIMIT_SIZE );
+					checkAxis("scale",currentObj);
 					break;
 				case "translate":
 					// console.log( transformControl.axis, currentObj.position );
@@ -2015,13 +2065,36 @@
 					} else if (transformControl.axis == "Y") {
 						if (currentObj.position.y >= 0 && currentObj.position.y <= ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 )) {
 							currentObj.position.y =  ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
-						} else if (currentObj.position.y < 0) {
+						} else if (currentObj.position.y< 0) {
 							currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
 						}
 					}
-
+					break;
+				case "rotate":
 					break;
 			}
+		}
+	}
+	function checkAxis(type, obj) { // 改变大小的时候，价差坐标，不能超出工作台
+		if(type==="scale") {
+			if (obj.position.x >= 0 && obj.position.x + ( ( SHAPE_SIZE * obj.scale.x ) / 2 ) >= ( WORK_SPACE_SIZE / 2 )) {
+				obj.position.x = ( WORK_SPACE_SIZE / 2 ) - ( ( SHAPE_SIZE * obj.scale.x ) / 2 );
+			} else if (obj.position.x < 0 && obj.position.x - ( ( SHAPE_SIZE * obj.scale.x ) / 2 ) <= - ( WORK_SPACE_SIZE / 2 )) {
+				obj.position.x = - ( WORK_SPACE_SIZE / 2 ) + ( ( SHAPE_SIZE * obj.scale.x ) / 2 );
+			}
+			if (obj.position.z >= 0 && obj.position.z + ( ( SHAPE_SIZE * obj.scale.z ) / 2 ) >= ( WORK_SPACE_SIZE / 2 )) {
+				obj.position.z = ( WORK_SPACE_SIZE / 2 ) - ( ( SHAPE_SIZE * obj.scale.z ) / 2 );
+			} else if (obj.position.z < 0 && obj.position.z - ( ( SHAPE_SIZE * obj.scale.z ) / 2 ) <= - ( WORK_SPACE_SIZE / 2 )) {
+				obj.position.z = - ( WORK_SPACE_SIZE / 2 ) + ( ( SHAPE_SIZE * obj.scale.z ) / 2 );
+			}
+			if (obj.position.y >= 0 && obj.position.y <= ( ( SHAPE_SIZE * obj.scale.y ) / 2 )) {
+				obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
+			} else if (obj.position.y < 0) {
+				obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
+			}
+		}
+		else if(type==="rotate"){
+
 		}
 	}
 </script>

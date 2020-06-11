@@ -160,16 +160,44 @@ THREE.TransformControls = function ( camera, domElement ) {
 		} );
 
 	};
-
-	// Set current object
+/*// Set current object
 	this.attach = function ( object ) {
-		if(object && object.name!='plane'){ //plane不可被选中移动
+		if(object){
 			this.object = object;
 			this.visible = true;
 		}
+		return this;
+	};*/
+	// Set current object
+	this.attach = function ( object ) {
+		var activelength = $(".active_control").length;
+		if(object && object.name!='plane'){ //plane不可被选中移动
+			this.object = object;
+			this.visible = true;
+			focusedTransformObj = object;
+			$(".color_control_wrapper").show();
+			$(".active_control").removeClass("active_control");
+			setTimeout(function () {
+				switch(scope.mode){
+					case "scale":
+						$('.size_control').addClass("active_control");
+						break;
+					case "translate":
+						$('.trans_control').addClass("active_control");
+						break;
+					case "rotate":
+						$('.rotate_control').addClass("active_control");
+						break;
+				}
+			},0)
+		}
 		else{
-			if(outlinePass){  //如果当前目标是plane，则取消选中轮廓效果
-				outlinePass.selectedObjects = []
+			if(focusedTransformObj && activelength>0){
+				this.object = focusedTransformObj;
+				this.visible = true;
+			}
+			else{
+				$(".color_control_wrapper").hide();
 			}
 		}
 		return this;
@@ -801,13 +829,13 @@ THREE.TransformControlsGizmo = function () {
 	matLineMagenta.color.set( 0xff00ff );
 
 	var matLineYellow = gizmoLineMaterial.clone();
-	matLineYellow.color.set( 0xffff00 );
+	matLineYellow.color.set( 0xFFDB03 );
 
 	var matLineGray = gizmoLineMaterial.clone();
 	matLineGray.color.set( 0x787878 );
 
 	var matLineYellowTransparent = matLineYellow.clone();
-	matLineYellowTransparent.opacity = 0.25;
+	matLineYellowTransparent.opacity = 0.5;
 
 	// reusable geometry
 
@@ -933,15 +961,15 @@ THREE.TransformControlsGizmo = function () {
 	var gizmoRotate = {
 		X: [
 			[ new THREE.Line( CircleGeometry( 1, 0.5 ), matLineRed ) ],
-			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 0 ), matRed ), [ 0, 0, 0.99 ], null, [ 1, 3, 1 ]],
+			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 2 ), matRed ), [ 0, 0, 0.99 ], null, [ 1, 3, 1 ]],
 		],
 		Y: [
 			[ new THREE.Line( CircleGeometry( 1, 0.5 ), matLineGreen ), null, [ 0, 0, - Math.PI / 2 ]],
-			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 0 ), matGreen ), [ 0, 0, 0.99 ], null, [ 3, 1, 1 ]],
+			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 2 ), matGreen ), [ 0, 0, 0.99 ], null, [ 3, 1, 1 ]],
 		],
 		Z: [
 			[ new THREE.Line( CircleGeometry( 1, 0.5 ), matLineBlue ), null, [ 0, Math.PI / 2, 0 ]],
-			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 0 ), matBlue ), [ 0.99, 0, 0 ], null, [ 1, 3, 1 ]],
+			[ new THREE.Mesh( new THREE.OctahedronBufferGeometry( 0.04, 2 ), matBlue ), [ 0.99, 0, 0 ], null, [ 1, 3, 1 ]],
 		],
 		E: [
 			[ new THREE.Line( CircleGeometry( 1.25, 1 ), matLineYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]],
