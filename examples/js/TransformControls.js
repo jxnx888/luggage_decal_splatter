@@ -839,9 +839,9 @@ THREE.TransformControlsGizmo = function () {
 
 	// reusable geometry
 
-	var arrowGeometry = new THREE.CylinderBufferGeometry( 0, 0.05, 0.2, 12, 1, false );
+	var arrowGeometry = new THREE.CylinderBufferGeometry( 0, 0.1, 0.2, 12, 1, false );
 
-	var scaleHandleGeometry = new THREE.BoxBufferGeometry( 0.125, 0.125, 0.125 );
+	var scaleHandleGeometry = new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 );
 
 	var lineGeometry = new THREE.BufferGeometry( );
 	lineGeometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0,	1, 0, 0 ], 3 ) );
@@ -1558,7 +1558,7 @@ THREE.TransformControlsGizmo = function () {
 				if ( handle.name === this.axis ) {
 
 					handle.material.opacity = 1.0;
-					handle.material.color.lerp( new THREE.Color( 1, 1, 1 ), 0.5 );
+					handle.material.color.lerp( new THREE.Color( 1, 1, 1 ), 0 );
 
 				} else if ( this.axis.split( '' ).some( function ( a ) {
 

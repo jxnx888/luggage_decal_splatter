@@ -204,7 +204,27 @@ THREE.OrientationControls = (function () {
             const id = side.toLowerCase();
 
             e.id = id;
-            e.textContent = side;
+            switch(side){
+				case 'Front':
+					e.textContent = "前";
+					break;
+				case 'Right':
+					e.textContent = "右";
+					break;
+				case 'Back':
+					e.textContent = "后";
+					break;
+				case 'Left':
+					e.textContent = "左";
+					break;
+				case 'Top':
+					e.textContent = "上";
+					break;
+				case 'Bottom':
+					e.textContent = "下";
+					break;
+			}
+            // e.textContent = side;
             e.className = id + ' face';
 
             e.style.width = size + unit;
@@ -225,6 +245,13 @@ THREE.OrientationControls = (function () {
         plane( 'Top' );
         plane( 'Bottom' );
 
+		/*plane( '前' );
+        plane( '右' );
+        plane( '后' );
+        plane( '左' );
+        plane( '上' );
+        plane( '下' );
+*/
 
 
         this.element = container;
@@ -244,7 +271,7 @@ THREE.OrientationControls = (function () {
 
 			container.style.perspective = ( ( options.perspective && camera.isPerspectiveCamera ) ?
 			( Math.pow( size * size + size * size, 0.5 ) / Math.tan( ( camera.fov / 2 ) * Math.PI / 180 ) ) : 0 ) + unit;
-				
+
 
 
         };

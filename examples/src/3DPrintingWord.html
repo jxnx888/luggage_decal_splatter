@@ -8,6 +8,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=11,chrome=1">
 	<link rel="stylesheet" type="text/css" href="../css/dialog.css"/>
 	<link type="text/css" rel="stylesheet" href="../css/font/iconfont.css">
+	<link type="text/css" rel="stylesheet" href="../css/common.css">
 	<link type="text/css" rel="stylesheet" href="../css/3dPrinting.css">
 </head>
 
@@ -29,18 +30,19 @@
 		<div class="child_wrapper normal_wrapper"></div>
 		<div class="child_wrapper cartoon_wrapper"></div>
 	</div>
-	<div class="child_wrapper mymodule_wrapper">
+	<!--<div class="child_wrapper mymodule_wrapper">
 		<div class="shapes_options cartoon" onclick="showModule(2)">购买模型 <i
 			class="iconfont arrow arrow_right">&#xe6f8;</i></div>
-	</div>
+	</div>-->
 	<div class="child_wrapper buymodule_wrapper">
 		<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>我的模型</div>
-		<div class="module shapes drag" onclick="">
+		<!--<div class="module shapes" onclick="">
 			<div class="drag sprint sprint_"></div>
 			<div class="name drag">模型一</div>
+		</div>-->
+		<div class="module shapes no_module">
+			<div class="name">无</div>
 		</div>
-		<div class="shapes_options cartoon" onclick="showModule(3)">购买模型 <i
-			class="iconfont arrow arrow_right">&#xe6f8;</i></div>
 	</div>
 </div>
 <div class="obj_control has_right_menu">
@@ -176,7 +178,7 @@
 		<div class="btn btn_cancle text_cancle" onclick="showInput(1)">取消</div>
 	</div>
 </div>
-<div class="control_type">移动中...</div>
+<div class="control_type">当前状态: 移动</div>
 <div id="loading_data"><img src="../img/loading.gif" alt=""></div>
 </body>
 

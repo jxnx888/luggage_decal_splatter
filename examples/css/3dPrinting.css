@@ -1,61 +1,5 @@
-@font-face {
-    font-family: 'HKFYTW7';
-    src: url("./font/other/huakangfangyuantiW7-GB.TTC") format("truetype");
-}
-@font-face {
-    font-family: 'webfont1';/*阿里巴巴-普惠体-Light*/
-    font-display: swap;
-    src: url('//at.alicdn.com/t/webfont_hwgsx4jws3b.eot'); /* IE9*/
-    src: url('//at.alicdn.com/t/webfont_hwgsx4jws3b.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.woff2') format('woff2'),
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.woff') format('woff'), /* chrome、firefox */
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.svg#AlibabaPuHuiTiL') format('svg'); /* iOS 4.1- */
-}
-@font-face {
-    font-family: 'webfont2';/*阿里巴巴-普惠体-Heavy*/
-    font-display: swap;
-    src: url('//at.alicdn.com/t/webfont_hwgsx4jws3b.eot'); /* IE9*/
-    src: url('//at.alicdn.com/t/webfont_hwgsx4jws3b.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.woff2') format('woff2'),
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.woff') format('woff'), /* chrome、firefox */
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/webfont_hwgsx4jws3b.svg#AlibabaPuHuiTiL') format('svg'); /* iOS 4.1- */
-}
-@font-face {
-    font-family: 'webfont3'; /*阿里巴巴-普惠体-Medium*/
-    font-display: swap;
-    src: url('//at.alicdn.com/t/webfont_2zzdijq8wh7.eot'); /* IE9*/
-    src: url('//at.alicdn.com/t/webfont_2zzdijq8wh7.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('//at.alicdn.com/t/webfont_2zzdijq8wh7.woff2') format('woff2'),
-    url('//at.alicdn.com/t/webfont_2zzdijq8wh7.woff') format('woff'), /* chrome、firefox */
-    url('//at.alicdn.com/t/webfont_2zzdijq8wh7.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/webfont_2zzdijq8wh7.svg#AlibabaPuHuiTiM') format('svg'); /* iOS 4.1- */
-}
-@font-face {
-    font-family: 'webfont4';/*阿里巴巴-普惠体-Bold*/
-    font-display: swap;
-    src: url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.eot'); /* IE9*/
-    src: url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.woff2') format('woff2'),
-    url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.woff') format('woff'), /* chrome、firefox */
-    url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/webfont_b8bi0f6tc6p.svg#Alibaba-PuHuiTi-Bold') format('svg'); /* iOS 4.1- */
-}
-@font-face {
-    font-family: 'webfont5';/*阿里巴巴-普惠体-Regular*/
-    font-display: swap;
-    src: url('//at.alicdn.com/t/webfont_vuov7tvopdn.eot'); /* IE9*/
-    src: url('//at.alicdn.com/t/webfont_vuov7tvopdn.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('//at.alicdn.com/t/webfont_vuov7tvopdn.woff2') format('woff2'),
-    url('//at.alicdn.com/t/webfont_vuov7tvopdn.woff') format('woff'), /* chrome、firefox */
-    url('//at.alicdn.com/t/webfont_vuov7tvopdn.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/webfont_vuov7tvopdn.svg#Alibaba-PuHuiTi-Regular') format('svg'); /* iOS 4.1- */
-}
 body {
     margin: 0;
-    background-color: #000;
-    color: #fff;
     font-family: Monospace;
     font-size: 13px;
     line-height: 24px;
@@ -63,7 +7,6 @@ body {
 }
 
 a {
-    color: #ff0;
     text-decoration: none;
 }
 
@@ -139,42 +82,6 @@ a, button, input, select {
     color: #777777;
     font-size: 12px;
 }
-@charset "utf-8";html{background-color:#fff;color:#000;font-size:16px}
-body,ul,ol,dl,dd,h1,h2,h3,h4,h5,h6,figure,form,fieldset,legend,input,textarea,button,p,blockquote,th,td,pre,xmp{margin:0;padding:0}
-body,input,textarea,button,select,pre,xmp,tt,code,kbd,samp{line-height:1.5;font-family:tahoma,arial,"Hiragino Sans GB",simsun,sans-serif}
-h1,h2,h3,h4,h5,h6,small,big,input,textarea,button,select{font-size:100%}
-h1,h2,h3,h4,h5,h6{font-family:tahoma,arial,"Hiragino Sans GB","微软雅黑",simsun,sans-serif}
-h1,h2,h3,h4,h5,h6,b,strong{font-weight:normal}
-address,cite,dfn,em,i,optgroup,var{font-style:normal}
-table{border-collapse:collapse;border-spacing:0;text-align:left}
-caption,th{text-align:inherit}
-ul,ol,menu{list-style:none}
-fieldset,img{border:0}
-img,object,input,textarea,button,select{vertical-align:middle}
-article,aside,footer,header,section,nav,figure,figcaption,hgroup,details,menu{display:block}
-audio,canvas,video{display:inline-block;*display:inline;*zoom:1}
-blockquote:before,blockquote:after,q:before,q:after{content:"\0020"}
-textarea{overflow:auto;resize:vertical}
-input,textarea,button,select,a{outline:0 none;border: none;}
-button::-moz-focus-inner,input::-moz-focus-inner{padding:0;border:0}
-mark{background-color:transparent}
-a,ins,s,u,del{text-decoration:none}
-sup,sub{vertical-align:baseline}
-html {overflow-x: hidden;height: 100%;font-size: 50px;-webkit-tap-highlight-color: transparent;}
-/*body {font-family: Arial, "Microsoft Yahei", "Helvetica Neue", Helvetica, sans-serif;color: #333;font-size: .28em;line-height: 1;-webkit-text-size-adjust: none;}*/
-body {font-family: Arial, "Microsoft Yahei", "Helvetica Neue", Helvetica, sans-serif;color: #333;font-size: 16px;line-height: 1;-webkit-text-size-adjust: none;}
-hr {height: .02rem;margin: .1rem 0;border: medium none;border-top: .02rem solid #cacaca;}
-a {color: #25a4bb;text-decoration: none;}
-html{font-size:625%}
-body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
-
-* { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;font-family:Microsoft YaHei; }
-.clearfix:after{content:'.';display:block;clear:both;visibility:hidden;line-height:0;height:0;font-size:0}
-
-*, input{font-family: "HKFYTW7"}
-#loading_data {display:none;position: fixed;top: 0;right: 0;left: 0;bottom:0;background:#FFF;opacity: .7;z-index: 999;}
-#loading_data img{position: absolute;top: 48%;left: 48%;}
-
 /*
 #container {
     background: #79B1EA; !* Old browsers *!
@@ -199,7 +106,11 @@ body {  font-family: Helvetica,Verdana,sans-serif,'Microsoft Yahei'}
 .child_wrapper{display: none;height:100%;max-width: 1rem;overflow: auto;background: #F0F7FF;position: fixed;top:0;right: 0;z-index: 3;}
 .child_title { font-size: .14rem; position: fixed; top: 0; right: 0; z-index: 2; width: 1rem; background: #F0F7FF;text-align: left; line-height: 0.3rem;  }
 .active_shape{background: rgba(118,174,234,.3)!important;}
-.asdf{color:#ffff00 }
+.go_shopping { position: fixed; bottom: 0; right: 0; width: 1rem; text-align: center; background:#F0F7FF;color:#FFE548;
+    border-top: 1px solid #FFE548;}
+.img_wrapper { margin: auto; width: 100%; text-align: center; }
+.module.shapes.no_module .name { height: 100%; width: 1rem; margin: auto; color: #333; line-height: 2rem; z-index: 3; }
+.cartoon_wrapper .module:last-of-type{ margin-bottom: .25rem;}
 /*.
 active_shape .color_change{display: block;line-height: .55rem;}
 .active_shape .color_change .color_circle { display: inline-block; margin: 0 .08rem; }
@@ -250,11 +161,11 @@ active_shape .color_change{display: block;line-height: .55rem;}
 
 .module_btns{position: fixed;top: .1rem; left: .1rem;}
 .btn_main{float: left}
-.btn_main .btn_child{width:.44rem;height: .44rem;background-image: url("../img/3dPrinting/btn_bg.png");background-repeat: no-repeat;background-size: contain;position: relative;}
+.btn_main .btn_child{width:.44rem;height: .44rem;background-image: url("../img/3dPrinting/btn_bg_blue.png");background-repeat: no-repeat;background-size: contain;position: relative;}
 .btn_main .btn_child .iconfont { font-size: .28rem; line-height: .4rem; color: #fff;left: 0;display: block; text-align: center; }
 .btn_main.save_module{margin-left: .1rem;}
 .btn_main.save_module .btn_child .iconfont { font-size: .25rem; line-height: .41rem;}
-.module_btn_name{font-size: .12rem; color: #FF7B11; text-align: center;}
+.module_btn_name{font-size: .12rem; color: #FFFFFF; text-align: center;}
 .save_module{left:.5rem}
 .save_module.noActive_save {opacity: .3}
 .save_name_module_bg {display:none;position: fixed;top: 0;right: 0;left: 0;bottom:0;background: #000; opacity: .3;z-index: 2;}
@@ -315,6 +226,17 @@ div#shapes.closeShapes{display: none;}
 .sprint_triprism{background-image: url("../img/3dPrinting/sprint_triprism.png");}
 .sprint_cone{background-image: url("../img/3dPrinting/sprint_cone.png");}
 .sprint_text{background-image: url("../img/3dPrinting/sprint_text.png");}
+.sprint_standing{background-image: url("../img/3dPrinting/sprint_standing.png");}
+.sprint_sitting{background-image: url("../img/3dPrinting/sprint_sitting.png");}
+.sprint_climbing{background-image: url("../img/3dPrinting/sprint_climbing.png");}
+.sprint_lying{background-image: url("../img/3dPrinting/sprint_lying.png");}
+.sprint_tyrannosaurusRex{background-image: url("../img/3dPrinting/sprint_tyrannosaurusRex.png");}
+.sprint_totodile{background-image: url("../img/3dPrinting/sprint_totodile.png");}
+.sprint_squirtle{background-image: url("../img/3dPrinting/sprint_squirtle.png");}
+.sprint_pikachu{background-image: url("../img/3dPrinting/sprint_pikachu.png");}
+.sprint_chikorita{background-image: url("../img/3dPrinting/sprint_chikorita.png");}
+.sprint_charmander{background-image: url("../img/3dPrinting/sprint_charmander.png");}
+.sprint_bulbasaur{background-image: url("../img/3dPrinting/sprint_bulbasaur.png");}
 .sprintY{background-position: 0 0;}
 
 /*文字输入*/
@@ -326,6 +248,7 @@ input#textContent { width: 90%; border: 1px solid #999; border-radius: 4px; marg
 .btn_disable{background:#eee;pointer-events: none;}
 
 .orientationControls { right: 1.3rem!important; left: auto!important; }
+.orientationControls .ring{display:none;}
 .orientationControls.right_menu_hide { right: 0.3rem!important; left: auto!important; }
 #front {background: #ff972d;}
 #right {background: #ffde41;}

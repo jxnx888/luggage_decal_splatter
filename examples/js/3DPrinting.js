@@ -3,13 +3,12 @@ var selectedDragObj;
 var maxW, maxH;
 var shapesEventL = document.getElementById( "childWrapper" );
 var shapesMain = document.getElementById( "shapes" );
+var movedDir; //拖拽距离
 var dragedFlag = false;
-
 var listShapes = [];
 var listLDraw = [];
 var listSTL = [];
 var saveFlag = false;
-
 
 // var mobile = /Android|webOS|iPhone|iPad|BlackBerry/i.test( navigator.userAgent );
 var mobile = true;
@@ -25,13 +24,11 @@ var gridHelper, gradGroundMesh, gradGroundMesh1;
 var mouse, raycaster, isShiftDown = false;
 var controls;
 var mouseHelper, mouseHelperMaterial;
-var cubeGeo, cubeMaterial;
 var controlsMoved = false;
 var objects = [];
 var currentObj; //当前形状
 var currentObjMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
 var currentShapeType;
-var currentColor;
 var currentColorFlag = 0;
 var currentObjMesh; //当前obj mesh
 var shapeHelperObjects = [];
@@ -46,9 +43,9 @@ var transformControlModeType = 1;
 var transformControlMove = false;
 var transformDragFlag = true;
 var focusedTransformObj;
-var textTR = '移动中..';
-var textSC = '改变大小中...';
-var textRO = '旋转中...';
+var textTR = '当前状态: 移动';
+var textSC = '当前状态: 改变大小';
+var textRO = '当前状态: 旋转';
 var intersectsSelect = [];
 var intersection = {
 	intersects: false,
@@ -59,74 +56,13 @@ var allOperation = [];//all the operated operation(undo)
 var redoOperation = [];//all the redo operation
 var eachObjectInfo = {};//每一个对象的每一个步骤；
 var eachRedoObjectInfo = {};//每一个对象的每一个步骤；
-var undoArr = [];
-var redoArr = [];
 var shootedFlag = false;
 
 var orientationControls = new THREE.OrientationControls( 50 ); //右上角三视图
-var params = {  //params for GUI
-	SUBMIT: function () {
-		if (objects.length > 1) {
-			exportASCII();
-		}
-	},
-	SUBMITGLTFE: function () {
-		if (objects.length > 1) {
-			exportGLTF();
-		}
-	},
-	Geometry: 0,//选中的形状
-	Cube: function () {
-		changeShapes( 0 );
-	},
-	Cylinder: function () {
-		changeShapes( 1 );
-	},
-	Cone: function () {
-		changeShapes( 2 );
-	},
-	Ball: function () {
-		changeShapes( 3 );
-	},
-	Doughnut: function () {
-		changeShapes( 4 );
-	},
-	Standing: function () {
-		loadSTL( 0 );
-	},
-	Climbing: function () {
-		loadSTL( 1 );
-	},
-	Lying: function () {
-		loadSTL( 2 );
-	},
-	Sitting: function () {
-		loadSTL( 3 );
-	},
-	TyrannosaurusRex: function () {
-		loadSTL( 4 );
-	},
-
-	color: 0,
-	selectShape: false,
-	changeCurrentSize: false,
-	RoteShape: false,
-	removeLast: function () {
-		redoUndo();
-	},
-	clear: function () {
-		removeAllShapes();
-	},
-};
-var colorsObj = {
-	White: 0,
-	Yellow: 1
-};
 
 //LDraw
 var lDrawModul;
 var lDrawModulGUI;
-var progressBarDiv;
 var lDrawGuiData = {
 	smoothNormals: true,
 	separateObjects: true,
@@ -151,7 +87,8 @@ $(function(){
 			} else {
 				dragObj = selectedDragObj.clone();
 			}
-
+			$( ".active_shape" ).removeClass( "active_shape" );
+			$( selectedDragObj).parents(".module").addClass( "active_shape" );
 			dragObj.addClass( "startDrag" );
 			maxW = document.body.clientWidth - selectedDragObj[0].offsetWidth;
 			maxH = document.body.clientHeight - selectedDragObj[0].offsetHeight;
@@ -164,7 +101,8 @@ $(function(){
 		var ev = e || window.event;
 		var touch = ev.targetTouches[0];
 		var windowWidth = window.innerWidth;
-		var movedDir = windowWidth - touch.clientX;
+		movedDir = windowWidth - touch.clientX;
+
 		if (dragObj && movedDir > 100) {
 			$( "body" ).append( dragObj );
 			var oLeft = touch.clientX - 50;
@@ -179,17 +117,29 @@ $(function(){
 			} else if (oTop >= maxH) {
 				oTop = maxH;
 			}
-			dragObj[0].style.left = oLeft + 'px';
+			dragObj[0].style.left = oLeft+25 + 'px';
 			dragObj[0].style.top = oTop + 'px';
 		}
 	}, false );
 	shapesEventL.addEventListener( "touchend", function ( e ) {
-		if (dragObj && dragedFlag) {
-			$( selectedDragObj ).parents( ".module" ).trigger( "click" );
+		if (dragObj && dragedFlag && movedDir>100) {
+			// $( selectedDragObj ).parents( ".module" ).trigger( "click" );
+			var code = Number($( selectedDragObj ).parents( ".module" ).find( ".this_code" ).val());
+			var type = Number($( selectedDragObj ).parents( ".module" ).find( ".this_module" ).val());
+			if(type == 0){
+				changeShapes(code);
+			}
+			else if(type == 1){
+				loadSTL(11);
+			}
 			$( dragObj ).remove();
 			onDocumentMouseDown( e );
 		}
+		else{
+			$( dragObj ).remove();
+		}
 		dragedFlag = false;
+		$( ".active_shape" ).removeClass( "active_shape" );
 	}, false );
 	window.addEventListener( "touchmove", function ( event ) {
 			if (event.scale !== 1) {
@@ -275,12 +225,16 @@ function listModule( type ) {
 			listShapes = res.data.shapes;
 			for (var i in listShapes) {
 				if (listShapes[i].module == "shape") {
-					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="changeShapes(' + listShapes[i].code + ',this)">';
+					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" >';
+					shapesHtml +='<input class="this_module" type="hidden" value="0">'
 				} else if (listShapes[i].module == "stl") {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="loadSTL(11,this)">';
+					shapesHtml +='<input class="this_module" type="hidden" value="1">'
 				} else if (listShapes[i].module == "text") {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="showInput(0,this)">';
 				}
+				shapesHtml +='<input class="this_code" type="hidden" value="' + listShapes[i].code + '">'
+
 				// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
 				shapesHtml += '<div class="drag sprint sprint_' + listShapes[i].title + '"></div>';
 				shapesHtml += '<div class="name drag">' + listShapes[i].name + '</div>';
@@ -303,7 +257,10 @@ function listModule( type ) {
 			listSTL = res.data.stl;
 			for (var i in listSTL) {
 				cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '" onclick="loadSTL(' + cartoonIndex + ',this)">';
-				cartoonHtml += '<img src="../img/3dPrinting/doughnut.png" alt="Doughnut" class="drag">';
+				cartoonHtml +='<input class="this_code" type="hidden" value="' + cartoonIndex + '">';
+				cartoonHtml +='<input class="this_module" type="hidden" value="1">'
+				// cartoonHtml += '<div class="drag sprint sprint_' + listSTL[i].title + ' sprintY"></div>';
+				cartoonHtml += '<div class="img_wrapper"><img src="../img/3dPrinting/sprint_' + listSTL[i].title + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
 				cartoonHtml += '<div class="name drag">' + listSTL[i].name + '</div>';
 				cartoonHtml += '<div class="color_change">';
 				cartoonHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
@@ -312,6 +269,7 @@ function listModule( type ) {
 				cartoonHtml += '</div>';
 				cartoonIndex ++;
 			}
+			cartoonHtml += '<a href=""><div class="go_shopping">购买模型</div></a>';
 			$( ".cartoon_wrapper" ).html( cartoonHtml );
 
 		},
@@ -430,7 +388,7 @@ function init() {
 	scene = new THREE.Scene();
 	// scene.background = new THREE.Color( 0xf0f0f0 );
 	// scene.background = new THREE.Color( 0xf8f8f9 );
-	// scene.background = new THREE.Color( 0x000000 );
+	// scene.background = new THREE.Color( 0xffffff );
 	// scene.userData.outlineEnabled = true;
 	// scene.add( new THREE.AxesHelper( 50 ) ); //坐标位置辅助线 Coordinate system
 
@@ -478,9 +436,9 @@ function init() {
 	//grid end
 
 	// lights
-	var ambientLight = new THREE.AmbientLight( 0x606060, 1.2 ); //0x606060
+	var ambientLight = new THREE.AmbientLight( 0x606060, 1); //0x606060
 	scene.add( ambientLight );
-	directionalLight = new THREE.DirectionalLight( 0xFFFFFF, .5 );
+	directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.3 );
 	directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
 	// dirLightHeper = new THREE.DirectionalLightHelper( directionalLight, 215 );//光源辅助线
 	// scene.add( dirLightHeper );
@@ -736,6 +694,13 @@ function onDocumentMouseMove( event ) {
 }
 
 function onDocumentMouseDown( event ) {
+	/*var intersects = raycaster.intersectObjects( objects );
+	if (intersects.length > 0) {
+		shootedFlag = false;
+	}
+	else{
+		shootedFlag = true;
+	}*/
 	if (! shootedFlag) {
 		event.preventDefault();
 		var controlBoardWidth = $( "#shapes" ).hasClass( "shapes_close" ); //left decal side width
@@ -808,7 +773,6 @@ function onDocumentMouseDown( event ) {
 				}*/
 			}
 			shootedFlag = true;
-			// OrbitControlsFn();
 			render();
 
 		}
@@ -1295,30 +1259,6 @@ function cleanSelectedObject( obj ) {
 	}
 }
 
-// transform controller 用于pc端
-var hiding;
-
-function delayHideTransform() {
-	cancelHideTransform();
-	hideTransform();
-}
-
-function hideTransform() {
-	hiding = setTimeout( function () {
-		transformControl.detach( transformControl.object );
-	}, 2500 );
-}
-
-function cancelHideTransform() {
-	if (hiding) clearTimeout( hiding );
-}
-
-function updateShapePosition() {
-	console.log( "updateShapePosition" );
-}
-
-// transform controller 用于pc端
-
 // 导出相关
 function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 	if (objects.length > 1) {
@@ -1392,9 +1332,9 @@ function saveString( text, filename ) {
 
 }
 
-
 // 导出相关 end
 //camera 方向
+
 function showCameraSides() {
 	$( ".sides_wrapper" ).toggle();
 }
@@ -1722,16 +1662,6 @@ function enabledLego( type ) { //type 0:enable 1:disable
 }
 
 //Lego end
-function OrbitControlsFn( type ) { //type=controls.enabled  0 true 1 false
-
-	if (type === 0) {
-		controls.enabled = true;
-	} else {
-		controls.enabled = false;
-	}
-	// 旋转控制end
-	// }
-}
 
 function changeControls( type, obj ) {
 	$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
@@ -1924,7 +1854,8 @@ function checkAxis(type, obj) { // 改变大小的时候，价差坐标，不能
 
 //main end
 
-// word
+
+// Text object
 
 var textInput;
 var loader = new THREE.FontLoader();
@@ -2052,3 +1983,4 @@ function createText( word ) {
 	transformControl.attach( focusedTransformObj );
 	resetSomeThing();
 }
+// Text object end
