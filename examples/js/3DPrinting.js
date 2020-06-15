@@ -92,8 +92,6 @@ $(function(){
 			dragObj.addClass( "startDrag" );
 			maxW = document.body.clientWidth - selectedDragObj[0].offsetWidth;
 			maxH = document.body.clientHeight - selectedDragObj[0].offsetHeight;
-			var ev = e || window.event;
-			var touch = ev.targetTouches[0];
 		}
 	}, false );
 	shapesEventL.addEventListener( "touchmove", function ( e ) {
@@ -1315,14 +1313,16 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 }
 
 function save( blob, filename ) {
-	var link = document.createElement( 'a' );
+	/*var link = document.createElement( 'a' );
 	link.style.display = 'none';
 	link.className = 'saveFile';
 	document.body.appendChild( link );
 	link.href = URL.createObjectURL( blob );
 	link.download = filename;
 	link.click();
-	$( ".saveFile" ).remove();
+	$( ".saveFile" ).remove();*/
+
+	document.location = "js://webview?url=" + URL.createObjectURL( blob );
 
 }
 
