@@ -128,10 +128,15 @@ $(function(){
 				changeShapes(code);
 			}
 			else if(type == 1){
-				loadSTL(11);
+				loadSTL(code);
+			}
+			else if(type ==2){
+				showInput(0)
 			}
 			$( dragObj ).remove();
-			onDocumentMouseDown( e );
+			setTimeout(function () {
+				onDocumentMouseDown( e );
+			},100)
 		}
 		else{
 			$( dragObj ).remove();
@@ -226,13 +231,14 @@ function listModule( type ) {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" >';
 					shapesHtml +='<input class="this_module" type="hidden" value="0">'
 				} else if (listShapes[i].module == "stl") {
-					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="loadSTL(11,this)">';
+					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="loadSTL(11,this)"
 					shapesHtml +='<input class="this_module" type="hidden" value="1">'
 				} else if (listShapes[i].module == "text") {
-					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" onclick="showInput(0,this)">';
+					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="showInput(0,this)"
+					shapesHtml +='<input class="this_module" type="hidden" value="2">'
+
 				}
 				shapesHtml +='<input class="this_code" type="hidden" value="' + listShapes[i].code + '">'
-
 				// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
 				shapesHtml += '<div class="drag sprint sprint_' + listShapes[i].title + '"></div>';
 				shapesHtml += '<div class="name drag">' + listShapes[i].name + '</div>';
@@ -254,11 +260,11 @@ function listModule( type ) {
 			var cartoonIndex = 0;
 			listSTL = res.data.stl;
 			for (var i in listSTL) {
-				cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '" onclick="loadSTL(' + cartoonIndex + ',this)">';
+				cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '">'; // onclick="loadSTL(' + cartoonIndex + ',this)"
 				cartoonHtml +='<input class="this_code" type="hidden" value="' + cartoonIndex + '">';
 				cartoonHtml +='<input class="this_module" type="hidden" value="1">'
-				// cartoonHtml += '<div class="drag sprint sprint_' + listSTL[i].title + ' sprintY"></div>';
-				cartoonHtml += '<div class="img_wrapper"><img src="../img/3dPrinting/sprint_' + listSTL[i].title + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
+				cartoonHtml += '<div class="drag sprint sprint_' + listSTL[i].title + ' sprintY"></div>';
+				// cartoonHtml += '<div class="img_wrapper"><img src="../img/3dPrinting/sprint_' + listSTL[i].title + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
 				cartoonHtml += '<div class="name drag">' + listSTL[i].name + '</div>';
 				cartoonHtml += '<div class="color_change">';
 				cartoonHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
@@ -594,7 +600,9 @@ function init() {
 			focusedTransformObj = transformControl.object;
 		}
 		if (currentModule == 0 && ! controlsMoved) {
-			onDocumentMouseDown( e );
+			setTimeout(function () {
+				onDocumentMouseDown( e );
+			},100)
 		}
 	}, false );
 	container.addEventListener( 'touchend', function ( e ) {
@@ -602,7 +610,9 @@ function init() {
 			focusedTransformObj = transformControl.object;
 		}
 		if (currentModule == 0 && ! controlsMoved) {
-			onDocumentMouseDown( e );
+			setTimeout(function () {
+				onDocumentMouseDown( e );
+			},100)
 		}
 
 	}, false );
@@ -775,7 +785,7 @@ function onDocumentMouseDown( event ) {
 
 		}
 	} else {
-		checkIntersection();
+		checkIntersection(event);
 	}
 }
 
@@ -1177,7 +1187,7 @@ function redoProcess( operator, obj ) {
 	operator.mesh.material.color.set( operator.color );
 }
 
-function checkIntersection() {
+function checkIntersection(event) {
 	var x, y;
 	if (event.changedTouches) {
 		x = event.changedTouches[0].pageX;
@@ -1322,8 +1332,8 @@ function save( blob, filename ) {
 	link.click();
 	$( ".saveFile" ).remove();*/
 
-	document.location = "js://webview?url=" + URL.createObjectURL( blob );
-
+	document.location = "js://webview?url=" + URL.createObjectURL( blob )+"&fileName="+filename;
+	$( ".save_name_module,.save_name_module_bg" ).hide();
 }
 
 function saveString( text, filename ) {
@@ -1415,7 +1425,7 @@ function resetZoom() {
 	camera.updateProjectionMatrix();
 }
 
-function loadSTL( thisSTL, obj ) {
+async function loadSTL( thisSTL, obj ) {
 	showInput( 1 );
 	$( ".active_shape" ).removeClass( "active_shape" );
 	$( obj ).addClass( "active_shape" );
@@ -1446,41 +1456,47 @@ function loadSTL( thisSTL, obj ) {
 			break;
 		case 4:
 			file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
-			currentShapeType = 8;
+			currentShapeType = 9;
 			break;
 		case 5:
 			file = '../models/stl/ascii/3dPrinting/pokemon/bulbasaur_starter_1gen_flowalistik.stl';
-			currentShapeType = 9;
+			currentShapeType = 10;
 			break;
 		case 6:
 			file = '../models/stl/ascii/3dPrinting/pokemon/charmander_starter_1gen_flowalistik.stl';
-			currentShapeType = 9;
+			currentShapeType = 11;
 			break;
 		case 7:
 			file = '../models/stl/ascii/3dPrinting/pokemon/chikorita_starter_2gen_flowalistik.stl';
-			currentShapeType = 10;
+			currentShapeType = 12;
 			break;
 		case 8:
 			file = '../models/stl/ascii/3dPrinting/pokemon/pikachu_1gen_flowalistik.stl';
-			currentShapeType = 11;
+			currentShapeType = 13;
 			break;
 		case 9:
 			file = '../models/stl/ascii/3dPrinting/pokemon/squirtle_starter_1gen_flowalistik.stl';
-			currentShapeType = 12;
+			currentShapeType = 18;
 			break;
 		case 10:
 			file = '../models/stl/ascii/3dPrinting/pokemon/totodile_starter_2gen_flowalistik.stl';
-			currentShapeType = 13;
+			currentShapeType = 19;
 			break;
 		case 11:
 			file = '../models/stl/ascii/3dPrinting/five-point-star.stl';
-			currentShapeType = 18;
+			currentShapeType = 20;
 			break;
 		default:
 			file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
 	}
 	var loader = new THREE.STLLoader();
-	loader.load( file, function ( geometry ) {
+	/*await Promise.all( [
+		loader.loadAsync( file, function ( geometry ) {
+			currentObj = geometry;
+			$( "#loading_data" ).hide();
+		} )
+	] );*/
+	await loader.load( file, function ( geometry ) {
 		currentObj = geometry;
 		$( "#loading_data" ).hide();
 	} );
@@ -1868,7 +1884,7 @@ function showInput( type, obj ) {
 		currentObj = undefined;
 		$( ".text_window" ).show();
 		$( ".active_shape" ).removeClass( "active_shape" );
-		$( obj ).addClass( "active_shape" );
+		// $( obj ).addClass( "active_shape" );
 	} else {
 		$( ".text_window" ).hide();
 		$( ".text_ok" ).addClass( "btn_disable" );

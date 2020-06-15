@@ -237,6 +237,7 @@ div#shapes.closeShapes{display: none;}
 .sprint_chikorita{background-image: url("../img/3dPrinting/sprint_chikorita.png");}
 .sprint_charmander{background-image: url("../img/3dPrinting/sprint_charmander.png");}
 .sprint_bulbasaur{background-image: url("../img/3dPrinting/sprint_bulbasaur.png");}
+.sprint_fivepointstar{background-image: url("../img/3dPrinting/sprint_fivepointstar.png");background-position: 0 0;}
 .sprintY{background-position: 0 0;}
 
 /*文字输入*/
