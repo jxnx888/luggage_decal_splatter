@@ -26,7 +26,7 @@ body{background:#4E92EF; font-size:.17rem;color:#FFFFFF}
 .delete {background: #FF636AFF;height: .75rem;text-align: center;line-height: .75rem;    border-radius: 0 5px 5px 0;}
 .moving_wrapper { position: absolute; top: 0; left: 0; height: .75rem; width: 100%; }
 .bought_content,.local_content {display:none;}
-.no_module a { color: #FF8828FF; }
+.no_module span { color: #FF8828FF; }
 .no_module { width: 100%; text-align: center; margin: 80px auto; color: #323232FF; }
 
 .each_module:nth-child(2n+1) {padding-right: 5px;}

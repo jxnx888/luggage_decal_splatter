@@ -127,6 +127,7 @@ active_shape .color_change{display: block;line-height: .55rem;}
 .obj_control_wrapper{display: none;  width: fit-content;height: .54rem;position: relative; margin:0 auto;background: #fff; border-radius: .2rem .2rem 0 0 ;text-align: center;top: 0;padding: .05rem .1rem;}
 .control_btn { color: #79c2de; font-size: .2rem;float:left;min-width: .3rem; min-height: .3rem;padding: 0 .1rem;position:relative;}
 .control_btn .iconfont{font-size:.2rem;line-height: .26rem;width: .28rem; height: .28rem;display: block;margin: auto;}
+.zoomin_control i.iconfont,.delete_control i.iconfont { font-size: .17rem; }
 /*.active_control { background: #eeff9a; border-radius: 50%; }*/
 .active_control .icon_wrapper {width: .28rem; height: .28rem;color:#FFF; margin: auto;background-image: url("../img/active_bg.png");background-repeat: no-repeat;background-size: cover;}
 .active_control .iconfont{color:#FFF}
@@ -137,7 +138,7 @@ active_shape .color_change{display: block;line-height: .55rem;}
 .color_circle { width: .25rem; height: .25rem; background: #f2f545; margin: auto; border-radius: 50%; }
 .active_color{border:1px solid #2067C8}
 .white_control .color_circle,.white_color_circle{background: #fff;border:1px solid #BABBBB}
-.btn_name { font-size: .1rem;font-family: "webfont5", serif; }
+.btn_name { font-size: .1rem;font-family: "webfont5", serif; line-height: .16rem;}
 .red{color:red;}
 .blue{color:blue;}
 .green{color:lawngreen;}
@@ -177,7 +178,7 @@ active_shape .color_change{display: block;line-height: .55rem;}
 input#save_name { width: 90%;margin-top: .1rem; padding: 0 .1rem; font-size: .12rem; height: .4rem; line-height: .4rem; border-radius: .1rem; background: rgba(255,255,255,1); box-shadow: 3px 2px 2px 0px rgba(204,161,57,0.64) inset; border: none; outline: none;color: #323232;}
 .save_name_cancle {position: absolute; top: -.14rem; right: -.1rem; width: .45rem;}
 img.save_name_ok,img.go_home_ok { width: .9rem; height: auto; margin-top: .12rem; }
-.save_name_verify{display:none;color:red;position: absolute;bottom: .75rem; left: .23rem; background: #fff;}
+.save_name_verify{display:none;color:red;position: absolute;bottom: .62rem; left: .23rem; background: #fff;}
 .open_save_name{}
 /*lego*/
 .dg.ac.lego_constrution{right: .9rem;}
@@ -257,4 +258,4 @@ input#textContent { width: 90%; border: 1px solid #999; border-radius: 4px; marg
 #left {background: #ff51e8;}
 #top {background: #fff;}
 
-.control_type {display: none; background: #7BB3FF; border-radius: 5px; position: fixed; top: .23rem; left: 2rem; font-size: 0.15rem; color: #426A8D; line-height: .13rem; padding: .07rem; }
+.control_type {display: none; background: #7BB3FF; border-radius: 5px; position: fixed; top: 1rem;left: .1rem; font-size: 0.15rem; color: #426A8D; line-height: .2rem; padding: .07rem; }

@@ -15,9 +15,9 @@
 <div class="my_module container">
 
 	<div class="top_menu row clearfix">
-		<div class="top_menu_btn mine col-xs-4 text-left">模型库</div>
+		<div class="top_menu_btn mine col-xs-4 text-left" onclick=" goPage(3) ">模型库</div>
 		<div class="top_menu_btn bought col-xs-4 text-center">我的模型</div>
-		<div class="top_menu_btn local col-xs-4 text-right"><a href="./3DPrinting.html">创造模型</a></div>
+		<div class="top_menu_btn local col-xs-4 text-right" onclick=" goPage(4) ">创造模型</div>
 	</div>
 	<div class="main_wrapper">
 		<div class="container">
@@ -100,7 +100,7 @@
 					</div>
 				</div>
 				<div class="bought_content">
-					<div class="no_module">您还没有购买哦，<a href="./shopping.html">点击这里浏览</a></div>
+					<div class="no_module">您还没有购买哦，<span onclick=" goPage(2) ">点击这里浏览</span></div>
 				</div>
 				<div class="local_content">
 					<div class="each_module ">
@@ -175,5 +175,5 @@
 </body>
 <script src='../js/jquery.min.js'></script>
 <script src='../js/swiper-3.3.1.min.js'></script>
-<script src='../js/myaccount.js'></script>
+<script src='../js/my_module.js'></script>
 </html>

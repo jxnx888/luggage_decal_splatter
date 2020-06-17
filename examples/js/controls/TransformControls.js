@@ -844,6 +844,7 @@ THREE.TransformControlsGizmo = function () {
 	var scaleHandleGeometry = new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 );
 
 	var lineGeometry = new THREE.BufferGeometry( );
+	// itemSize = 3 because there are 3 values (components) per vertex
 	lineGeometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0,	1, 0, 0 ], 3 ) );
 
 	var CircleGeometry = function ( radius, arc ) {

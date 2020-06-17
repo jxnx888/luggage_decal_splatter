@@ -1,5 +1,6 @@
 var dragObj;
 var selectedDragObj;
+var selectedDragObjFlag;
 var maxW, maxH;
 var shapesEventL = document.getElementById( "childWrapper" );
 var shapesMain = document.getElementById( "shapes" );
@@ -35,17 +36,18 @@ var shapeHelperObjects = [];
 var shapesObj = []; //所有的当前已放置的obj
 var currentAllObjs = []; //所有的当前已放置的obj
 var transformControl;
-var WORK_SPACE_SIZE = 300;
-var SHAPE_SIZE = 50;
+var WORK_SPACE_SIZE = 200;
+var SHAPE_SIZE = 20;
 var LIMIT_SIZE = 4;
-var tcX, tcY, tcZ;
+var tcX, tcY, tcZ, tcScale, tcScaleY; //当前对象的xyz值
+var tcScaleYPosition, tcScaleYPositionFlag; //tcScaleYPosition: 改变大小之前位置；tcScaleYPosition: 改变大小之前是否贴住工作台
 var transformControlModeType = 1;
 var transformControlMove = false;
 var transformDragFlag = true;
 var focusedTransformObj;
-var textTR = '当前状态: 移动';
-var textSC = '当前状态: 改变大小';
-var textRO = '当前状态: 旋转';
+var textTR = '当前状态:<br>移动';
+var textSC = '当前状态:<br>改变大小';
+var textRO = '当前状态:<br> 旋转';
 var intersectsSelect = [];
 var intersection = {
 	intersects: false,
@@ -59,7 +61,7 @@ var eachRedoObjectInfo = {};//每一个对象的每一个步骤；
 var shootedFlag = false;
 
 var orientationControls = new THREE.OrientationControls( 50 ); //右上角三视图
-
+var stlGeoFlag = 0; //0 geo; 1 stl
 //LDraw
 var lDrawModul;
 var lDrawModulGUI;
@@ -71,24 +73,30 @@ var lDrawGuiData = {
 };
 //LDraw  end
 var currentModule = 0; //0:基础模型 1：lego
-
-$(function(){
+$( function () {
 	listModule();
 
 	shapesMain.addEventListener( "touchstart", function ( e ) {
-		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
-	})
+		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
+	} );
 	shapesEventL.addEventListener( "touchstart", function ( e ) {
-		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 		selectedDragObj = $( e.target );
 		if (selectedDragObj.hasClass( "drag" )) {
+			$( ".active_shape" ).removeClass( "active_shape" );
 			if (selectedDragObj.hasClass( "name" )) {
 				dragObj = $( selectedDragObj ).parents( ".module" ).find( ".sprint" ).clone();
-			} else {
+				$( selectedDragObj ).parents( ".module" ).addClass( "active_shape" );
+				selectedDragObjFlag = true;
+			} else if (selectedDragObj.hasClass( "sprint" )) {
 				dragObj = selectedDragObj.clone();
+				$( selectedDragObj ).parents( ".module" ).addClass( "active_shape" );
+				selectedDragObjFlag = true;
+			} else if (selectedDragObj.hasClass( "module" )) {
+				dragObj = $( selectedDragObj ).find( ".sprint" ).clone();
+				$( selectedDragObj ).addClass( "active_shape" );
+				selectedDragObjFlag = false;
 			}
-			$( ".active_shape" ).removeClass( "active_shape" );
-			$( selectedDragObj).parents(".module").addClass( "active_shape" );
 			dragObj.addClass( "startDrag" );
 			maxW = document.body.clientWidth - selectedDragObj[0].offsetWidth;
 			maxH = document.body.clientHeight - selectedDragObj[0].offsetHeight;
@@ -115,30 +123,32 @@ $(function(){
 			} else if (oTop >= maxH) {
 				oTop = maxH;
 			}
-			dragObj[0].style.left = oLeft+25 + 'px';
+			dragObj[0].style.left = oLeft + 25 + 'px';
 			dragObj[0].style.top = oTop + 'px';
 		}
 	}, false );
 	shapesEventL.addEventListener( "touchend", function ( e ) {
-		if (dragObj && dragedFlag && movedDir>100) {
+		if (dragObj && dragedFlag && movedDir > 100) {
 			// $( selectedDragObj ).parents( ".module" ).trigger( "click" );
-			var code = Number($( selectedDragObj ).parents( ".module" ).find( ".this_code" ).val());
-			var type = Number($( selectedDragObj ).parents( ".module" ).find( ".this_module" ).val());
-			if(type == 0){
-				changeShapes(code);
+			if (selectedDragObjFlag) {
+				var code = Number( $( selectedDragObj ).parents( ".module" ).find( ".this_code" ).val() );
+				var type = Number( $( selectedDragObj ).parents( ".module" ).find( ".this_module" ).val() );
+			} else if (selectedDragObjFlag == false) {
+				var code = Number( $( selectedDragObj ).find( ".this_code" ).val() );
+				var type = Number( $( selectedDragObj ).find( ".this_module" ).val() );
 			}
-			else if(type == 1){
-				loadSTL(code);
-			}
-			else if(type ==2){
-				showInput(0)
+			if (type == 0) {
+				changeShapes( code );
+			} else if (type == 1) {
+				loadSTL( code );
+			} else if (type == 2) {
+				showInput( 0 );
 			}
 			$( dragObj ).remove();
-			setTimeout(function () {
+			setTimeout( function () {
 				onDocumentMouseDown( e );
-			},100)
-		}
-		else{
+			}, 100 );
+		} else {
 			$( dragObj ).remove();
 		}
 		dragedFlag = false;
@@ -152,32 +162,32 @@ $(function(){
 		{ passive: false }
 	);
 //input标签 软键盘打开和收起
-	$("#save_name").focus(function(){
-		$(".save_name_module").css({"top":"-.85rem"});
-		$(".obj_control").hide();
-	});
-	$("#save_name").blur(function(){
-		$(".save_name_module").css({"top":"23%"});
-		$(".obj_control").show();
-	});
+	$( "#save_name" ).focus( function () {
+		$( ".save_name_module" ).css( { "top": "-.85rem" } );
+		$( ".obj_control" ).hide();
+	} );
+	$( "#save_name" ).blur( function () {
+		$( ".save_name_module" ).css( { "top": "23%" } );
+		$( ".obj_control" ).show();
+	} );
 //以下代码针对安卓收起，关闭软键盘，是不会失去焦点的
-	var winHeight = $(window).height();   //获取当前页面高度
-	$(window).resize(function(){
-		var thisHeight=$(this).height();
-		if(winHeight - thisHeight >50){
+	var winHeight = $( window ).height();   //获取当前页面高度
+	$( window ).resize( function () {
+		var thisHeight = $( this ).height();
+		if (winHeight - thisHeight > 50) {
 			//当软键盘弹出，在这里面操作
-			$(".save_name_module").css({"top":"-.85rem"});
-			$(".obj_control").hide();
+			$( ".save_name_module" ).css( { "top": "-.85rem" } );
+			$( ".obj_control" ).hide();
 
-		}else{
+		} else {
 			//当软键盘收起，在此处操作
-			$(".save_name_module").css({"top":"23%"});
-			$(".obj_control").show();
+			$( ".save_name_module" ).css( { "top": "23%" } );
+			$( ".obj_control" ).show();
 		}
-	});
+	} );
 //input标签 软键盘打开和收起 end
 	$( ".show_more" ).click( function () {
-		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 		$( "#shapes" ).toggle();
 		$( "#shapes" ).toggleClass( "shapes_close" );
 		$( ".show_more" ).toggleClass( "show_more_close" );
@@ -195,7 +205,7 @@ $(function(){
 
 	init();
 	render();
-});
+} );
 
 function showModule( type ) {//type 0: 标准模型    1:卡通模型 2: lego 模型
 	if (type == 0) {
@@ -229,16 +239,16 @@ function listModule( type ) {
 			for (var i in listShapes) {
 				if (listShapes[i].module == "shape") {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" >';
-					shapesHtml +='<input class="this_module" type="hidden" value="0">'
+					shapesHtml += '<input class="this_module" type="hidden" value="0">';
 				} else if (listShapes[i].module == "stl") {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="loadSTL(11,this)"
-					shapesHtml +='<input class="this_module" type="hidden" value="1">'
+					shapesHtml += '<input class="this_module" type="hidden" value="1">';
 				} else if (listShapes[i].module == "text") {
 					shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="showInput(0,this)"
-					shapesHtml +='<input class="this_module" type="hidden" value="2">'
+					shapesHtml += '<input class="this_module" type="hidden" value="2">';
 
 				}
-				shapesHtml +='<input class="this_code" type="hidden" value="' + listShapes[i].code + '">'
+				shapesHtml += '<input class="this_code" type="hidden" value="' + listShapes[i].code + '">';
 				// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
 				shapesHtml += '<div class="drag sprint sprint_' + listShapes[i].title + '"></div>';
 				shapesHtml += '<div class="name drag">' + listShapes[i].name + '</div>';
@@ -261,8 +271,8 @@ function listModule( type ) {
 			listSTL = res.data.stl;
 			for (var i in listSTL) {
 				cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '">'; // onclick="loadSTL(' + cartoonIndex + ',this)"
-				cartoonHtml +='<input class="this_code" type="hidden" value="' + cartoonIndex + '">';
-				cartoonHtml +='<input class="this_module" type="hidden" value="1">'
+				cartoonHtml += '<input class="this_code" type="hidden" value="' + cartoonIndex + '">';
+				cartoonHtml += '<input class="this_module" type="hidden" value="1">';
 				cartoonHtml += '<div class="drag sprint sprint_' + listSTL[i].title + ' sprintY"></div>';
 				// cartoonHtml += '<div class="img_wrapper"><img src="../img/3dPrinting/sprint_' + listSTL[i].title + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
 				cartoonHtml += '<div class="name drag">' + listSTL[i].name + '</div>';
@@ -273,7 +283,7 @@ function listModule( type ) {
 				cartoonHtml += '</div>';
 				cartoonIndex ++;
 			}
-			cartoonHtml += '<a href=""><div class="go_shopping">购买模型</div></a>';
+			cartoonHtml += '<div class="go_shopping" onclick="goShop() ">购买模型</div>';
 			$( ".cartoon_wrapper" ).html( cartoonHtml );
 
 		},
@@ -310,7 +320,7 @@ function saveModuleShow( type ) {
 	}
 }
 
-function saveModuleName( obj,type ) {
+function saveModuleName( obj, type ) {
 	var name = $( obj ).val();
 	if (name.length > 0) {
 		// $(".save_name_ok").removeClass("btn_disable");
@@ -331,12 +341,13 @@ function validateName() {
 function goHomePage() {
 	if (objects.length > 1) {
 		if (saveFlag) {
-			alert( "to home page" );
+			js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 		} else {
 			$( ".save_ask,.save_name_module_bg" ).show();
 		}
 	} else {
-		alert( "to home page" );
+		// document.location = "http://192.168.1.163:8080/examples/src/shopping.html";
+		js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 	}
 
 }
@@ -344,10 +355,14 @@ function goHomePage() {
 function goHomeSaveModule( type ) {//type 0:gohome 1; save
 	$( ".save_ask,.save_name_module_bg" ).hide();
 	if (type === 0) {
-		alert( "to home page" );
+		js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 	} else {
 		saveModuleShow( 0 );
 	}
+}
+
+function goShop() {//type 0:gohome 1; save
+	js.changeActive( "2" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 }
 
 function hideGoHome() {
@@ -386,7 +401,7 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 	// camera.position.set( 0, 200, 350 ); //正面
-	camera.position.set( 230, 200, 350 ); //45°
+	camera.position.set( 170, 145, 255 ); //45°
 	camera.lookAt( 0, 0, 0 );
 
 	scene = new THREE.Scene();
@@ -420,19 +435,19 @@ function init() {
 
 	// grid
 
-	gridHelper = new THREE.GridHelper( 300, 30, 0x999999, 0xc999999 );
+	gridHelper = new THREE.GridHelper( WORK_SPACE_SIZE, 20, 0x999999, 0xc999999 );
 	// gridHelper = new THREE.GridHelper( 300, 6, 0x999999, 0xc999999 );
 	gridHelper.name = 'GridHelper';
 	scene.add( gridHelper );
 
-	gradGroundMesh = new THREE.Mesh( new THREE.BoxBufferGeometry( 300, .8, 300 ), new THREE.MeshLambertMaterial( { color: 0xffffff } ) );
+	gradGroundMesh = new THREE.Mesh( new THREE.BoxBufferGeometry( WORK_SPACE_SIZE, .8, WORK_SPACE_SIZE ), new THREE.MeshLambertMaterial( { color: 0xffffff } ) );
 	gradGroundMesh.position.y = - .8;
 	gradGroundMesh.name = 'GridHelper';
 	gradGroundMesh.receiveShadow = true;
 	gradGroundMesh.castShadow = true;
 	scene.add( gradGroundMesh );
-	gradGroundMesh1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 300, 5, 300 ), new THREE.MeshLambertMaterial( { color: 0xffc869 } ) );
-	gradGroundMesh1.position.y = - 3.8;
+	gradGroundMesh1 = new THREE.Mesh( new THREE.BoxBufferGeometry( WORK_SPACE_SIZE, 3, WORK_SPACE_SIZE ), new THREE.MeshLambertMaterial( { color: 0xffc869 } ) );
+	gradGroundMesh1.position.y = - 2.5;
 	gradGroundMesh1.name = 'GridHelper';
 	gradGroundMesh1.receiveShadow = true;
 	gradGroundMesh1.castShadow = true;
@@ -440,7 +455,7 @@ function init() {
 	//grid end
 
 	// lights
-	var ambientLight = new THREE.AmbientLight( 0x606060, 1); //0x606060
+	var ambientLight = new THREE.AmbientLight( 0x606060, 1 ); //0x606060
 	scene.add( ambientLight );
 	directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.3 );
 	directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
@@ -464,7 +479,6 @@ function init() {
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 	effectFXAA.uniforms['resolution'].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
 	// outline end
-
 
 	// 旋转控制
 	controls = new THREE.OrbitControls( camera, renderer.domElement ); // project controller
@@ -501,8 +515,7 @@ function init() {
 				scene.add( gradGroundMesh );
 				scene.add( gradGroundMesh1 );
 			}
-		}
-		else{
+		} else {
 			clearCache( gridHelper );
 			scene.remove( gridHelper );
 			clearCache( gradGroundMesh );
@@ -518,7 +531,7 @@ function init() {
 	//移动shape
 	transformControl = new THREE.TransformControls( camera, renderer.domElement );
 	transformControl.name = "transformControl";
-	transformControl.size = 2;
+	transformControl.size = 1.5;
 	scene.add( transformControl );
 
 	transformControl.addEventListener( 'dragging-changed', function ( event ) {
@@ -538,18 +551,48 @@ function init() {
 	}, false );
 	transformControl.addEventListener( 'mouseDown', function () {
 		transformControlMove = false;
+		checkScalePosition( transformControl.object );
+	}, false );
+	transformControl.addEventListener( 'touchstart', function () {
+		transformControlMove = false;
+		var obj = transformControl.object;
+		tcScaleYPosition = obj.position.clone().y;
+		tcScaleY = obj.scale.clone().y;
 	}, false );
 	transformControl.addEventListener( 'mouseUp', function () {
 		if (transformControlMove) {
 			allOperationAdd();
 		}
 		showCurrentColor();
-		if(focusedTransformObj){
+		if (focusedTransformObj) {
 			transformControl.object = focusedTransformObj;
 		}
 	}, false );
 	//移动shape End
-
+	container.addEventListener( 'mousedown', function ( e ) {
+		controlsMoved = false;
+		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
+	}, false );
+	container.addEventListener( 'touchstart', function ( e ) {
+		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
+		controlsMoved = false;
+		var obj = transformControl.object;
+		if (e.touches.length >= 2) { //判断是否有两个点在屏幕上
+			controls.enabled = false;
+			twoPointTouchFlag = true;
+			pointOneFlag = e.touches; //得到第一组两个点
+			if (transformControl.object) {
+				tcX = obj.scale.x;
+				tcY = obj.scale.y;
+				tcZ = obj.scale.z;
+				checkScalePosition( obj );
+			}
+		} else {
+			controls.enabled = transformDragFlag;
+			twoPointTouchFlag = false;
+			touchScale = '';
+		}
+	}, false );
 	container.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	container.addEventListener( 'touchmove', function ( e ) {
 		onDocumentMouseMove( e );
@@ -568,53 +611,42 @@ function init() {
 					scaleZZ = LIMIT_SIZE;
 				}
 				transformControl.object.scale.set( scaleXX, scaleYY, scaleZZ );
-				checkAxis("scale",transformControl.object);
+				checkAxis( "scale", transformControl.object );
 			}
 		}
-		;
 	}, false );
-	container.addEventListener( 'mousedown', function ( e ) {
-		controlsMoved = false;
-		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
-	}, false );
-	container.addEventListener( 'touchstart', function ( e ) {
-		$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
-		controlsMoved = false;
-		if (e.touches.length >= 2) { //判断是否有两个点在屏幕上
-			controls.enabled = false;
-			twoPointTouchFlag = true;
-			pointOneFlag = e.touches; //得到第一组两个点
-			if (transformControl.object) {
-				tcX = transformControl.object.scale.x;
-				tcY = transformControl.object.scale.y;
-				tcZ = transformControl.object.scale.z;
-			}
-		} else {
-			controls.enabled = transformDragFlag;
-			twoPointTouchFlag = false;
-			touchScale = '';
-		}
-	}, false );
+
 	container.addEventListener( 'mouseup', function ( e ) {
 		if (transformControl.object) {
 			focusedTransformObj = transformControl.object;
 		}
 		if (currentModule == 0 && ! controlsMoved) {
-			setTimeout(function () {
+			setTimeout( function () {
 				onDocumentMouseDown( e );
-			},100)
+			}, 100 );
 		}
+		tcScaleYPosition = '';
+		tcScaleYPositionFlag = '';
+		tcScaleY = '';
+		tcX = '';
+		tcY = '';
+		tcZ = '';
 	}, false );
 	container.addEventListener( 'touchend', function ( e ) {
 		if (transformControl.object) {
 			focusedTransformObj = transformControl.object;
 		}
 		if (currentModule == 0 && ! controlsMoved) {
-			setTimeout(function () {
+			setTimeout( function () {
 				onDocumentMouseDown( e );
-			},100)
+			}, 100 );
 		}
-
+		tcScaleYPosition = '';
+		tcScaleYPositionFlag = '';
+		tcScaleY = '';
+		tcX = '';
+		tcY = '';
+		tcZ = '';
 	}, false );
 	container.addEventListener( 'keydown', onDocumentKeyDown, false );
 	container.addEventListener( 'keyup', onDocumentKeyUp, false );
@@ -624,22 +656,22 @@ function init() {
 
 		switch (e.target.id) {
 			case 'front':
-				camera.position.set( 0, 0, 430 );
+				camera.position.set( 0, 0, 300 );
 				break;
 			case 'back':
-				camera.position.set( 0, 0, - 430 );
+				camera.position.set( 0, 0, - 300 );
 				break;
 			case 'top':
-				camera.position.set( 0, 530, 0 );
+				camera.position.set( 0, 300, 0 );
 				break;
 			case 'bottom':
-				camera.position.set( 0, - 530, 0 );
+				camera.position.set( 0, - 300, 0 );
 				break;
 			case 'left':
-				camera.position.set( - 430, 0, 0 );
+				camera.position.set( - 300, 0, 0 );
 				break;
 			case 'right':
-				camera.position.set( 430, 0, 0 );
+				camera.position.set( 300, 0, 0 );
 				break;
 		}
 		camera.lookAt( scene.position );
@@ -755,8 +787,14 @@ function onDocumentMouseDown( event ) {
 					var voxelMaterial = currentObjMaterial.clone();
 					var voxel = new THREE.Mesh( currentObj, voxelMaterial );
 					voxel.position.copy( intersect.point ).add( intersect.face.normal );
-					voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
-					voxel.name = "shapes";
+					// voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar(25 );
+					if (stlGeoFlag == 0) {
+						voxel.position.divideScalar( SHAPE_SIZE ).floor().multiplyScalar( SHAPE_SIZE ).addScalar( SHAPE_SIZE / 2 );
+						voxel.name = "shapes";
+					} else if (stlGeoFlag == 1) {
+						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+						voxel.name = "stl";
+					}
 					voxel.receiveShadow = true;
 					voxel.castShadow = true;
 					scene.add( voxel );
@@ -785,7 +823,7 @@ function onDocumentMouseDown( event ) {
 
 		}
 	} else {
-		checkIntersection(event);
+		checkIntersection( event );
 	}
 }
 
@@ -834,6 +872,7 @@ function clearCache( currentMesh ) {
 }
 
 function changeShapes( geo ) {//geo: 当前类型
+	stlGeoFlag = 0;//0 geo; 1 stl
 	stopPropagationFn();
 	showInput( 1 );
 	$( ".active_color" ).removeClass( "active_color" );
@@ -866,13 +905,13 @@ function changeShapes( geo ) {//geo: 当前类型
 		case 3:
 			// 球形
 			currentShapeType = 3;
-			currentObj = new THREE.SphereBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, 32 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+			currentObj = new THREE.SphereBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, 50 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
 			$( ".ball" ).addClass( "active_shape" );
 			break;
 		case 4:
 			// 环形
 			currentShapeType = 4;
-			currentObj = new THREE.TorusGeometry( 20, 5, 16, 100 );//TorusGeometry(radius : Float, tube : Float, radialSegments : Integer, tubularSegments : Integer, arc : Float)
+			currentObj = new THREE.TorusGeometry( 10, 2.5, 16, 100 );//TorusGeometry(radius : Float, tube : Float, radialSegments : Integer, tubularSegments : Integer, arc : Float)
 			$( ".doughnut" ).addClass( "active_shape" );
 			break;
 		case 5:
@@ -891,7 +930,7 @@ function changeShapes( geo ) {//geo: 当前类型
 			// 空心圆柱Hollow cylinder
 			currentShapeType = 16;
 			var outerRadius = SHAPE_SIZE / 2;
-			var innerRadius = 13;
+			var innerRadius = SHAPE_SIZE / 3;
 			var height = SHAPE_SIZE;
 
 			var arcShape = new THREE.Shape();
@@ -1063,7 +1102,7 @@ function eachObjSetps( e, type ) { //生成json 键的行为对象; e:mesh objec
 }
 
 function redoUndo( type ) { //type 0: undo 1: redo
-	$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+	$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	var transformFlag = false;
 	var deleteFlag = false;
 	var addFlag = false;
@@ -1144,9 +1183,9 @@ function redoUndo( type ) { //type 0: undo 1: redo
 		}
 	}
 	transformControl.detach(); //隐藏控制控件
-	outlinePass.selectedObjects=[];
-	$(".color_control_wrapper").hide();
-	$(".active_control").removeClass("active_control");
+	outlinePass.selectedObjects = [];
+	$( ".color_control_wrapper" ).hide();
+	$( ".active_control" ).removeClass( "active_control" );
 	render();
 	if (allOperation.length > 0) {
 		$( ".undo_control" ).removeClass( "noActive_control" );
@@ -1158,10 +1197,9 @@ function redoUndo( type ) { //type 0: undo 1: redo
 	} else {
 		$( ".redo_control" ).addClass( "noActive_control" );
 	}
-	if (objects.length >1 ) {
+	if (objects.length > 1) {
 		$( ".save_stl" ).removeClass( "noActive_save" );
-	}
-	else{
+	} else {
 		$( ".save_stl" ).removeClass( "noActive_save" ).addClass( "noActive_save" );
 	}
 
@@ -1187,7 +1225,7 @@ function redoProcess( operator, obj ) {
 	operator.mesh.material.color.set( operator.color );
 }
 
-function checkIntersection(event) {
+function checkIntersection( event ) {
 	var x, y;
 	if (event.changedTouches) {
 		x = event.changedTouches[0].pageX;
@@ -1223,7 +1261,7 @@ function checkIntersection(event) {
 
 		var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
 		if (sceneChilds.length > 1) {
-			if (sceneChilds && sceneChilds[0].object.name == "shapes") {
+			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" )) {
 				transformControl.detach( transformControl.object );
 				transformControl.attach( sceneChilds[0].object );
 			} else if (sceneChilds[0].object.name == "plane") {
@@ -1239,7 +1277,7 @@ function checkIntersection(event) {
 
 		var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
 		if (sceneChilds.length > 0) {
-			if (sceneChilds && sceneChilds[0].object.name == "shapes") {
+			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" )) {
 				transformControl.detach( transformControl.object );
 				transformControl.attach( sceneChilds[0].object );
 			} else if (sceneChilds[0].object.name == "plane") {
@@ -1284,13 +1322,16 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 180 ) );
 
 		var nameStr = $( "#save_name" ).val();
+		var successFlag;
 		if (nameStr) {
 			saveFlag = true;
 			if (type === 0) {
 				exporter = new THREE.STLExporter(); //导出工具  exporter tool
 				var result = exporter.parse( scene );
 				var date = Date.parse( new Date() );
-				saveString( result, nameStr + '.stl' );
+				// saveString( result, nameStr + '.stl' );
+				successFlag = js.saveStl( result, nameStr + '.stl' );
+				// successFlag = true;
 			} else {
 				var input = scene;
 				var gltfExporter = new THREE.GLTFExporter();
@@ -1310,30 +1351,50 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 				}, options );
 			}
 		}
+
+		if (successFlag) {
+			saveModuleShow( 1 );
+			// 保存成功，清空当前项目
+			objects.forEach( function ( d ) {
+				clearCache( d );
+				scene.remove( d );
+			} );
+			objects = [];
+			objects.push( plane );
+			transformControl.detach();
+			$( ".save_stl" ).addClass( "noActive_save" );
+			// 保存成功，清空当前项目 end
+		} else {
+			$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
+			setTimeout( function () {
+				$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
+			}, 1500 );
+		}
+		if (! mobile) {
+			scene.add( mouseHelper );
+		}
 		scene.add( transformControl );
 		scene.add( gridHelper );
 		scene.add( gradGroundMesh );
 		scene.add( gradGroundMesh1 );
 		scene.add( plane );
-		if (! mobile) {
-			scene.add( mouseHelper );
-		}
-		saveModuleShow( 1 );
+		camera.position.set( 170, 145, 255 ); //45°
+		camera.lookAt( 0, 0, 0 );
 	}
 }
 
 function save( blob, filename ) {
-	/*var link = document.createElement( 'a' );
+	var link = document.createElement( 'a' );
 	link.style.display = 'none';
 	link.className = 'saveFile';
 	document.body.appendChild( link );
 	link.href = URL.createObjectURL( blob );
 	link.download = filename;
 	link.click();
-	$( ".saveFile" ).remove();*/
+	$( ".saveFile" ).remove();
 
-	document.location = "js://webview?url=" + URL.createObjectURL( blob )+"&fileName="+filename;
-	$( ".save_name_module,.save_name_module_bg" ).hide();
+	// document.location = "js://webview?url=" + URL.createObjectURL( blob )+"&fileName="+filename;
+	//$( ".save_name_module,.save_name_module_bg" ).hide();
 }
 
 function saveString( text, filename ) {
@@ -1426,6 +1487,7 @@ function resetZoom() {
 }
 
 async function loadSTL( thisSTL, obj ) {
+	stlGeoFlag = 1;//0 geo; 1 stl
 	showInput( 1 );
 	$( ".active_shape" ).removeClass( "active_shape" );
 	$( obj ).addClass( "active_shape" );
@@ -1680,7 +1742,7 @@ function enabledLego( type ) { //type 0:enable 1:disable
 //Lego end
 
 function changeControls( type, obj ) {
-	$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+	$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	if (transformControlModeType == 0 && type == 0) {
 		$( obj ).toggleClass( "active_control" );
 	} else if (transformControlModeType == 1 && type == 1) {
@@ -1702,30 +1764,30 @@ function changeControls( type, obj ) {
 	switch (type) {
 		case 0:
 			transformControl.setMode( "scale" );
-			$( ".control_type" ).text( textSC );
+			$( ".control_type" ).html( textSC );
 			transformControlModeType = 0;
 			break;
 		case 1:
 			transformControl.setMode( "translate" );
-			$( ".control_type" ).text( textTR );
+			$( ".control_type" ).html( textTR );
 			transformControlModeType = 1;
 			break;
 		case 2:
 			transformControl.setMode( "rotate" );
-			$( ".control_type" ).text( textRO );
+			$( ".control_type" ).html( textRO );
 			transformControlModeType = 2;
 			break;
 		default:
 			transformControl.setMode( "translate" );
-			$( ".control_type" ).text( textTR );
+			$( ".control_type" ).html( textTR );
 			transformControlModeType = 0;
 	}
-	transformControl.object ? $(".color_control_wrapper").show():$(".color_control_wrapper").hide();
+	transformControl.object ? $( ".color_control_wrapper" ).show() : $( ".color_control_wrapper" ).hide();
 
 }
 
 function deletedSelected() {
-	$(".zoom_options,.color_wrapper").hide();//隐藏子窗口
+	$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	if (focusedTransformObj && transformControl.object) {
 		createObjForOperation( transformControl.object, 'delete' );
 		eachObjSetps( transformControl.object, 0 );
@@ -1736,10 +1798,9 @@ function deletedSelected() {
 	// $(".active_control").removeClass("active_control");
 	shapesController( 0 );
 	render();
-	if (objects.length >1 ) {
+	if (objects.length > 1) {
 		$( ".save_stl" ).removeClass( "noActive_save" );
-	}
-	else{
+	} else {
 		$( ".save_stl" ).removeClass( "noActive_save" ).addClass( "noActive_save" );
 	}
 
@@ -1788,13 +1849,13 @@ function showCurrentColor() {
 		cleanSelectedObject( transformControl.object );
 		switch (transformControlModeType) {
 			case 0:
-				$( ".control_type" ).text( textSC );
+				$( ".control_type" ).html( textSC );
 				break;
 			case 1:
-				$( ".control_type" ).text( textTR );
+				$( ".control_type" ).html( textTR );
 				break;
 			case 2:
-				$( ".control_type" ).text( textRO );
+				$( ".control_type" ).html( textRO );
 				break;
 		}
 		$( ".control_type" ).show();
@@ -1809,14 +1870,47 @@ function getDistance( p1, p2 ) {
 	return Math.sqrt( ( x * x ) + ( y * y ) );
 };
 
+function checkScalePosition( obj ) {
+	tcScale = obj.scale.clone();
+	tcScaleYPosition = obj.position.clone().y;
+	tcScaleY = obj.scale.clone().y;
+	if (obj.name == "shapes") {
+		if (tcScaleYPosition == ( ( SHAPE_SIZE * obj.scale.y ) / 2 )) {
+			tcScaleYPositionFlag = true;
+		} else {
+			tcScaleYPositionFlag = false;
+		}
+	} else if (obj.name == "stl") {
+		if (tcScaleYPosition == ( obj.geometry.boundingSphere.radius )) {
+			tcScaleYPositionFlag = true;
+		} else {
+			tcScaleYPositionFlag = false;
+		}
+	}
+}
+
 function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之间
 	if (transformControl.object) {
+		var saveDefauleSHAPE_SIZE = SHAPE_SIZE;
+		var saveDefauleLIMIT_SIZE = LIMIT_SIZE;
+		var saveDefauleLIMIT_SIZEMin = 0.1;
 		var getMode = transformControl.getMode();
 		var currentObj = transformControl.object;
+		/*if(currentObj.name == "shapes"){
+
+		}else if(currentObj.name == "stl"){
+			if(currentObj.geometry.boundingSphere) {
+				SHAPE_SIZE = ( currentObj.geometry.boundingSphere.radius ) * 2
+			}
+		}*/
 		switch (getMode) {
 			case "scale":
-				currentObj.scale.clampScalar( 0.1, LIMIT_SIZE );
-				checkAxis("scale",currentObj);
+				if (currentObj.name == "stl") {
+					LIMIT_SIZE = 2.22;
+					// saveDefauleLIMIT_SIZEMin = 0.056
+				}
+				currentObj.scale.clampScalar( saveDefauleLIMIT_SIZEMin, LIMIT_SIZE );
+				checkAxis( "scale", currentObj );
 				break;
 			case "translate":
 				// console.log( transformControl.axis, currentObj.position );
@@ -1833,20 +1927,28 @@ function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之�
 						currentObj.position.z = - ( WORK_SPACE_SIZE / 2 ) + ( ( SHAPE_SIZE * currentObj.scale.z ) / 2 );
 					}
 				} else if (transformControl.axis == "Y") {
-					if (currentObj.position.y >= 0 && currentObj.position.y <= ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 )) {
-						currentObj.position.y =  ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
-					} else if (currentObj.position.y< 0) {
-						currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y ) / 2 ;
+					if (currentObj.position.y >= 0 && ( currentObj.position.y + ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 ) ) >= ( WORK_SPACE_SIZE )) { //向上移
+						currentObj.position.y = ( WORK_SPACE_SIZE ) - ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 );
+					} else if (currentObj.name == "stl") {
+						if (currentObj.position.y < ( currentObj.geometry.boundingSphere.radius * currentObj.scale.y )) {
+							console.log( currentObj.position.y, currentObj.geometry.boundingSphere.radius * currentObj.scale.y );
+							currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y );
+						}
+					} else if (currentObj.position.y < ( SHAPE_SIZE * currentObj.scale.y ) / 2) {
+						currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y ) / 2;
 					}
 				}
 				break;
 			case "rotate":
 				break;
 		}
+		SHAPE_SIZE = saveDefauleSHAPE_SIZE;
+		LIMIT_SIZE = saveDefauleLIMIT_SIZE;
 	}
 }
-function checkAxis(type, obj) { // 改变大小的时候，价差坐标，不能超出工作台
-	if(type==="scale") {
+
+function checkAxis( type, obj ) { // 改变大小的时候，价差坐标，不能超出工作台
+	if (type === "scale") {
 		if (obj.position.x >= 0 && obj.position.x + ( ( SHAPE_SIZE * obj.scale.x ) / 2 ) >= ( WORK_SPACE_SIZE / 2 )) {
 			obj.position.x = ( WORK_SPACE_SIZE / 2 ) - ( ( SHAPE_SIZE * obj.scale.x ) / 2 );
 		} else if (obj.position.x < 0 && obj.position.x - ( ( SHAPE_SIZE * obj.scale.x ) / 2 ) <= - ( WORK_SPACE_SIZE / 2 )) {
@@ -1859,11 +1961,24 @@ function checkAxis(type, obj) { // 改变大小的时候，价差坐标，不能
 		}
 		if (obj.position.y >= 0 && obj.position.y <= ( ( SHAPE_SIZE * obj.scale.y ) / 2 )) {
 			obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
+		} else if (obj.position.y >= 0 && tcScaleYPositionFlag) {
+			console.log( "if y 2" );
+			if (obj.name == "stl") {
+				// console.log("stl",tcScaleYPosition,((obj.geometry.boundingSphere.radius* obj.scale.y )/2));
+				if (obj.geometry.boundingSphere) {
+					if (tcScaleYPosition == ( ( obj.geometry.boundingSphere.radius * obj.scale.y ) / 2 )) {
+						obj.position.y = obj.geometry.boundingSphere.radius * obj.scale.y;
+					} else {
+						obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
+					}
+				}
+			} else {
+				obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
+			}
 		} else if (obj.position.y < 0) {
 			obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
 		}
-	}
-	else if(type==="rotate"){
+	} else if (type === "rotate") {
 
 	}
 }
@@ -1999,4 +2114,5 @@ function createText( word ) {
 	transformControl.attach( focusedTransformObj );
 	resetSomeThing();
 }
+
 // Text object end
