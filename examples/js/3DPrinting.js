@@ -74,6 +74,7 @@ var lDrawGuiData = {
 //LDraw  end
 var currentModule = 0; //0:基础模型 1：lego
 var goHomeFlag = false;//是否是点击首页
+var deleteObjFlag = false;//是否点击了删除
 $( function () {
 	listModule();
 	// getLocalAppSTL();
@@ -109,7 +110,6 @@ $( function () {
 		var touch = ev.targetTouches[0];
 		var windowWidth = window.innerWidth;
 		movedDir = windowWidth - touch.clientX;
-
 		if (dragObj && movedDir > 100) {
 			$( "body" ).append( dragObj );
 			var oLeft = touch.clientX - 50;
@@ -159,13 +159,13 @@ $( function () {
 		dragedFlag = false;
 		$( ".active_shape" ).removeClass( "active_shape" );
 	}, false );
-	window.addEventListener( "touchmove", function ( event ) {
+/*	window.addEventListener( "touchmove", function ( event ) {
 			if (event.scale !== 1) {
 				event.preventDefault();
 			}
 		},
 		{ passive: false }
-	);
+	);*/
 //input标签 软键盘打开和收起
 	$( "#save_name" ).focus( function () {
 		$( ".save_name_module" ).css( { "top": "-.85rem" } );
@@ -997,7 +997,7 @@ function changeShapes( geo ) {//geo: 当前类型
 		case 3:
 			// 球形
 			currentShapeType = 3;
-			currentObj = new THREE.SphereBufferGeometry( SHAPE_SIZE / 2, SHAPE_SIZE / 2, 50 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+			currentObj = new THREE.SphereBufferGeometry( SHAPE_SIZE / 2, 32, 32 );//SphereBufferGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
 			$( ".ball" ).addClass( "active_shape" );
 			break;
 		case 4:
@@ -1119,6 +1119,7 @@ function removeAllShapes() {
 }
 
 function createObjForOperation( meshObj, type ) {
+	deleteObjFlag = false;
 	if (allOperation.length >= 5) {
 		allOperation.shift();
 	}
@@ -1898,7 +1899,7 @@ function enabledLego( type ) { //type 0:enable 1:disable
 //Lego end
 
 function changeControls( type, obj ) {
-	if(!transformControl.object){return}
+	if(deleteObjFlag){return}
 	$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	if (transformControlModeType == 0 && type == 0) {
 		$( obj ).toggleClass( "active_control" );
@@ -1952,6 +1953,7 @@ function deletedSelected() {
 		objects.splice( objects.indexOf( transformControl.object ), 1 );
 		$( ".active_control" ).removeClass( "active_control" );
 		$( ".color_control_wrapper" ).hide();
+		deleteObjFlag = true;
 	}
 	transformControl.detach();
 	// $(".active_control").removeClass("active_control");

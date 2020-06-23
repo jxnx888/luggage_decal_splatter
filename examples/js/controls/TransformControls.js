@@ -992,13 +992,13 @@ THREE.TransformControlsGizmo = function () {
 
 	var pickerRotate = {
 		X: [
-			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.2, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]],
+			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.08, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]],
 		],
 		Y: [
-			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.2, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]],
+			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.08, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]],
 		],
 		Z: [
-			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]],
+			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.08, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]],
 		],
 		/*E: [
 			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1.25, 0.1, 2, 24 ), matInvisible ) ]
