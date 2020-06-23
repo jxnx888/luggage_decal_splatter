@@ -73,9 +73,10 @@ var lDrawGuiData = {
 };
 //LDraw  end
 var currentModule = 0; //0:基础模型 1：lego
+var goHomeFlag = false;//是否是点击首页
 $( function () {
 	listModule();
-	getLocalAppSTL();
+	// getLocalAppSTL();
 	shapesMain.addEventListener( "touchstart", function ( e ) {
 		$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	} );
@@ -217,7 +218,7 @@ function showModule( type ) {//type 0: 标准模型    1:卡通模型 2: lego �
 	} else if (type == 1) {
 		$( ".cartoon_wrapper" ).show();
 	} else if (type == 2) {
-		$( ".buymodule_wrapper" ).show();
+		$( ".mymodule_wrapper" ).show();
 	} else if (type == 3) {
 		alert( "购买跳转" );
 	}
@@ -297,7 +298,65 @@ function listModule( type ) {
 	} );
 
 }
+/*function listModule( type ) {
+	var data = js.getModuleList();
+	if(data){
+		data = eval('('+data+')')
+		console.log(JSON.stringify(data))
+		var shapesHtml = '<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>基础模型</div>';
+		var shapesIndex = 0;
+		listShapes = data.data.shapes;
+		for (var i in listShapes) {
+			if (listShapes[i].module == "shape") {
+				shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '" >';
+				shapesHtml += '<input class="this_module" type="hidden" value="0">';
+			} else if (listShapes[i].module == "stl") {
+				shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="loadSTL(11,this)"
+				shapesHtml += '<input class="this_module" type="hidden" value="1">';
+			} else if (listShapes[i].module == "text") {
+				shapesHtml += '<div class="module shapes drag ' + listShapes[i].title + '">'; // onclick="showInput(0,this)"
+				shapesHtml += '<input class="this_module" type="hidden" value="2">';
 
+			}
+			shapesHtml += '<input class="this_code" type="hidden" value="' + listShapes[i].code + '">';
+			// shapesHtml += '<img src="' + listShapes[i].url + '" alt="Doughnut" class="drag">';
+			shapesHtml += '<div class="drag sprint sprint_' + listShapes[i].title + '"></div>';
+			shapesHtml += '<div class="name drag">' + listShapes[i].name + '</div>';
+			shapesHtml += '<div class="color_change">';
+			if (i != listShapes.length - 1) {
+				shapesHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
+				shapesHtml += '<div class="color_option color_white color_circle" onclick="changeColorBeforeShoot(0,this)"></div>';
+			} else {
+				shapesHtml += '<div class="color_option color_yellow color_circle" onclick="changeTextColor(1,this)"></div>';
+				shapesHtml += '<div class="color_option color_white color_circle" onclick="changeTextColor(0,this)"></div>';
+			}
+			shapesHtml += '</div>';
+			shapesHtml += '</div>';
+			shapesIndex ++;
+		}
+		$( ".normal_wrapper" ).html( shapesHtml );
+
+		var cartoonHtml = '<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>卡通模型</div>';
+		var cartoonIndex = 0;
+		listSTL = data.data.stl;
+		for (var i in listSTL) {
+			cartoonHtml += '<div class="module lego drag ' + listSTL[i].title + '">'; // onclick="loadSTL(' + cartoonIndex + ',this)"
+			cartoonHtml += '<input class="this_code" type="hidden" value="' + cartoonIndex + '">';
+			cartoonHtml += '<input class="this_module" type="hidden" value="1">';
+			cartoonHtml += '<div class="drag sprint sprint_' + listSTL[i].title + ' sprintY"></div>';
+			// cartoonHtml += '<div class="img_wrapper"><img src="../img/3dPrinting/sprint_' + listSTL[i].title + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
+			cartoonHtml += '<div class="name drag">' + listSTL[i].name + '</div>';
+			cartoonHtml += '<div class="color_change">';
+			cartoonHtml += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
+			cartoonHtml += '<div class="color_option color_white color_circle" onclick="changeColorBeforeShoot(0,this)"></div>';
+			cartoonHtml += '</div>';
+			cartoonHtml += '</div>';
+			cartoonIndex ++;
+		}
+		cartoonHtml += '<div class="go_shopping" onclick="goShop() ">购买模型</div>';
+		$( ".cartoon_wrapper" ).html( cartoonHtml );
+	}
+}*/
 function getLocalAppSTL(){
 	var stlList = js.getStlList() || null;
 	if(stlList) {
@@ -310,7 +369,7 @@ function getLocalAppSTL(){
 			stlListHTML += '<input class="this_module" type="hidden" value="3">';
 			stlListHTML += '<input class="this_url" type="hidden" value="' + stlList[i].realStlName + '">';
 			// stlListHTML += '<div class="drag sprint sprint_' + stlList[i].title + ' sprintY"></div>';
-			stlListHTML += '<div class="img_wrapper"><img src="' + stlList[i].realStlName + '.png" alt="' + listSTL[i].title + '" class="drag"></div>';
+			stlListHTML += '<div class="img_wrapper"><img src="file://' + stlList[i].localImg + '" alt="' + listSTL[i].localImg + '" class="drag"></div>';
 			stlListHTML += '<div class="name drag">' + stlList[i].sourceStlName + '</div>';
 			stlListHTML += '<div class="color_change">';
 			stlListHTML += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
@@ -320,6 +379,10 @@ function getLocalAppSTL(){
 			stlListIndex ++;
 		}
 	}
+	else{
+		stlListHTML+='<div class="module shapes no_module"><div class="name">无</div></div>'
+	}
+	$(".mymodule_wrapper").html(stlListHTML)
 }
 function getTimeStr() {
 	var date = new Date();
@@ -370,6 +433,7 @@ function goHomePage() {
 		if (saveFlag) {
 			js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 		} else {
+			goHomeFlag = true;
 			$( ".save_ask,.save_name_module_bg" ).show();
 		}
 	} else {
@@ -417,7 +481,7 @@ function zoomView( zoomIndex ) {
 
 //main
 function init() {
-	renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+	renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true, preserveDrawingBuffer: true} );
 	// renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setPixelRatio( ( window.devicePixelRatio ) ? window.devicePixelRatio : 1 );
 	renderer.setSize( window.innerWidth, window.innerHeight );
@@ -513,6 +577,7 @@ function init() {
 	controls.minDistance = 10; //设置相机距离原点的最近距离 min distance of camera to coordinate origin
 	controls.maxDistance = 1300;//设置相机距离原点的最远距离 max distance of camera to coordinate origin
 	controls.enableKeys = true;
+	controls.rotateSpeed  = .1;
 	controls.keys = {
 		LEFT: 65, //left arrow
 		UP: 87, // up arrow
@@ -567,7 +632,6 @@ function init() {
 			controls.enabled = ! event.value;
 			transformDragFlag = ! event.value;
 		}
-		// console.log('dragging-changed')
 		transformControlMove = true;
 	}, false );
 	transformControl.addEventListener( 'change', function () {
@@ -1166,7 +1230,6 @@ function redoUndo( type ) { //type 0: undo 1: redo
 						redoProcess( thisObj[thisObj.length - 1] );
 					}
 					eachObjSetps( eachObjectInfo[operationL.uuid].pop(), 1 );
-					console.log( "transform" );
 				}
 			}
 			allOperation.pop();
@@ -1347,8 +1410,10 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		clearCache( plane );
 		scene.remove( plane );
 		outlinePass.selectedObjects = [];
+		camera.position.set( 170, 145, 255 ); //45°
+		camera.lookAt( 0, 0, 0 );
 		// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 180 ) );
-
+		animate();
 		var nameStr = $( "#save_name" ).val();
 		var successFlag;
 		if (nameStr) {
@@ -1358,7 +1423,7 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 				var result = exporter.parse( scene );
 				var date = Date.parse( new Date() );
 				// saveString( result, nameStr + '.stl' );
-				successFlag = js.saveStl( result, nameStr + '.stl' );
+				saveAsImage(nameStr,result );
 				// successFlag = true;
 			} else {
 				var input = scene;
@@ -1373,7 +1438,6 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 				};
 				gltfExporter.parse( input, function ( result ) {
 					var output = JSON.stringify( result, null, 2 );
-					console.log( output );
 					var date = Date.parse( new Date() );
 					saveString( output, nameStr + '.gltf' );
 				}, options );
@@ -1381,16 +1445,7 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		}
 
 		if (successFlag) {
-			saveModuleShow( 1 );
-			// 保存成功，清空当前项目
-			objects.forEach( function ( d ) {
-				clearCache( d );
-				scene.remove( d );
-			} );
-			objects = [];
-			objects.push( plane );
-			transformControl.detach();
-			$( ".save_stl" ).addClass( "noActive_save" );
+			saveAsImage(nameStr + '.png' );
 			// 保存成功，清空当前项目 end
 		} else {
 			$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
@@ -1406,8 +1461,7 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		scene.add( gradGroundMesh );
 		scene.add( gradGroundMesh1 );
 		scene.add( plane );
-		camera.position.set( 170, 145, 255 ); //45°
-		camera.lookAt( 0, 0, 0 );
+
 	}
 }
 
@@ -1431,6 +1485,76 @@ function saveString( text, filename ) {
 
 }
 
+function saveAsImage(nameStr,result) {
+	var imgData;
+	var strDownloadMime = "image/octet-stream";
+	try {
+		var strMime = "image/png";
+		/*var getClipCanvas = (renderer.domElement).getImageData(20,20, 500,500)
+		imgData = getClipCanvas.toDataURL( strMime, 1 );*/
+		imgData = renderer.domElement.toDataURL( strMime, 1 );
+		var successFlag = js.saveStl( result, nameStr + '.stl', imgData.split(",")[1]);
+
+		if(successFlag){
+			afterSTLImg()
+		}
+		else{
+			$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
+			setTimeout( function () {
+				$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
+			}, 1500 );
+		}
+
+	} catch (e) {
+		console.log( e );
+		$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
+		setTimeout( function () {
+			$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
+		}, 1500 );
+		return;
+	}
+
+}
+function getBase64Image(img) {
+	var canvas = document.createElement("canvas");
+	canvas.width = img.width;
+	canvas.height = img.height;
+	var ctx = canvas.getContext("2d");
+	ctx.drawImage(img, 0, 0, img.width, img.height);
+	var dataURL = canvas.toDataURL("image/png");
+	return dataURL
+}
+var saveFile = function (strData, filename) {
+	var link = document.createElement('a');
+	if (typeof link.download === 'string') {
+		document.body.appendChild(link); //Firefox requires the link to be in the body
+		link.download = filename;
+		link.href = strData;
+		link.click();
+		document.body.removeChild(link); //remove the link when done
+	} else {
+		location.replace(uri);
+	}
+}
+
+function afterSTLImg(){
+	saveModuleShow( 1 );
+	// 保存成功，清空当前项目
+	objects.forEach( function ( d ) {
+		clearCache( d );
+		scene.remove( d );
+	} );
+	objects = [];
+	objects.push( plane );
+	transformControl.detach();
+	$( ".save_stl" ).addClass( "noActive_save" );
+	$("#canImg").remove();//保存当前图片后，删除
+	if(goHomeFlag){
+		goHomeFlag = false;
+		js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
+	}
+
+}
 // 导出相关 end
 //camera 方向
 
@@ -1774,6 +1898,7 @@ function enabledLego( type ) { //type 0:enable 1:disable
 //Lego end
 
 function changeControls( type, obj ) {
+	if(!transformControl.object){return}
 	$( ".zoom_options,.color_wrapper" ).hide();//隐藏子窗口
 	if (transformControlModeType == 0 && type == 0) {
 		$( obj ).toggleClass( "active_control" );
@@ -1825,6 +1950,8 @@ function deletedSelected() {
 		eachObjSetps( transformControl.object, 0 );
 		scene.remove( transformControl.object );
 		objects.splice( objects.indexOf( transformControl.object ), 1 );
+		$( ".active_control" ).removeClass( "active_control" );
+		$( ".color_control_wrapper" ).hide();
 	}
 	transformControl.detach();
 	// $(".active_control").removeClass("active_control");
@@ -1963,7 +2090,6 @@ function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之�
 						currentObj.position.y = ( WORK_SPACE_SIZE ) - ( ( SHAPE_SIZE * currentObj.scale.y ) / 2 );
 					} else if (currentObj.name == "stl") {
 						if (currentObj.position.y < ( currentObj.geometry.boundingSphere.radius * currentObj.scale.y )) {
-							console.log( currentObj.position.y, currentObj.geometry.boundingSphere.radius * currentObj.scale.y );
 							currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y );
 						}
 					} else if (currentObj.position.y < ( SHAPE_SIZE * currentObj.scale.y ) / 2) {
@@ -1994,7 +2120,6 @@ function checkAxis( type, obj ) { // 改变大小的时候，价差坐标，不�
 		if (obj.position.y >= 0 && obj.position.y <= ( ( SHAPE_SIZE * obj.scale.y ) / 2 )) {
 			obj.position.y = ( SHAPE_SIZE * obj.scale.y ) / 2;
 		} else if (obj.position.y >= 0 && tcScaleYPositionFlag) {
-			console.log( "if y 2" );
 			if (obj.name == "stl") {
 				// console.log("stl",tcScaleYPosition,((obj.geometry.boundingSphere.radius* obj.scale.y )/2));
 				if (obj.geometry.boundingSphere) {
