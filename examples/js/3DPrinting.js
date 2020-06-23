@@ -358,10 +358,11 @@ function listModule( type ) {
 	}
 }*/
 function getLocalAppSTL(){
-	var stlList = js.getStlList() || null;
-	if(stlList) {
+	var data = js.getStlList() || null;
+	var stlListHTML = '<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>我的模型</div>';
+	if(data) {
+		var stlList = eval('('+data+')');
 		var stlListIndex = 100;
-		var stlListHTML = '<div class="child_title" onclick="hideModule(this)"><i class="iconfont arrow">&#xe720;</i>我的模型</div>';
 		for (var i in stlList) {
 			stlListHTML += '';
 			stlListHTML += '<div class="module lego drag">'; // onclick="loadSTL(' + cartoonIndex + ',this)"

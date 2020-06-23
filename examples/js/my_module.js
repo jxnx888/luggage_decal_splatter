@@ -5,16 +5,7 @@ var DLETET_LEFT = 83;
 var Xflag =false;
 var Yflag =false;
 $( function () {
-	var swiper = new Swiper('.swiper-container', {
-		slidesPerView: 'auto',
-		spaceBetween: 0,
-		freeMode: false,
-		freeModeSticky : true,
-		resistance:true,
-	});
-
-	var contentModule = document.getElementById( "contentModule" );
-
+	getLocalAppSTL();
 } );
 function goPage(type) {//type 1,我的模型 2 商城 3 模型库首页 4 创建模型 5 返回上一页
 	if(type==1) {
@@ -61,4 +52,37 @@ function thisParamInfo( type ) {
 	} else {
 		$( ".module_param,.module_param_bg" ).hide();
 	}
+}
+
+function getLocalAppSTL(){
+	var data = js.getStlList() || null;
+	var stlListHTML = '';
+	if(stlList) {
+		var stlList = eval('('+data+')');
+		for (var i in stlList) {
+			stlListHTML += '<div class="each_module "><div class="each_module_wrapper clearfix swiper-container"><div class="swiper-wrapper">';
+			stlListHTML += '<div class="swiper-slide">';
+			stlListHTML += '<div class="col-xs-3"><img src="'+stlList[i].localImg+'" alt=""></div>';
+			stlListHTML += '<div class="col-xs-6"><div class="row clearfix">';
+			stlListHTML += '<div class="col-xs-12 module_name">'+stlList[i].realStlName+'</div>';
+			stlListHTML += '<div class="col-xs-12 module_time"><div class="info">创建时间: <span class="this_createTime">'+stlList[i].createTime+'</span></div></div>';
+			stlListHTML += '<div class="col-xs-12 module_size"><div class="info">打印尺寸(mm): <span class="this_createTime">X:15 Y:25 Z:30</span></div></div>';
+			stlListHTML += '</div></div>';
+			stlListHTML += '<div class="col-xs-3" onclick="thisParamInfo(0,this)"><div class="img_wrapper showHide first_child"><img src="../img/3dPrinting/btn_print.png" alt=""></div></div>';
+			stlListHTML += '</div>';
+			stlListHTML += '<div class="swiper-slide delete_slide" onclick="thisParamInfo(0,this)"><div class="delete">删除</div></div>';
+			stlListHTML += '</div></div></div>';
+		}
+	}
+	else{
+		stlListHTML+='<div class="no_module">您还没有创建模型哦，<span onclick=" goPage(4) ">点击这里创建模型</span></div>'
+	}
+	$(".mine_content").html(stlListHTML);
+	var swiper = new Swiper('.swiper-container', {
+		slidesPerView: 'auto',
+		spaceBetween: 0,
+		freeMode: false,
+		freeModeSticky : true,
+		resistance:true,
+	});
 }
