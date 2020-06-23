@@ -992,10 +992,10 @@ THREE.TransformControlsGizmo = function () {
 
 	var pickerRotate = {
 		X: [
-			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]],
+			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.2, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]],
 		],
 		Y: [
-			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]],
+			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.2, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]],
 		],
 		Z: [
 			[ new THREE.Mesh( new THREE.TorusBufferGeometry( 1, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]],
@@ -1050,13 +1050,13 @@ THREE.TransformControlsGizmo = function () {
 
 	var pickerScale = {
 		X: [
-			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0, 0.8, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]
+			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0.2, 1.3, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]
 		],
 		Y: [
-			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0, 0.8, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ]]
+			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0.2, 1.3, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ]]
 		],
 		Z: [
-			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0, 0.8, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ]]
+			[ new THREE.Mesh( new THREE.CylinderBufferGeometry( 0.2, 0.2, 1.3, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ]]
 		]/*,
 		XY: [
 			[ new THREE.Mesh( scaleHandleGeometry, matInvisible ), [ 0.85, 0.85, 0 ], null, [ 3, 3, 0.2 ]],
@@ -1182,9 +1182,9 @@ THREE.TransformControlsGizmo = function () {
 
 	// Pickers should be hidden always
 
-	this.picker[ "translate" ].visible = true;
-	this.picker[ "rotate" ].visible = true;
-	this.picker[ "scale" ].visible = true;
+	this.picker[ "translate" ].visible = false;
+	this.picker[ "rotate" ].visible = false;
+	this.picker[ "scale" ].visible = false;
 
 	// updateMatrixWorld will update transformations and appearance of individual handles
 
