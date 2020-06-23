@@ -288,7 +288,7 @@ function listModule( type ) {
 				cartoonHtml += '</div>';
 				cartoonIndex ++;
 			}
-			cartoonHtml += '<div class="go_shopping" onclick="goShop() ">购买模型</div>';
+			cartoonHtml += '<div class="go_shopping" onclick="goShop() ">购买模型<i class="iconfont arrow arrow_right">&#xe6f8;</i></div>';
 			$( ".cartoon_wrapper" ).html( cartoonHtml );
 
 		},
@@ -370,7 +370,7 @@ function getLocalAppSTL(){
 			stlListHTML += '<input class="this_module" type="hidden" value="3">';
 			stlListHTML += '<input class="this_url" type="hidden" value="' + stlList[i].realStlName + '">';
 			// stlListHTML += '<div class="drag sprint sprint_' + stlList[i].title + ' sprintY"></div>';
-			stlListHTML += '<div class="img_wrapper"><img src="file://' + stlList[i].localImg + '" alt="' + listSTL[i].localImg + '" class="drag"></div>';
+			stlListHTML += '<div class="img_wrapper"><img src="file://' + stlList[i].localImg + '" alt="' + listSTL[i].localImg + '" class="drag sprint"></div>';
 			stlListHTML += '<div class="name drag">' + stlList[i].sourceStlName + '</div>';
 			stlListHTML += '<div class="color_change">';
 			stlListHTML += '<div class="color_option color_yellow color_circle" onclick="changeColorBeforeShoot(1,this)"></div>';
@@ -434,7 +434,6 @@ function goHomePage() {
 		if (saveFlag) {
 			js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 		} else {
-			goHomeFlag = true;
 			$( ".save_ask,.save_name_module_bg" ).show();
 		}
 	} else {
@@ -450,6 +449,7 @@ function goHomeSaveModule( type ) {//type 0:gohome 1; save
 		js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
 	} else {
 		saveModuleShow( 0 );
+		goHomeFlag = true;
 	}
 }
 
@@ -1121,6 +1121,7 @@ function removeAllShapes() {
 
 function createObjForOperation( meshObj, type ) {
 	deleteObjFlag = false;
+	saveFlag = false;
 	if (allOperation.length >= 5) {
 		allOperation.shift();
 	}
@@ -1495,8 +1496,8 @@ function saveAsImage(nameStr,result) {
 		/*var getClipCanvas = (renderer.domElement).getImageData(20,20, 500,500)
 		imgData = getClipCanvas.toDataURL( strMime, 1 );*/
 		imgData = renderer.domElement.toDataURL( strMime, 1 );
-		var successFlag = js.saveStl( result, nameStr + '.stl', imgData.split(",")[1]);
-
+		// var successFlag = js.saveStl( result, nameStr + '.stl', imgData.split(",")[1]);
+		var successFlag = true;
 		if(successFlag){
 			afterSTLImg()
 		}
@@ -1505,6 +1506,8 @@ function saveAsImage(nameStr,result) {
 			setTimeout( function () {
 				$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
 			}, 1500 );
+			goHomeFlag = false;
+			saveFlag = false;
 		}
 
 	} catch (e) {
@@ -1513,6 +1516,8 @@ function saveAsImage(nameStr,result) {
 		setTimeout( function () {
 			$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
 		}, 1500 );
+		goHomeFlag = false;
+		saveFlag = false;
 		return;
 	}
 
@@ -1551,9 +1556,14 @@ function afterSTLImg(){
 	transformControl.detach();
 	$( ".save_stl" ).addClass( "noActive_save" );
 	$("#canImg").remove();//保存当前图片后，删除
+	$(".obj_control_wrapper").hide();
 	if(goHomeFlag){
 		goHomeFlag = false;
+		saveFlag = false;
 		js.changeActive( "3" );//1,我的模型 2 商城 3 模型库首页 4 创建模型
+	}else{
+		goHomeFlag = false;
+		saveFlag = false;
 	}
 
 }
@@ -1964,6 +1974,7 @@ function deletedSelected() {
 		$( ".save_stl" ).removeClass( "noActive_save" );
 	} else {
 		$( ".save_stl" ).removeClass( "noActive_save" ).addClass( "noActive_save" );
+		$(".obj_control_wrapper").hide();
 	}
 
 }
