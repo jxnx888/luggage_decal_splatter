@@ -110,7 +110,7 @@ a, button, input, select {
     border-top: 1px solid #FF9829;}
 .go_shopping .iconfont{color: #FF9829;}
 .img_wrapper { margin: auto; width: 100%; text-align: center; }
-.mymodule_wrapper .img_wrapper img {margin:.1rem auto 0; max-width: 80%; max-height: 80%;}
+.mymodule_wrapper .img_wrapper img {margin:.1rem auto 0; max-width: 90%; max-height: 90%;}
 .module.shapes.no_module .name { height: 100%; width: 1rem; margin: auto; color: #333; line-height: 2rem; z-index: 3; }
 .cartoon_wrapper .module:last-of-type,.totodile{ margin-bottom: .25rem;}
 /*.
@@ -206,13 +206,13 @@ div#shapes.closeShapes{display: none;}
     -webkit-transform:rotate(180deg); !* Safari 和 Chrome *!
     -o-transform:rotate(180deg); 	!* Opera *!}*/
 .show_more{width:.15rem;height:.6rem;background:#F0F7FF;border-radius: .1rem 0 0 .1rem;position: fixed;right:99px;top: 44%;}
-.show_more img { position: absolute; left: 4px; top: 25px; cursor: pointer;width:.05rem;height:.1rem;-ms-transform:rotate(180deg); 	/* IE 9 */-moz-transform:rotate(180deg); 	/* Firefox */-webkit-transform:rotate(180deg); /* Safari 和 Chrome */-o-transform:rotate(180deg); 	/* Opera */}
+.show_more img { position: absolute; left: 4px; top: 25px; cursor: pointer;width:.05rem;height:.1rem;}
 .show_more.show_more_close{right:0;}
 .show_more.show_more_close img{transform:rotate(180deg);
-    -ms-transform:rotate(0deg); 	/* IE 9 */
-    -moz-transform:rotate(0deg); 	/* Firefox */
-    -webkit-transform:rotate(0deg); /* Safari 和 Chrome */
-    -o-transform:rotate(0deg); 	/* Opera */}
+    -ms-transform:rotate(180deg); 	/* IE 9 */
+    -moz-transform:rotate(180deg); 	/* Firefox */
+    -webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+    -o-transform:rotate(180deg); 	/* Opera */}
 
 .note {display:none; width: 1.1rem; background: #7BB3FF; border-radius: 5px; position: fixed; top: .91rem; left: .1rem; font-size: 0.1rem; color: #426A8D; line-height: .13rem; padding: .04rem; }
 

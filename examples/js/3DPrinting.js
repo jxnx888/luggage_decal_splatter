@@ -578,7 +578,7 @@ function init() {
 	controls.minDistance = 10; //设置相机距离原点的最近距离 min distance of camera to coordinate origin
 	controls.maxDistance = 1300;//设置相机距离原点的最远距离 max distance of camera to coordinate origin
 	controls.enableKeys = true;
-	controls.rotateSpeed  = .1;
+	controls.rotateSpeed  = .3;
 	controls.keys = {
 		LEFT: 65, //left arrow
 		UP: 87, // up arrow
@@ -890,8 +890,8 @@ function onDocumentMouseDown( event ) {
 						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 						voxel.name = "stl";
 					} else if (stlGeoFlag == 2){
-						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
-						voxel.name = "stl";
+						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 );
+						voxel.name = "stlLocal";
 						voxel.rotation.set( -Math.PI / 2, 0, 0 );
 					}
 					voxel.receiveShadow = true;
@@ -1361,7 +1361,7 @@ function checkIntersection( event ) {
 
 		var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
 		if (sceneChilds.length > 1) {
-			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" )) {
+			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" || sceneChilds[0].object.name == "stlLocal" )) {
 				transformControl.detach( transformControl.object );
 				transformControl.attach( sceneChilds[0].object );
 			} else if (sceneChilds[0].object.name == "plane") {
@@ -1377,7 +1377,7 @@ function checkIntersection( event ) {
 
 		var sceneChilds = raycaster.intersectObjects( scene.children ); //get all objects in the current position of your mouse;
 		if (sceneChilds.length > 0) {
-			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" )) {
+			if (sceneChilds && ( sceneChilds[0].object.name == "shapes" || sceneChilds[0].object.name == "stl" || sceneChilds[0].object.name == "stlLocal"  )) {
 				transformControl.detach( transformControl.object );
 				transformControl.attach( sceneChilds[0].object );
 			} else if (sceneChilds[0].object.name == "plane") {
@@ -1435,8 +1435,8 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 				exporter = new THREE.STLExporter(); //导出工具  exporter tool
 				var result = exporter.parse( scene );
 				var date = Date.parse( new Date() );
-				saveString( result, nameStr + '.stl' );
-				// saveAsImage(nameStr,result );
+				// saveString( result, nameStr + '.stl' );
+				saveAsImage(nameStr,result );
 				// successFlag = true;
 			} else {
 				var input = scene;
@@ -1502,26 +1502,53 @@ function saveString( text, filename ) {
 }
 
 function saveAsImage(nameStr,result) {
-	var imgData;
+	var imgData,screenshootImgData;
 	var strDownloadMime = "image/octet-stream";
 	try {
 		var strMime = "image/png";
 		/*var getClipCanvas = (renderer.domElement).getImageData(20,20, 500,500)
 		imgData = getClipCanvas.toDataURL( strMime, 1 );*/
 		imgData = renderer.domElement.toDataURL( strMime, 1 );
-		// var successFlag = js.saveStl( result, nameStr + '.stl', imgData.split(",")[1]);
-		var successFlag = true;
-		if(successFlag){
-			afterSTLImg()
+
+		var canvas1 = document.createElement("canvas")
+		var cxt1 = canvas1.getContext("2d")
+		var img = new Image();
+		img.src = imgData;
+		img.onload = function(){
+			canvas1.width = img.width;
+			canvas1.height = img.height;
+			// 为原图添加图片
+			cxt1.drawImage(img,0,0,img.width,img.height)
+			var canvas2 = document.createElement("canvas");
+			var cxt2 = canvas2.getContext("2d");
+			canvas2.width = img.height;
+			canvas2.height = img.height;
+			// 根据坐标和宽高 截取图片
+			var dataImg = cxt1.getImageData(img.width*0.15, 0,img.width-10,img.width-10) //画框的坐标宽高
+			// 把截取的cavens图 放入临时容器
+			cxt2.putImageData(dataImg,0,0,0,0,canvas2.height, canvas2.width)
+			canvas2.style="width:85%"
+			document.body.append(canvas2);
+			// 把整个临时图片容器转成 base64字符
+			var img2 = canvas2.toDataURL("image/png");
+			var div = document.createElement("div");
+			div.textContent=img2
+			document.body.append(div);
+			// var successFlag = js.saveStl( result, nameStr + '.stl', img2.split(",")[1]);
+			var successFlag = true;
+			if(successFlag){
+				afterSTLImg()
+			}
+			else{
+				$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
+				setTimeout( function () {
+					$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
+				}, 1500 );
+				goHomeFlag = false;
+				saveFlag = false;
+			}
 		}
-		else{
-			$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
-			setTimeout( function () {
-				$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
-			}, 1500 );
-			goHomeFlag = false;
-			saveFlag = false;
-		}
+
 
 	} catch (e) {
 		console.log( e );
@@ -2118,6 +2145,10 @@ function onAnimationStep() { //检测scale，使其永远在0.1- LIMIT_SIZE 之�
 					} else if (currentObj.name == "stl") {
 						if (currentObj.position.y < ( currentObj.geometry.boundingSphere.radius * currentObj.scale.y )) {
 							currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y );
+						}
+					} else if (currentObj.name == "stlLocal") {
+						if (currentObj.position.y < 0) {
+							currentObj.position.y = 0;
 						}
 					} else if (currentObj.position.y < ( SHAPE_SIZE * currentObj.scale.y ) / 2) {
 						currentObj.position.y = ( SHAPE_SIZE * currentObj.scale.y ) / 2;
