@@ -61,7 +61,7 @@ var eachRedoObjectInfo = {};//每一个对象的每一个步骤；
 var shootedFlag = false;
 
 var orientationControls = new THREE.OrientationControls( 50 ); //右上角三视图
-var stlGeoFlag = 0; //0 geo; 1 stl
+var stlGeoFlag = 0; //0 geo; 1 stl 2, localStl
 //LDraw
 var lDrawModul;
 var lDrawModulGUI;
@@ -634,6 +634,8 @@ function init() {
 			transformDragFlag = ! event.value;
 		}
 		transformControlMove = true;
+		console.log("dragging-changed")
+
 	}, false );
 	transformControl.addEventListener( 'change', function () {
 		if (shootedFlag) {
@@ -881,12 +883,16 @@ function onDocumentMouseDown( event ) {
 					var voxel = new THREE.Mesh( currentObj, voxelMaterial );
 					voxel.position.copy( intersect.point ).add( intersect.face.normal );
 					// voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar(25 );
-					if (stlGeoFlag == 0) {
+					if (stlGeoFlag == 0) {//0 geo; 1 stl 2, localStl
 						voxel.position.divideScalar( SHAPE_SIZE ).floor().multiplyScalar( SHAPE_SIZE ).addScalar( SHAPE_SIZE / 2 );
 						voxel.name = "shapes";
 					} else if (stlGeoFlag == 1) {
 						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 						voxel.name = "stl";
+					} else if (stlGeoFlag == 2){
+						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+						voxel.name = "stl";
+						voxel.rotation.set( -Math.PI / 2, 0, 0 );
 					}
 					voxel.receiveShadow = true;
 					voxel.castShadow = true;
@@ -1415,8 +1421,12 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		outlinePass.selectedObjects = [];
 		camera.position.set( 170, 145, 255 ); //45°
 		camera.lookAt( 0, 0, 0 );
-		// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 180 ) );
+		// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 2 ) );
 		animate();
+		//threejs Y-up, 别的事Z-up,所以到处之前要旋转
+		scene.rotation.set( Math.PI / 2, 0, 0 );
+		scene.updateMatrixWorld();
+		//end
 		var nameStr = $( "#save_name" ).val();
 		var successFlag;
 		if (nameStr) {
@@ -1425,8 +1435,8 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 				exporter = new THREE.STLExporter(); //导出工具  exporter tool
 				var result = exporter.parse( scene );
 				var date = Date.parse( new Date() );
-				// saveString( result, nameStr + '.stl' );
-				saveAsImage(nameStr,result );
+				saveString( result, nameStr + '.stl' );
+				// saveAsImage(nameStr,result );
 				// successFlag = true;
 			} else {
 				var input = scene;
@@ -1464,7 +1474,10 @@ function exportMoudle( type ) { //type 0: ASCII 1: GLTF
 		scene.add( gradGroundMesh );
 		scene.add( gradGroundMesh1 );
 		scene.add( plane );
-
+		//threejs Y-up, 别的事Z-up,所以到处之前要旋转
+		scene.rotation.set( 0, 0, 0 );
+		scene.updateMatrixWorld();
+		//end
 	}
 }
 
@@ -1719,7 +1732,7 @@ async function loadSTL( thisSTL, obj ) {
 	} );
 }
 async function loadLocalSTL( thisSTL) {
-	stlGeoFlag = 1;//0 geo; 1 stl
+	stlGeoFlag = 2;//0 geo; 1 stl 2, localStl
 	showInput( 1 );
 	$( ".active_shape" ).removeClass( "active_shape" );
 	currentModule = 0; //编辑模式，各种基础模型
@@ -2223,31 +2236,31 @@ function createText( word ) {
 	var fontSize;
 	switch (message.length) {
 		case 3:
-			fontSize = 60;
-			break;
-		case 4:
-			fontSize = 55;
-			break;
-		case 5:
 			fontSize = 50;
 			break;
-		case 6:
+		case 4:
 			fontSize = 45;
 			break;
-		case 7:
+		case 5:
 			fontSize = 40;
+			break;
+		case 6:
+			fontSize = 35;
+			break;
+		case 7:
+			fontSize = 30;
 			break;
 		case 8:
-			fontSize = 40;
+			fontSize = 20;
 			break;
 		case 9:
-			fontSize = 40;
+			fontSize = 10;
 			break;
 		case 10:
-			fontSize = 40;
+			fontSize = 10;
 			break;
 		default:
-			fontSize = 70;
+			fontSize = 50;
 	}
 	var textGeo = new THREE.TextGeometry( message, {
 		font: wordFont,
@@ -2262,7 +2275,7 @@ function createText( word ) {
 	geometry.computeBoundingBox();
 
 	xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x ); //位置，使其居中
-	geometry.translate( xMid, 0, 0 );
+	geometry.translate( xMid, -25, 0 );
 	geometry.rotateX( - ( Math.PI / 2 ) ); //文字为横卧在工作台上
 	// make shape ( N.B. edge view not visible )
 	var matLite = new THREE.MeshPhongMaterial( { color: wordColor, flatShading: true } );
