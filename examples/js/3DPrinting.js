@@ -633,9 +633,6 @@ function init() {
 			controls.enabled = ! event.value;
 			transformDragFlag = ! event.value;
 		}
-		transformControlMove = true;
-		console.log("dragging-changed")
-
 	}, false );
 	transformControl.addEventListener( 'change', function () {
 		if (shootedFlag) {
@@ -648,11 +645,8 @@ function init() {
 		transformControlMove = false;
 		checkScalePosition( transformControl.object );
 	}, false );
-	transformControl.addEventListener( 'touchstart', function () {
-		transformControlMove = false;
-		var obj = transformControl.object;
-		tcScaleYPosition = obj.position.clone().y;
-		tcScaleY = obj.scale.clone().y;
+	transformControl.addEventListener( 'objectChange', function () {
+		transformControlMove = true;
 	}, false );
 	transformControl.addEventListener( 'mouseUp', function () {
 		if (transformControlMove) {
@@ -691,7 +685,7 @@ function init() {
 	container.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	container.addEventListener( 'touchmove', function ( e ) {
 		onDocumentMouseMove( e );
-		transformControlMove = true;
+		// transformControlMove = true;
 		if (e.touches.length >= 2 && twoPointTouchFlag) { //判断是否有两个点在屏幕上
 			twoPointTouchFlag = true;
 			pointTwoFlag = e.touches; //得到第一组两个点
@@ -710,12 +704,11 @@ function init() {
 			}
 		}
 	}, false );
-
-	container.addEventListener( 'mouseup', function ( e ) {
+	container.addEventListener( 'mouseup', function ( e ) { //可屏蔽
 		if (transformControl.object) {
 			focusedTransformObj = transformControl.object;
 		}
-		if (currentModule == 0 && ! controlsMoved) {
+		if (! controlsMoved && !transformControlMove) {
 			setTimeout( function () {
 				onDocumentMouseDown( e );
 			}, 100 );
@@ -731,7 +724,7 @@ function init() {
 		if (transformControl.object) {
 			focusedTransformObj = transformControl.object;
 		}
-		if (currentModule == 0 && ! controlsMoved) {
+		if (! controlsMoved && !transformControlMove) {
 			setTimeout( function () {
 				onDocumentMouseDown( e );
 			}, 100 );
@@ -742,6 +735,7 @@ function init() {
 		tcX = '';
 		tcY = '';
 		tcZ = '';
+		transformControlMove = false;
 	}, false );
 	container.addEventListener( 'keydown', onDocumentKeyDown, false );
 	container.addEventListener( 'keyup', onDocumentKeyUp, false );
