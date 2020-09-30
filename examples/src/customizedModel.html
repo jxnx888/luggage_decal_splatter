@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>MagicBox::定制名字模型</title>
+	<meta charset="utf-8">
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=1, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=11,chrome=1">
+	<link rel="stylesheet" type="text/css" href="../css/dialog.css"/>
+	<link type="text/css" rel="stylesheet" href="../css/font/iconfont.css">
+	<link type="text/css" rel="stylesheet" href="../css/swiper.min.css">
+	<link type="text/css" rel="stylesheet" href="../css/common.css">
+	<link type="text/css" rel="stylesheet" href="../css/customizedModel.css">
+</head>
+<body>
+<div class="main_wrapper">
+	<div class="container">
+
+		<div class="name_wrapper">
+			<div class="title">请输入您的姓名：</div>
+			<input type="text" class="name_inpit" id="modelName" placeholder="请输入您的姓名,最大5个字符" maxlength="5">
+			<div class="validate_name" onclick="clearTimeoutFn()">请输入您的姓名</div>
+			<div class="btn_confirm" onclick="checkName()">下一步</div>
+		</div>
+		<div class="row clearfix modules_slides">
+			<div class="title">请选择定制模型（拥有您的名字）</div>
+			<div class="swiper-container">
+				<div class="swiper-wrapper">
+					<div class="swiper-slide">
+						<div class="img_wrapper">
+							<img src="../img/3dPrinting/ring.png" alt="">
+						</div>
+					</div>
+					<div class="swiper-slide">
+						<div class="img_wrapper">
+							<img src="../img/3dPrinting/longmao.png" alt="">
+						</div>
+					</div>
+					<div class="swiper-slide">
+						<div class="img_wrapper">
+							<img src="../img/3dPrinting/shudi.png" alt="">
+						</div>
+					</div>
+				</div>
+				<!-- Add Arrows -->
+				<!-- Add Arrows -->
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+			</div>
+			<div class="confirm_print" onclick="confirmPrint()">打印</div>
+		</div>
+	</div>
+	<div id="container"></div>
+</div>
+</body>
+
+<script src='../js/jquery.min.js'></script>
+<script src='../js/three.js'></script>
+<script src='../js/loaders/STLLoader.js'></script>
+<script src='../js/exporters/STLExporter.js'></script>
+<script src="../js/others/BendModifierMy.js"></script>
+<script src='../js/swiper.min.js'></script>
+<script src='../js/3DPrintingName.js'></script>
+</html>

@@ -92,6 +92,11 @@
     ],
     "stl": [
       {
+        "title": "ring",
+        "name": "戒指",
+        "url": "../img/3dPrinting/cube.png"
+      },
+       {
         "title": "standing",
         "name": "站立",
         "url": "../img/3dPrinting/cube.png"

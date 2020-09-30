@@ -221,7 +221,7 @@ div#shapes.closeShapes{display: none;}
 .sprint {width: .5rem; height: .5rem; margin:.07rem auto 0;background-repeat: no-repeat;background-size: cover;background-position: -50px 0;}
 .sprint_cube{background-image: url("../img/3dPrinting/sprint_cube.png");}
 .sprint_ball{background-image: url("../img/3dPrinting/sprint_ball.png");}
-.sprint_cylinder{background-image: url("../img/3dPrinting/sprint_cylinder.png");}
+.sprint_cylinder,.sprint_ring {background-image: url("../img/3dPrinting/sprint_cylinder.png");}
 .sprint_doughnut{background-image: url("../img/3dPrinting/sprint_doughnut.png");}
 .sprint_hollowcylinder{background-image: url("../img/3dPrinting/sprint_hollowcylinder.png");}
 .sprint_prismatic{background-image: url("../img/3dPrinting/sprint_prismatic.png");}

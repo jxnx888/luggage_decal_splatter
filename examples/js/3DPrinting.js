@@ -36,8 +36,8 @@ var shapeHelperObjects = [];
 var shapesObj = []; //所有的当前已放置的obj
 var currentAllObjs = []; //所有的当前已放置的obj
 var transformControl;
-var WORK_SPACE_SIZE = 200;
-var SHAPE_SIZE = 20;
+var WORK_SPACE_SIZE = 100;
+var SHAPE_SIZE = 10;
 var LIMIT_SIZE = 4;
 var tcX, tcY, tcZ, tcScale, tcScaleY; //当前对象的xyz值
 var tcScaleYPosition, tcScaleYPositionFlag; //tcScaleYPosition: 改变大小之前位置；tcScaleYPosition: 改变大小之前是否贴住工作台
@@ -493,7 +493,7 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 	// camera.position.set( 0, 200, 350 ); //正面
-	camera.position.set( 170, 145, 255 ); //45°
+	camera.position.set( 83, 71, 124); //45°
 	camera.lookAt( 0, 0, 0 );
 
 	scene = new THREE.Scene();
@@ -881,10 +881,11 @@ function onDocumentMouseDown( event ) {
 						voxel.position.divideScalar( SHAPE_SIZE ).floor().multiplyScalar( SHAPE_SIZE ).addScalar( SHAPE_SIZE / 2 );
 						voxel.name = "shapes";
 					} else if (stlGeoFlag == 1) {
-						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+						voxel.position.divideScalar( SHAPE_SIZE*2.5 ).floor().multiplyScalar( SHAPE_SIZE*2.5 ).addScalar( SHAPE_SIZE*2.5/2 );
 						voxel.name = "stl";
+						voxel.scale.set(.5,.5,.5)
 					} else if (stlGeoFlag == 2){
-						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 );
+						voxel.position.divideScalar( SHAPE_SIZE*2.5  ).floor().multiplyScalar( SHAPE_SIZE*2.5 );
 						voxel.name = "stlLocal";
 						voxel.rotation.set( -Math.PI / 2, 0, 0 );
 					}
@@ -1696,6 +1697,10 @@ async function loadSTL( thisSTL, obj ) {
 	var file;
 	switch (thisSTL) {
 		case 0:
+			file = '../models/stl/ascii/3dPrinting/ring.stl';
+			currentShapeType = 5;
+			break;
+		case 0:
 			file = '../models/stl/ascii/3dPrinting/standing.stl';
 			currentShapeType = 5;
 			break;
@@ -2349,3 +2354,74 @@ function createText( word ) {
 }
 
 // Text object end
+
+/*在平面上生成镂空字体*/
+function calcShape(font,name,currentObj) {
+	var fontShape = font.generateShapes(name,1); //text, size
+	// var boxShape = currentObj;
+	var boxShape = new THREE.Shape();
+	boxShape.moveTo(-2,-2);
+	boxShape.lineTo(2,-2);
+	boxShape.lineTo(2,2);
+	boxShape.lineTo(-2,2);
+	boxShape.lineTo(-2,-2);
+	boxShape.holes.push(fontShape[0]);
+	return boxShape;
+}
+
+function creatModifiedName(name){
+	name = '宁鑫'
+	var xMid,text;
+	var loader = new THREE.FontLoader();
+	loader.load( '../css/font/other/minicaiyunkongxin.json',
+		// onLoad callback
+		function ( font ) {
+			file = '../models/stl/ascii/3dPrinting/ring.stl';
+			var loader = new THREE.STLLoader();
+			loader.load( file, function ( geometry ) {
+				currentObj = geometry;
+				//生成字体
+				textGeometry = new THREE.ExtrudeGeometry(calcShape(font,name,currentObj), {
+					depth:1,
+					bevelEnabled: false,
+					curveSegments: 4
+				});
+				let material = new THREE.MeshLambertMaterial({ color: 0x666666 });
+				//object
+				cube = new THREE.Mesh(textGeometry, material);
+				//立体模型
+				scene.add(cube);
+				// scene.add(shape);
+			} );
+
+
+			/*var geometry = new THREE.TextBufferGeometry( name, {
+				font: font,
+				size: 20,
+				height: 10,
+				curveSegments: 12,
+				bevelEnabled: false,
+				bevelThickness: 10,
+				bevelSize: 8,
+				bevelOffset: 0,
+				bevelSegments: 5
+			} );
+			var matLite = new THREE.MeshPhongMaterial( { color: 0x006699, flatShading: true } );
+			text = new THREE.Mesh( geometry, matLite );
+			text.name = 'shapes_text';
+			text.receiveShadow = true;
+			text.castShadow = true;
+			scene.add( text );
+			objects.push( text );*/
+		},
+		// onProgress callback
+		function ( xhr ) {
+			console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+		},
+
+		// onError callback
+		function ( err ) {
+			console.log( 'An error happened' );
+		}
+		);
+}
