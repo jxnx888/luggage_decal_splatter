@@ -227,7 +227,7 @@
 			// 生成名字
 			if(fontObj) {// && false
 				name = "SS"
-				//B: 87.037 C:117.707 O:116  G:121.36 S:222.64 U:45.45 R:37
+				//B: 87.037 C:117.707 O:116  G:121.36 S:222.64 SS:448.16 U:45.45 R:37
 				console.log( "name::" + name )
 				var currentWord = name.toUpperCase();
 				console.log( "currentWord::" + currentWord )
@@ -235,7 +235,7 @@
 					font: fontObj,
 					size: 3,
 					height: 1,
-					curveSegments: 22,
+					curveSegments: 2,
 					bevelEnabled: false
 				} );
 				textGeo.center();
@@ -246,7 +246,7 @@
 					textGeo.translate( centerOffset+1, 0, 2.5 );//坐标中心位置
 				}
 				else if(name.length==2){
-					textGeo.translate( centerOffset+1.5, 1, 2.5 );//坐标中心位置
+					textGeo.translate( centerOffset+1.5, 0, 2.5 );//坐标中心位置
 				}
 				else if(name.length==3){
 					textGeo.translate( centerOffset+3, 0, 2.5 );//坐标中心位置
