@@ -75,6 +75,16 @@ var lDrawGuiData = {
 var currentModule = 0; //0:基础模型 1：lego
 var goHomeFlag = false;//是否是点击首页
 var deleteObjFlag = false;//是否点击了删除
+var mouse = new THREE.Vector2();
+var modifier = new THREE.BendModifier();
+var fontObj;
+var exporter = new THREE.STLExporter(); //导出工具  exporter tool
+var nameValidate;
+var userName;
+var model_ring;
+var model_longmao;
+var model_shudi;
+var currentModelStl=0;
 $( function () {
 	listModule();
 	// getLocalAppSTL();
@@ -159,13 +169,13 @@ $( function () {
 		dragedFlag = false;
 		$( ".active_shape" ).removeClass( "active_shape" );
 	}, false );
-/*	window.addEventListener( "touchmove", function ( event ) {
-			if (event.scale !== 1) {
-				event.preventDefault();
-			}
-		},
-		{ passive: false }
-	);*/
+	/*	window.addEventListener( "touchmove", function ( event ) {
+				if (event.scale !== 1) {
+					event.preventDefault();
+				}
+			},
+			{ passive: false }
+		);*/
 //input标签 软键盘打开和收起
 	$( "#save_name" ).focus( function () {
 		$( ".save_name_module" ).css( { "top": "-.85rem" } );
@@ -772,6 +782,7 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 	animate();
 	onWindowResize();
+	getFont();
 }
 
 function animate() {
@@ -1401,79 +1412,62 @@ function cleanSelectedObject( obj ) {
 }
 
 // 导出相关
-function exportMoudle( type ) { //type 0: ASCII 1: GLTF
-	if (objects.length > 1) {
-		scene.remove( transformControl );
-		scene.remove( mouseHelper );
-		clearCache( gridHelper );
-		scene.remove( gridHelper );
-		clearCache( gradGroundMesh );
-		scene.remove( gradGroundMesh );
-		clearCache( gradGroundMesh1 );
-		scene.remove( gradGroundMesh1 );
-		clearCache( plane );
-		scene.remove( plane );
-		outlinePass.selectedObjects = [];
-		camera.position.set( 170, 145, 255 ); //45°
-		camera.lookAt( 0, 0, 0 );
-		// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 2 ) );
-		animate();
-		//threejs Y-up, 别的事Z-up,所以到处之前要旋转
-		scene.rotation.set( Math.PI / 2, 0, 0 );
-		scene.updateMatrixWorld();
-		//end
-		var nameStr = $( "#save_name" ).val();
-		var successFlag;
-		if (nameStr) {
-			saveFlag = true;
-			if (type === 0) {
-				exporter = new THREE.STLExporter(); //导出工具  exporter tool
-				var result = exporter.parse( scene );
-				var date = Date.parse( new Date() );
-				// saveString( result, nameStr + '.stl' );
-				saveAsImage(nameStr,result );
-				// successFlag = true;
-			} else {
-				var input = scene;
-				var gltfExporter = new THREE.GLTFExporter();
-				var options = {
-					trs: false,
-					onlyVisible: true,
-					truncateDrawRange: true,
-					binary: false,
-					forcePowerOfTwoTextures: false,
-					maxTextureSize: 4096
-				};
-				gltfExporter.parse( input, function ( result ) {
-					var output = JSON.stringify( result, null, 2 );
-					var date = Date.parse( new Date() );
-					saveString( output, nameStr + '.gltf' );
-				}, options );
-			}
+function exportMoudle( type , name,thisSTL) { //type 0: ASCII 1: GLTF
+	scene.remove( mouseHelper );
+	clearCache( gridHelper );
+	scene.remove( gridHelper );
+	clearCache( gradGroundMesh );
+	scene.remove( gradGroundMesh );
+	clearCache( gradGroundMesh1 );
+	scene.remove( gradGroundMesh1 );
+	clearCache( plane );
+	scene.remove( plane );
+	camera.position.set( 67, 57, 101 ); //45°
+	camera.lookAt( 0, 0, 0 );
+	// scene.rotateOnAxis( new THREE.Vector3( 1, 0, 0 ), -90 * ( Math.PI / 2 ) );
+	animate();
+	//threejs Y-up, 别的事Z-up,所以到处之前要旋转
+	scene.rotation.set( Math.PI / 2, 0, 0 );
+	scene.updateMatrixWorld();
+	//end
+	var nameStr = name;
+	if (nameStr) {
+		// exporter = new THREE.STLExporter(); //导出工具  exporter tool
+		var result = exporter.parse( scene );
+		var date = Date.parse( new Date() );
+		if(thisSTL==0){
+			model_ring = result;
+		} else if(thisSTL==1){
+			model_longmao = result;
+		}else if(thisSTL==2){
+			model_shudi = result;
 		}
+		console.log("clean前：")
+		console.log(scene.children)
+		clearObjects();
+		console.log("clean后：")
+		console.log(scene.children)
+		console.log("thisStl down:"+thisSTL)
+		// saveString( result, nameStr + '.stl' );
+		// saveAsImage(nameStr,result );
+		// successFlag = true;
 
-		if (successFlag) {
-			saveAsImage(nameStr + '.png' );
-			// 保存成功，清空当前项目 end
-		} else {
-			$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
-			setTimeout( function () {
-				$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
-			}, 1500 );
-		}
-		if (! mobile) {
-			scene.add( mouseHelper );
-		}
-		scene.add( transformControl );
-		scene.add( gridHelper );
-		scene.add( gradGroundMesh );
-		scene.add( gradGroundMesh1 );
-		scene.add( plane );
-		//threejs Y-up, 别的事Z-up,所以到处之前要旋转
-		scene.rotation.set( 0, 0, 0 );
-		scene.updateMatrixWorld();
-		//end
 	}
+	/*
+			scene.add( gridHelper );
+			scene.add( gradGroundMesh );
+			scene.add( gradGroundMesh1 );
+			scene.add( plane );*/
+	//threejs Y-up, 别的事Z-up,所以到处之前要旋转
+	scene.rotation.set( 0, 0, 0 );
+	scene.updateMatrixWorld();
+	if(thisSTL==0){
+		loadSTL(1)
+	} else if(thisSTL==1){
+		loadSTL(2);
+	}else if(thisSTL==2){
+	}
+	//end
 }
 
 function save( blob, filename ) {
@@ -1484,99 +1478,11 @@ function save( blob, filename ) {
 	link.href = URL.createObjectURL( blob );
 	link.download = filename;
 	link.click();
-	$( ".saveFile" ).remove();
-
-	// document.location = "js://webview?url=" + URL.createObjectURL( blob )+"&fileName="+filename;
-	//$( ".save_name_module,.save_name_module_bg" ).hide();
 }
 
 function saveString( text, filename ) {
 	// console.log( new Blob( [ text ]))
 	save( new Blob( [text], { type: 'text/plain' } ), filename );
-
-}
-
-function saveAsImage(nameStr,result) {
-	var imgData,screenshootImgData;
-	var strDownloadMime = "image/octet-stream";
-	try {
-		var strMime = "image/png";
-		/*var getClipCanvas = (renderer.domElement).getImageData(20,20, 500,500)
-		imgData = getClipCanvas.toDataURL( strMime, 1 );*/
-		imgData = renderer.domElement.toDataURL( strMime, 1 );
-
-		var canvas1 = document.createElement("canvas")
-		var cxt1 = canvas1.getContext("2d")
-		var img = new Image();
-		img.src = imgData;
-		img.onload = function(){
-			canvas1.width = img.width;
-			canvas1.height = img.height;
-			// 为原图添加图片
-			cxt1.drawImage(img,0,0,img.width,img.height)
-			var canvas2 = document.createElement("canvas");
-			var cxt2 = canvas2.getContext("2d");
-			canvas2.width = img.height;
-			canvas2.height = img.height;
-			// 根据坐标和宽高 截取图片
-			var dataImg = cxt1.getImageData(img.width*0.15, 0,img.width-10,img.width-10) //画框的坐标宽高
-			// 把截取的cavens图 放入临时容器
-			cxt2.putImageData(dataImg,0,0,0,0,canvas2.height, canvas2.width)
-			canvas2.style="width:85%"
-			document.body.append(canvas2);
-			// 把整个临时图片容器转成 base64字符
-			var img2 = canvas2.toDataURL("image/png");
-			var div = document.createElement("div");
-			div.textContent=img2
-			document.body.append(div);
-			// var successFlag = js.saveStl( result, nameStr + '.stl', img2.split(",")[1]);
-			var successFlag = true;
-			if(successFlag){
-				afterSTLImg()
-			}
-			else{
-				$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
-				setTimeout( function () {
-					$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
-				}, 1500 );
-				goHomeFlag = false;
-				saveFlag = false;
-			}
-		}
-
-
-	} catch (e) {
-		console.log( e );
-		$( ".save_name_verify" ).text( "保存失败，请重试" ).show();
-		setTimeout( function () {
-			$( ".save_name_verify" ).text( "请输入模型名称" ).hide();
-		}, 1500 );
-		goHomeFlag = false;
-		saveFlag = false;
-		return;
-	}
-
-}
-function getBase64Image(img) {
-	var canvas = document.createElement("canvas");
-	canvas.width = img.width;
-	canvas.height = img.height;
-	var ctx = canvas.getContext("2d");
-	ctx.drawImage(img, 0, 0, img.width, img.height);
-	var dataURL = canvas.toDataURL("image/png");
-	return dataURL
-}
-var saveFile = function (strData, filename) {
-	var link = document.createElement('a');
-	if (typeof link.download === 'string') {
-		document.body.appendChild(link); //Firefox requires the link to be in the body
-		link.download = filename;
-		link.href = strData;
-		link.click();
-		document.body.removeChild(link); //remove the link when done
-	} else {
-		location.replace(uri);
-	}
 }
 
 function afterSTLImg(){
@@ -1685,78 +1591,6 @@ function resetZoom() {
 	camera.updateProjectionMatrix();
 }
 
-async function loadSTL( thisSTL, obj ) {
-	stlGeoFlag = 1;//0 geo; 1 stl
-	showInput( 1 );
-	$( ".active_shape" ).removeClass( "active_shape" );
-	$( obj ).addClass( "active_shape" );
-	currentModule = 0; //编辑模式，各种基础模型
-	enabledLego( 1 );
-	$( "#loading_data" ).show();
-	shootedFlag = false;
-	var file;
-	switch (thisSTL) {
-		case 0:
-			file = '../models/stl/ascii/3dPrinting/ring.stl';
-			currentShapeType = 5;
-			break;
-		case 0:
-			file = '../models/stl/ascii/3dPrinting/standing.stl';
-			currentShapeType = 5;
-			break;
-		case 1:
-			file = '../models/stl/ascii/3dPrinting/climbing.stl';
-			currentShapeType = 6;
-			break;
-		case 2:
-			file = '../models/stl/ascii/3dPrinting/lying.stl';
-			currentShapeType = 7;
-			break;
-		case 3:
-			file = '../models/stl/ascii/3dPrinting/sitting.stl';
-			currentShapeType = 8;
-			break;
-		case 4:
-			file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
-			currentShapeType = 9;
-			break;
-		case 5:
-			file = '../models/stl/ascii/3dPrinting/pokemon/bulbasaur_starter_1gen_flowalistik.stl';
-			currentShapeType = 10;
-			break;
-		case 6:
-			file = '../models/stl/ascii/3dPrinting/pokemon/charmander_starter_1gen_flowalistik.stl';
-			currentShapeType = 11;
-			break;
-		case 7:
-			file = '../models/stl/ascii/3dPrinting/pokemon/chikorita_starter_2gen_flowalistik.stl';
-			currentShapeType = 12;
-			break;
-		case 8:
-			file = '../models/stl/ascii/3dPrinting/pokemon/pikachu_1gen_flowalistik.stl';
-			currentShapeType = 13;
-			break;
-		case 9:
-			file = '../models/stl/ascii/3dPrinting/pokemon/squirtle_starter_1gen_flowalistik.stl';
-			currentShapeType = 18;
-			break;
-		case 10:
-			file = '../models/stl/ascii/3dPrinting/pokemon/totodile_starter_2gen_flowalistik.stl';
-			currentShapeType = 19;
-			break;
-		case 11:
-			file = '../models/stl/ascii/3dPrinting/five-point-star.stl';
-			currentShapeType = 20;
-			break;
-		default:
-			file = '../models/stl/ascii/3dPrinting/tyrannosaurusRex.stl';
-	}
-	var loader = new THREE.STLLoader();
-	await loader.load( file, function ( geometry ) {
-		currentObj = geometry;
-		$( "#loading_data" ).hide();
-	} );
-}
 async function loadLocalSTL( thisSTL) {
 	stlGeoFlag = 2;//0 geo; 1 stl 2, localStl
 	showInput( 1 );
@@ -2354,3 +2188,115 @@ function createText( word ) {
 }
 
 // Text object end
+async function loadSTL( thisSTL, name ) {
+	var file,fontSize;
+	switch (thisSTL) {
+		case 0:
+			file = '../models/stl/ascii/3dPrinting/ring.stl';
+			break;
+		case 1:
+			file = '../models/stl/ascii/3dPrinting/longmao.stl';
+			break;
+		case 2:
+			file = '../models/stl/ascii/3dPrinting/shudi.stl';
+			break;
+		default:
+			file = '../models/stl/ascii/3dPrinting/ring.stl';
+	}
+
+	var loader = new THREE.STLLoader();
+	await loader.load( file, function ( geometry ) {
+		currentObj = geometry;
+		console.log(currentObj)
+		var voxelMaterial = currentObjMaterial.clone();
+		var voxel = new THREE.Mesh( currentObj, voxelMaterial );
+		// voxel.rotation.set( Math.PI / 2, 0, 0 );
+		voxel.rotation.x = -Math.PI/2;
+		voxel.position.set( 0, 0, 0 );
+		// voxel.position.divideScalar( SHAPE_SIZE*2.5 ).floor().multiplyScalar( SHAPE_SIZE*2.5 ).addScalar( SHAPE_SIZE*2.5/2 );
+		voxel.name = "stl";
+		voxel.scale.set(1,1,1)
+		if(thisSTL==2){
+			voxel.scale.set(.9,.9,.9)
+		}
+		voxel.receiveShadow = true;
+		voxel.castShadow = true;
+		objects.push( voxel );
+		scene.add( voxel );
+		creatModifiedName(userName,thisSTL)
+	} );
+}
+//main end
+function getFont(){
+	var loader = new THREE.FontLoader();
+	loader.load( '../css/font/other/SimHei_Regular.json', function ( font ) {
+		fontObj = font;
+		console.log("get Font")
+		// loadSTL(0)
+	})
+}
+function creatModifiedName(name,thisSTL){
+	var fontSize = 5;
+	if(thisSTL == 0) {//戒指
+		fontSize = 4;
+	}
+	/*var loader = new THREE.FontLoader();
+	loader.load( '../css/font/other/SimHei_Regular.json', function ( font ) {*/
+	if(fontObj) {
+		console.log( "name::" + name )
+		var currentWord = name.toUpperCase();
+		console.log( "currentWord::" + currentWord )
+		var textGeo = new THREE.TextGeometry( currentWord, {
+			font: fontObj,
+			size: fontSize,
+			height: 1.2,
+			curveSegments: 22,
+			bevelEnabled: false
+		} );
+		textGeo.computeBoundingBox();
+		textGeo.computeVertexNormals();
+		var centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x ); //位置，使其居中 centerOffset
+		textGeo.translate( centerOffset, - 0, 0 );//坐标中心位置
+		var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff, flatShading: true } );
+		var mesh = new THREE.Mesh( textGeo, textMaterial );
+		mesh.receiveShadow = true;
+		mesh.castShadow = true;
+		if (thisSTL == 0) {//戒指
+			mesh.rotation.y = Math.PI / 2; // 文字反转
+			mesh.rotation.x = Math.PI / 2;
+			mesh.position.x = 11.88;
+			mesh.position.y = 12.61;
+			mesh.position.z = - 1.99;
+			var direction = new THREE.Vector3( 0, 0, - 1 );
+			var axis = new THREE.Vector3( 0, 1, 0 );
+			var angle = Math.PI / 6;
+			modifier.set( direction, axis, angle ).modify( mesh.geometry );
+		} else if (thisSTL == 1) { //龙猫
+			mesh.rotation.y = Math.PI; // 文字反转180
+			mesh.rotation.x = ( Math.PI / 2 ) / 8;
+			mesh.position.y = 14;
+			mesh.position.z = - 13;
+			var direction = new THREE.Vector3( 0, 0, - 1 );
+			var axis = new THREE.Vector3( 0, 1, 0 );
+			var angle = Math.PI / 6;
+			modifier.set( direction, axis, angle ).modify( mesh.geometry );
+		} else if (thisSTL == 2) { //竖笛
+			mesh.rotation.y = - Math.PI / 2; // 文字反转90
+			mesh.rotation.x = Math.PI / 2; // 文字反转90
+			mesh.position.x = - 5.4;
+			mesh.position.y = 71;
+			mesh.position.z = 4.9;
+			var direction = new THREE.Vector3( 0, 0, - 1 );
+			var axis = new THREE.Vector3( 0, 1, 0 );
+			var angle = Math.PI / 40;
+			modifier.set( direction, axis, angle ).modify( mesh.geometry );
+		}
+		objects.push( mesh );
+		scene.add( mesh )
+		// camera.position.set(7,37,49)
+		// camera.lookAt( 0, 0, 0 );
+		// exportMoudle( 0, name, thisSTL )
+	}
+	// } );
+}
+

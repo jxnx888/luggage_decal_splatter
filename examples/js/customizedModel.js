@@ -342,7 +342,6 @@ function exportMoudle( type , name,thisSTL) { //type 0: ASCII 1: GLTF
 		if (nameStr) {
 			// exporter = new THREE.STLExporter(); //导出工具  exporter tool
 			var result = exporter.parse( scene );
-			var date = Date.parse( new Date() );
 			if(thisSTL==0){
 				model_ring = result;
 			} else if(thisSTL==1){
