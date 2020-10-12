@@ -84,6 +84,7 @@ var userName;
 var model_ring;
 var model_longmao;
 var model_shudi;
+var model_heart;
 var currentModelStl=0;
 $( function () {
 	listModule();
