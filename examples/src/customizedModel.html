@@ -15,21 +15,30 @@
 <body>
 <div class="main_wrapper">
 	<div class="container">
-
+		<div class="top_menu row clearfix">
+			<div class="top_menu_btn col-xs-3 text-center"></div>
+			<div class="top_menu_btn col-xs-6 text-center" id="title">个性定制模型</div>
+			<div class="top_menu_btn col-xs-3 text-right">跳过</div>
+		</div>
 		<div class="name_wrapper">
-			<div class="title">请输入您的姓名：</div>
-			<input type="text" class="name_inpit" id="modelName" placeholder="请输入您的姓名,最大5个字符" maxlength="5">
+			<input type="text" class="name_inpit" id="modelName" placeholder="请输入您的姓名，最多5个字符" maxlength="5">
+			<div class="name_note">*录入姓名可打印有您姓名的模型</div>
 			<div class="validate_name" onclick="clearTimeoutFn()">请输入您的姓名</div>
 			<div class="btn_confirm" onclick="checkName()">下一步</div>
 			<div id="es6Next">下一步</div>
 		</div>
 		<div class="row clearfix modules_slides">
-			<div class="title">请选择定制模型（拥有您的名字）</div>
+<!--			<div class="title">请选择定制模型（拥有您的名字）</div>-->
 			<div class="swiper-container">
 				<div class="swiper-wrapper">
-					<div class="swiper-slide">
+					<!--<div class="swiper-slide">
 						<div class="img_wrapper">
 							<img src="../img/3dPrinting/ring.png" alt="">
+						</div>
+					</div>-->
+					<div class="swiper-slide">
+						<div class="img_wrapper">
+							<img src="../img/3dPrinting/heart.png" alt="">
 						</div>
 					</div>
 					<div class="swiper-slide">
@@ -42,18 +51,15 @@
 							<img src="../img/3dPrinting/shudi.png" alt="">
 						</div>
 					</div>
-					<div class="swiper-slide">
-						<div class="img_wrapper">
-							<img src="../img/3dPrinting/btn_bg_blue.png" alt="">
-						</div>
-					</div>
+
 				</div>
 				<!-- Add Arrows -->
 				<!-- Add Arrows -->
 				<div class="swiper-button-prev"></div>
 				<div class="swiper-button-next"></div>
 			</div>
-			<div class="confirm_print" onclick="confirmPrint()">打印</div>
+			<div class="confirm_print" onclick="confirmPrint()"></div>
+			<div class="print_note">请选择模型打印</div>
 		</div>
 	</div>
 	<div id="container"></div>

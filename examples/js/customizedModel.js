@@ -114,6 +114,7 @@ function checkName() {
 	userName = name;
 	if(name){
 		showLoading();
+		$("#title").text("选择定制模型")
 		$(".name_wrapper").hide();
 		$(".modules_slides").show(200);
 		loadSTL(1);
@@ -133,13 +134,14 @@ function clearTimeoutFn() {
 }
 function confirmPrint(){
 	if(currentModelStl == 0){
-		saveString(model_ring,userName+".stl")
+		// saveString(model_ring,userName+".stl")
+		saveString(model_heart,userName+"-heart.stl")
 	}
 	else if(currentModelStl == 1){
-		saveString(model_longmao,userName+".stl")
+		saveString(model_longmao,userName+"longmao.stl")
 	}
 	else if(currentModelStl == 2){
-		saveString(model_shudi,userName+".stl")
+		saveString(model_shudi,userName+"-shudi.stl")
 	}
 }
 //main
