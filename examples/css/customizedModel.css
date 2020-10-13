@@ -102,3 +102,5 @@ body{background: #79B1EA; /* Old browsers */height: 100%;}
 .name_wrapper{text-align: center;line-height: .6rem; position: relative;}
 #modelName {padding: .05rem .1rem;border-radius: 4px;width: 80%;}
 .validate_name {display:none; color: red; position: absolute; top: .77rem; left: 13%; width: 74%; text-align: left; background: #FFF; line-height: .28rem; }
+
+#es6Next{display: none}

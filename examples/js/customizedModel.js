@@ -84,7 +84,9 @@ var userName;
 var model_ring;
 var model_longmao;
 var model_shudi;
+var model_heart;
 var currentModelStl=0;
+var checkNameFlag=false;//名字检测是否通过
 $( function () {
 	var swiper = new Swiper( '.swiper-container', {
 		freeMode: false,
@@ -111,9 +113,11 @@ function checkName() {
 	var name = $("#modelName").val();
 	userName = name;
 	if(name){
+		showLoading();
 		$(".name_wrapper").hide();
 		$(".modules_slides").show(200);
-		loadSTL(0);
+		loadSTL(1);
+		checkNameFlag=true;
 	}
 	else{
 		$(".validate_name").show();
@@ -344,10 +348,13 @@ function exportMoudle( type , name,thisSTL) { //type 0: ASCII 1: GLTF
 			var result = exporter.parse( scene );
 			if(thisSTL==0){
 				model_ring = result;
+				console.log("get model_ring result")
 			} else if(thisSTL==1){
 				model_longmao = result;
+				console.log("get model_longmao result")
 			}else if(thisSTL==2){
 				model_shudi = result;
+				console.log("get model_shudi result")
 			}
 			console.log("clean前：")
 			console.log(scene.children)
@@ -373,6 +380,7 @@ function exportMoudle( type , name,thisSTL) { //type 0: ASCII 1: GLTF
 	} else if(thisSTL==1){
 		loadSTL(2);
 	}else if(thisSTL==2){
+		$("#es6Next").trigger("click")
 	}
 		//end
 }

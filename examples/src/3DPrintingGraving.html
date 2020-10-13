@@ -240,11 +240,9 @@
 			}
 			// 生成名字
 			if(fontObj) {// && false
-				name = "AIDEN"
-				//B: 87.037 C:117.707 O:116  G:121.36 S:222.64 SS:448.16 U:45.45 R:37
-				console.log( "name::" + name )
+				name = "HMMH"
 				var currentWord = name.toUpperCase();
-				console.log( "currentWord::" + currentWord )
+				console.log( "current Name::" + currentWord )
 				var textGeo = new THREE.TextGeometry( currentWord, {
 					font: fontObj,
 					size: fontSize,
@@ -259,25 +257,12 @@
 				var namePositionX = centerOffset;
 				var namePositionY = 0;
 				var namePositionZ = 2.5;//竖直方向
-				if(thisSTL==2){
-					namePositionZ = 79 //垂直
-					textGeo.rotateX(Math.PI/2)//默认平躺的，立起来
-					textGeo.rotateZ(Math.PI)
-					camera.position.set(181.6, 110.63, 8.3 ); //45°
-					camera.lookAt( 0, 0, 0 );
-				}else if(thisSTL==3){
+				if(thisSTL==3){// heart
 					namePositionY = 4;
 					namePositionZ =15.5 //垂直
-					camera.position.set(1, 52, 19 ); //45°
-					camera.lookAt( 0, 0, 0 );
 				}
-
 				if(name.length==1){
-					if(thisSTL==2){
-						namePositionX = namePositionX+10.5
-						namePositionY =10
-					}
-					else if(thisSTL==3){
+					if(thisSTL==3){// heart
 						namePositionX = namePositionX+.8
 					}
 					else{
@@ -285,12 +270,7 @@
 					}
 				}
 				else if(name.length==2){
-					if(thisSTL==2){
-						angle = -Math.PI/18;
-						namePositionX = namePositionX+10
-						namePositionY =10
-					}
-					else if(thisSTL==3){
+					if(thisSTL==3){// heart
 						namePositionX = namePositionX+1.9
 					}
 					else{
@@ -298,28 +278,17 @@
 					}
 				}
 				else if(name.length==3){
-					if(thisSTL==2){
-
-					}
-					else if(thisSTL==3){
+					if(thisSTL==3){// heart
 						namePositionX = namePositionX+2.9
-					}else{ // heart
+					}else{
 						namePositionX = namePositionX+3
 					}
 				}
 				else if(name.length==4){
-					if(thisSTL==2){
-
-					}else{
-						namePositionX = namePositionX+4
-					}
+					namePositionX = namePositionX+4
 				}
 				else if(name.length==5){
-					if(thisSTL==2){
-
-					}else{ // heart
-						namePositionX = namePositionX+5
-					}
+					namePositionX = namePositionX+5
 				}
 				textGeo.translate( namePositionX, namePositionY,namePositionZ );//坐标中心位置
 				var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff, flatShading: true } );
