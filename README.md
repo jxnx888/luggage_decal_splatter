@@ -27,6 +27,10 @@ Download project and run `npm install`, then just find the file path: `../exampl
 <script src='../js/STLExporter.js'></script>
 ```
 
+### Showcase: ### 
+![image](https://github.com/jxnx888/luggage_decal_splatter/blob/master/examples/img/luggage_decal_splatter.gif)
+
+
 [npm]: https://img.shields.io/npm/v/three
 [npm-url]: https://www.npmjs.com/package/three
 [build-size]: https://badgen.net/bundlephobia/minzip/three
