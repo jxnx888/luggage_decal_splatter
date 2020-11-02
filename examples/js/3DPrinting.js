@@ -1697,10 +1697,6 @@ async function loadSTL( thisSTL, obj ) {
 	var file;
 	switch (thisSTL) {
 		case 0:
-			file = '../models/stl/ascii/3dPrinting/ring.stl';
-			currentShapeType = 5;
-			break;
-		case 0:
 			file = '../models/stl/ascii/3dPrinting/standing.stl';
 			currentShapeType = 5;
 			break;

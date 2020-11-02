@@ -91,11 +91,7 @@
       }
     ],
     "stl": [
-      {
-        "title": "ring",
-        "name": "戒指",
-        "url": "../img/3dPrinting/cube.png"
-      },
+
        {
         "title": "standing",
         "name": "站立",
@@ -139,7 +135,7 @@
       {
         "title": "pikachu",
         "name": "皮卡丘",
-        "url": "../img/3dPrinting/doughnut.png"
+        "url": "http://csmmg.com/pikachu.stl"
       },
       {
         "title": "squirtle",
